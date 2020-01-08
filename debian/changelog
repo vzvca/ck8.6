@@ -1,0 +1,16 @@
+ck (8.6-1) unstable; urgency=low
+
+	* Port to Tcl 8.6
+	* Added progress, playcard, terminal widgets
+	* Added <Alt-?> key bindings
+	* Added X11 colors
+	* Added resize support
+
+ -- VCA <vca@somewhere.com>  Mon, 16 Dec 2019 20:00:00 +0100
+
+ck (8.4-1) unstable; urgency=low
+
+  * initial debian packaging
+
+ -- C Werner <chw@ch-werner.de>  Wed, 17 Nov 2010 08:55:00 +0100
+

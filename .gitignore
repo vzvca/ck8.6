@@ -1,0 +1,9 @@
+*.a
+*.o
+*.exe
+*~ 
+*.stackdump
+\#*#
+config.cache
+config.log
+config.status
