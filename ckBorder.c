@@ -38,60 +38,69 @@ Ck_GetGChar(interp, name, gchar)
 {
     Tcl_HashEntry *hPtr;
 
+#define SETHASHVALUE(x) \
+    if ( sizeof(long) == sizeof(void*) ) {		     \
+      Tcl_SetHashValue(hPtr, (ClientData) (long) (x));	     \
+    }							     \
+    if ( sizeof(long long) == sizeof(void*) ) {		     \
+      Tcl_SetHashValue(hPtr, (ClientData) (long long ) (x)); \
+    }
+
+    
     if (!initialized) {
 	int new;
 
 	Tcl_InitHashTable(&gCharTable, TCL_STRING_KEYS);
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "ulcorner", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_ULCORNER);
+	SETHASHVALUE( ACS_ULCORNER );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "urcorner", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_URCORNER);
+	SETHASHVALUE( ACS_URCORNER );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "llcorner", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_LLCORNER);
+	SETHASHVALUE( ACS_LLCORNER );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "lrcorner", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_LRCORNER);
+	SETHASHVALUE( ACS_LRCORNER );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "rtee", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_RTEE);
+	SETHASHVALUE( ACS_RTEE );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "ltee", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_LTEE);
+	SETHASHVALUE( ACS_LTEE );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "btee", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_BTEE);
+	SETHASHVALUE( ACS_BTEE );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "ttee", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_TTEE);
+	SETHASHVALUE( ACS_TTEE );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "hline", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_HLINE);
+	SETHASHVALUE( ACS_HLINE );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "vline", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_VLINE);
+	SETHASHVALUE( ACS_VLINE );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "plus", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_PLUS);
+	SETHASHVALUE( ACS_PLUS );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "s1", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_S1);
+	SETHASHVALUE( ACS_S1 );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "s9", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_S9);
+	SETHASHVALUE( ACS_S9 );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "diamond", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_DIAMOND);
+	SETHASHVALUE( ACS_DIAMOND );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "ckboard", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_CKBOARD);
+	SETHASHVALUE( ACS_CKBOARD );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "degree", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_DEGREE);
+	SETHASHVALUE( ACS_DEGREE );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "plminus", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_PLMINUS);
+	SETHASHVALUE( ACS_PLMINUS );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "bullet", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_BULLET);
+	SETHASHVALUE( ACS_BULLET );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "larrow", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_LARROW);
+	SETHASHVALUE( ACS_LARROW );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "rarrow", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_RARROW);
+	SETHASHVALUE( ACS_RARROW );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "darrow", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_DARROW);
+	SETHASHVALUE( ACS_DARROW );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "uarrow", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_UARROW);
+	SETHASHVALUE( ACS_UARROW );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "board", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_BOARD);
+	SETHASHVALUE( ACS_BOARD );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "lantern", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_LANTERN);
+	SETHASHVALUE( ACS_LANTERN );
 	hPtr = Tcl_CreateHashEntry(&gCharTable, "block", &new);
-	Tcl_SetHashValue(hPtr, (ClientData) ACS_BLOCK);
+	SETHASHVALUE( ACS_BLOCK );
 
 	initialized = 1;
     }

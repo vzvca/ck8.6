@@ -88,7 +88,6 @@ static struct {
 #endif
 #define X11COLOR(name,r,g,b) { "x11 " name , r,g,b },
 #include "x11_colors.h"
-#endif
 #undef X11COLOR
 
   };
@@ -151,7 +150,7 @@ static void
 findBestCell( colorPtr )
      struct color_t *colorPtr;
 {
-  int j, ibest = -1, dbest = INT_MAX;
+  int j, dist, ibest = -1, dbest = INT_MAX;
 
   colorPtr->value = -1;
   colorPtr->dist = INT_MAX;
@@ -198,7 +197,7 @@ static void findBestCells()
   struct Tcl_HashEntry *entryPtr;
   struct color_t *colorPtr;
 
-  for( entryPtr = Tcl_FirstHashEntry( colorTable, &search );
+  for( entryPtr = Tcl_FirstHashEntry( &colorTable, &search );
        entryPtr != NULL;
        entryPtr = Tcl_NextHashEntry( &search ) )
     {
@@ -288,13 +287,13 @@ setCell( idx, red, green, blue )
        blue < 0 || blue >= 256 ) {
     return;
   }
-  if (can_change_color()) {
-    init_color( i, (1000*red)/255,(1000*green)/255,(1000*blue)/255);
+  if ( can_change_color()) {
+    init_color( idx, (1000*red)/255,(1000*green)/255,(1000*blue)/255);
   }
-  color_content( i, &red, &green, &blue );
-  termcolors[i].r = (255*red)/1000;
-  termcolors[i].g = (255*green)/1000;
-  termcolors[i].b = (255*blue)/1000;
+  color_content( idx, &red, &green, &blue );
+  termcolors[idx].r = (255*red)/1000;
+  termcolors[idx].g = (255*green)/1000;
+  termcolors[idx].b = (255*blue)/1000;
 }
 
 
@@ -364,36 +363,26 @@ Ck_InitColor()
 
   /* force system entries */
   for ( i = 0; i < 16; ++i ) {
-    Tcl_HashEntry *entryPtr = NULL;
-    int isnew = 0;
-    entryPtr = Tcl_CreateHashEntry( &colorTable, x11ctab[i].name, &isnew);
-    if ( isnew ) {
-      struct color_t *colorPtr = NULL;
-      colorPtr = (struct color_t *) Tcl_Alloc(sizeof(*colorPtr));
-      colorPtr->x11r = colorPtr->r = x11ctab[i].r;
-      colorPtr->x11g = colorPtr->g = x11ctab[i].g;
-      colorPtr->x11b = colorPtr->b = x11ctab[i].b;
-      colorPtr->name = x11ctab[i].name;
-      colorPtr->dist = 0;
-      colorPtr->value = i;
-      Tcl_SetHashValue( entryPtr, colorPtr );
-    }
+    struct color_t color;
+    color.x11r = color.r = x11ctab[i].r;
+    color.x11g = color.g = x11ctab[i].g;
+    color.x11b = color.b = x11ctab[i].b;
+    color.name = x11ctab[i].name;
+    color.dist = 0;
+    color.value = i;
+    setColor( &color );
   }
 
   /* scan all X11 colors and find the best matching terminal colors */
   for ( /* nothing */; i < sizeof(x11ctab)/sizeof(x11ctab[0]); ++i) {
-    Tcl_HashEntry *entryPtr = NULL;
-    int isnew = 0;
-    entryPtr = Tcl_CreateHashEntry( &colorTable, x11ctab[i].name, &isnew);
-    if ( isnew ) {
-      struct color_t *colorPtr = NULL;
-      colorPtr = (struct color_t *) Tcl_Alloc(sizeof(*colorPtr));
-      colorPtr->x11r = x11ctab[i].r;
-      colorPtr->x11g = x11ctab[i].g;
-      colorPtr->x11b = x11ctab[i].b;
-      colorPtr->name = x11ctab[i].name;
-      findBestCell( colorPtr );      
-    }
+    struct color_t color;
+    color.x11r = x11ctab[i].r;
+    color.x11g = x11ctab[i].g;
+    color.x11b = x11ctab[i].b;
+    color.name = x11ctab[i].name;
+    color.dist = INT_MAX;
+    color.value = -1;
+    setColor( &color );
   }
 }
 
@@ -950,6 +939,7 @@ Ck_GetCoord(interp, winPtr, string, intPtr)
     *intPtr = value;
     return TCL_OK;
 }
+
 
 /*
  *----------------------------------------------------------------------
@@ -1001,14 +991,12 @@ Ck_ColorCmd(clientData, interp, argc, argv)
       
       if ( argc == 2 ) {
 	/* returns a list of all color cells */
-	Tcl_AppendResult( interp, "{ ", NULL );
 	for ( i = 0; i < maxcell; ++i ) {
 	  struct termcolor_t *cellPtr = termcolors + i;
-	  sprintf( buffer, "{ red %3d green %3d blue %3d }",
-		   cellPtr->red, cellPtr->green, cellPtr->blue );
+	  sprintf( buffer, "{ red %3d green %3d blue %3d } ",
+		   cellPtr->r & 0xff, cellPtr->g & 0xff, cellPtr->b & 0xff );
 	  Tcl_AppendResult( interp, buffer, NULL );
 	}
-	Tcl_AppendResult( interp, " }", NULL );
 	return TCL_OK;
       }
       else if (argc == 3) {
@@ -1023,24 +1011,24 @@ Ck_ColorCmd(clientData, interp, argc, argv)
 	  return TCL_ERROR;
 	}
 	cellPtr = termcolors + i;
-	sprintf( buffer, "{ red %3d green %3d blue %3d }",
-		 cellPtr->red, cellPtr->green, cellPtr->blue );
+	sprintf( buffer, "red %3d green %3d blue %3d",
+		 cellPtr->r & 0xff, cellPtr->g & 0xff, cellPtr->b & 0xff );
 	Tcl_AppendResult( interp, buffer, NULL );
 	return TCL_OK;
       }
       else if (argc == 4) {
-	int largc, icell, j, idx, rgb[3] = { -1, -1, -1 };
-	const char **largv;
+	int largc = 0, icell, j, idx, rgb[3] = { -1, -1, -1 };
+	char **largv = NULL;
 	if ( TCL_OK != Tcl_GetInt( interp, argv[2], &icell)) {
 	  return TCL_ERROR;
 	}
-	if ( (i < 0) || (i >= maxcell) ) {
+	if ( (icell < 0) || (icell >= maxcell) ) {
 	  sprintf(buffer,"value out of range (expected between 0 and %6d)",
 		  maxcell-1);
 	  Tcl_AppendResult( interp, buffer, NULL );
 	  return TCL_ERROR;
 	}
-	if ( TCL_OK != TCL_SplitList( interp, argv[3], &largc, &largv) ) {
+	if ( TCL_OK != Tcl_SplitList( interp, argv[3], &largc, &largv) ) {
 	  return TCL_ERROR;
 	}
 	if ( largc != 6 ) {
@@ -1053,12 +1041,15 @@ Ck_ColorCmd(clientData, interp, argc, argv)
 	  if (!strcmp( largv[j], "blue")) idx = 2;
 
 	  if ( idx == -1 ) {
-	    Tcl_AppendResult( interp, (char*) NULL);
+	    Tcl_AppendResult( interp, "unknown color component \"",
+			      largv[j], "\". Must be on of ",
+			      "\"red\", \"green\" or \"blue\".", (char*) NULL);
 	    res = TCL_ERROR;
 	    break;
 	  }
 	  if ( rgb[idx] != -1 ) {
-	    Tcl_AppendResult( interp, (char*) NULL);
+	    Tcl_AppendResult( interp, "color component \"", largv[j],
+			      "\" must be specified once only.", (char*) NULL);
 	    res = TCL_ERROR;
 	    break;
 	  }
@@ -1069,16 +1060,16 @@ Ck_ColorCmd(clientData, interp, argc, argv)
 	  if ( rgb[idx] < 0 || rgb[idx] > 255 ) {
 	    sprintf(buffer,"color component %d out of range (0-255)", rgb[idx]);
 	    Tcl_AppendResult( interp, buffer, (char*) NULL);
-	    return TCL_ERROR;
+	    res = TCL_ERROR;
+	    break;
 	  }
 	}
 	if ( res == TCL_OK ) {
-	  setCell( i, rgb[0], rgb[1], rgb[2] );
+	  setCell( icell, rgb[0], rgb[1], rgb[2] );
 	  findBestCells();
 	}
-	Tcl_Free(largv);
+	Tcl_Free( (char*) largv);
 	return res;
-      failed:
       }
       else {
 	return TCL_ERROR;
@@ -1087,6 +1078,7 @@ Ck_ColorCmd(clientData, interp, argc, argv)
     else {
       goto error;
     }
+    break;
     
   case 'i':
     if (strncmp(argv[1], "info", len) == 0) {
@@ -1136,16 +1128,36 @@ Ck_ColorCmd(clientData, interp, argc, argv)
     } else {
       goto error;
     }
+    break;
     
   case 'n':
     if (strncmp(argv[1], "names", len) == 0) {
       if ( argc == 2 ) {
+	/* returns a list of all colors in table */
+	struct Tcl_HashSearch search;
+	struct Tcl_HashEntry *entryPtr;
+	struct color_t *colorPtr;
+
+	Tcl_AppendResult( interp, "{ ", NULL );
+	for( entryPtr = Tcl_FirstHashEntry( &colorTable, &search );
+	     entryPtr != NULL;
+	     entryPtr = Tcl_NextHashEntry( &search ) ) {
+	  colorPtr = (struct color_t*) Tcl_GetHashValue( entryPtr );
+	  sprintf(buffer,"{ name \"%s\" red %3d green %3d blue %3d cell %d distance %d }",
+		  colorPtr->name,
+		  colorPtr->x11r, colorPtr->x11g, colorPtr->x11b,
+		  colorPtr->value, colorPtr->dist );
+	  Tcl_AppendResult( interp, buffer, NULL );
+	}
+	Tcl_AppendResult( interp, " }", NULL );
+	return TCL_OK;
       }
       else if ( argc == 3 ) {
       }
     } else {
       goto error;
     }
+    break;
 
   case 'r':
     if (strncmp(argv[1], "reset", len) == 0) {
@@ -1159,10 +1171,12 @@ Ck_ColorCmd(clientData, interp, argc, argv)
 	     argv[0], " reset\"", (char *) NULL);
 	return TCL_ERROR;
       }
+    }
     else {
       goto error;
     }
-
+    break;
+    
   case 't':
     if (strncmp(argv[1], "threshold", len) == 0) {
       if ( argc == 2 ) {
@@ -1191,7 +1205,8 @@ Ck_ColorCmd(clientData, interp, argc, argv)
     else {
       goto error;
     }
-
+    break;
+    
   default:
   error:
     Tcl_AppendResult( interp, "unknown subcommand \"",  argv[1],"\" :",

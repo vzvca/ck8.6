@@ -921,6 +921,8 @@ EXTERN int	Ck_ProgressCmd _ANSI_ARGS_((ClientData clientData,
 		    Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_PlaycardCmd _ANSI_ARGS_((ClientData clientData,
 		    Tcl_Interp *interp, int argc, char **argv));
+EXTERN int	Ck_ColorCmd _ANSI_ARGS_((ClientData clientData,
+		    Tcl_Interp *interp, int argc, char **argv));
 EXTERN void     Ck_RecomputeLayout _ANSI_ARGS_((CkWindow *mainWinPtr));
 
 #endif  /* RESOURCE_INCLUDED */

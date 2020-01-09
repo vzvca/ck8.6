@@ -110,6 +110,7 @@ CkCmd commands[] = {
     {"tkwait",		Ck_TkwaitCmd},
     {"update",		Ck_UpdateCmd},
     {"winfo",		Ck_WinfoCmd},
+    {"gloglo",          Ck_PlaycardCmd},
 
     /*
      * Widget-creation commands.
@@ -132,6 +133,7 @@ CkCmd commands[] = {
     {"terminal",        Ck_TerminalCmd},
     {"progress",        Ck_ProgressCmd},
     {"playcard",        Ck_PlaycardCmd},
+    {"color",           Ck_ColorCmd},
 
     {(char *) NULL,	(CkCmdProc *) NULL}
 };
