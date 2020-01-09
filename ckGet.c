@@ -246,7 +246,6 @@ setColor( colorPtr )
   findBestCell( colorPtr );
 }
 
-
 
 /*
  *----------------------------------------------------------------------
@@ -300,25 +299,24 @@ setCell( idx, red, green, blue )
 /*
  *----------------------------------------------------------------------
  *
- * Ck_InitColor --
+ * resetCells --
  *
- *	Initialize the color table. The initialisation depends
- *      on the number of available colors reported by ncurses.
+ *      Initialize the curses terminal color table.
  *
  * Results:
  *      None
  *
  * Side effects:
- *	Initialize color hashtable
+ *	Updates the terminal color table
  *
  *----------------------------------------------------------------------
  */
 
-void
-Ck_InitColor()
+static void
+resetCells()
 {
-  int dist, i = 0, j = 0;
-
+  int i;
+  
   /* retreive the color definition actually used 
    * by ncurses. */
   for ( i = 0; (i < COLORS) && (i < 256); ++i ) {
@@ -357,6 +355,32 @@ Ck_InitColor()
       setCell( i, col->r, col->g, col->b );
     }
   }
+}
+
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * Ck_InitColor --
+ *
+ *	Initialize the color table. The initialisation depends
+ *      on the number of available colors reported by ncurses.
+ *
+ * Results:
+ *      None
+ *
+ * Side effects:
+ *	Initialize color hashtable
+ *
+ *----------------------------------------------------------------------
+ */
+
+void
+Ck_InitColor()
+{
+  int dist, i = 0, j = 0;
+
+  resetCells();
 
   /* start creation of color hashtable */
   Tcl_InitHashTable( &colorTable, TCL_STRING_KEYS );
@@ -966,6 +990,7 @@ Ck_ColorCmd(clientData, interp, argc, argv)
     int argc;			/* Number of arguments. */
     char **argv;		/* Argument strings. */
 {
+  int maxcell = (COLORS < 256) ? COLORS : 256;
   char buffer[64];
   int res = TCL_OK;
   char c;
@@ -984,10 +1009,6 @@ Ck_ColorCmd(clientData, interp, argc, argv)
   switch(c) {
   case 'c':
     if (strncmp(argv[1], "cells", len) == 0) {
-      int maxcell = COLORS;
-      if ( maxcell > 256 ) {
-	maxcell = 256;
-      }
       
       if ( argc == 2 ) {
 	/* returns a list of all color cells */
@@ -1138,21 +1159,59 @@ Ck_ColorCmd(clientData, interp, argc, argv)
 	struct Tcl_HashEntry *entryPtr;
 	struct color_t *colorPtr;
 
-	Tcl_AppendResult( interp, "{ ", NULL );
 	for( entryPtr = Tcl_FirstHashEntry( &colorTable, &search );
 	     entryPtr != NULL;
 	     entryPtr = Tcl_NextHashEntry( &search ) ) {
 	  colorPtr = (struct color_t*) Tcl_GetHashValue( entryPtr );
-	  sprintf(buffer,"{ name \"%s\" red %3d green %3d blue %3d cell %d distance %d }",
+	  sprintf(buffer,"{ name \"%s\" red %3d green %3d blue %3d cell %d distance %d } ",
 		  colorPtr->name,
 		  colorPtr->x11r, colorPtr->x11g, colorPtr->x11b,
 		  colorPtr->value, colorPtr->dist );
 	  Tcl_AppendResult( interp, buffer, NULL );
 	}
-	Tcl_AppendResult( interp, " }", NULL );
 	return TCL_OK;
       }
       else if ( argc == 3 ) {
+	Tcl_HashEntry *entryPtr = NULL;
+	struct color_t *colorPtr;
+	int isnew = 0;
+
+	if ( argv[2][0] == '@' ) {
+	  int icell;
+	  if ( TCL_OK != Tcl_GetInt( interp, argv[2]+1, &icell )) {
+	    return TCL_ERROR;
+	  }
+	  if ( icell < 0 || icell >= maxcell ) {
+	    sprintf(buffer,"value out of range (expected between 0 and %6d)",
+		    maxcell-1);
+	    Tcl_AppendResult( interp, buffer, NULL );
+	    return TCL_ERROR;
+	  }
+	}
+	
+	entryPtr = Tcl_CreateHashEntry( &colorTable, argv[2], &isnew);
+	if ( isnew ) {
+	  Tcl_DeleteHashEntry( entryPtr );
+	  Tcl_AppendResult( interp, "unknown color \"",
+			    argv[2], "\"", (char*) NULL);
+	  return TCL_ERROR;
+	}
+	else {
+	  colorPtr = (struct color_t *) Tcl_GetHashValue( entryPtr );
+	  sprintf(buffer,"name \"%s\" red %3d green %3d blue %3d cell %d distance %d",
+		  colorPtr->name,
+		  colorPtr->x11r, colorPtr->x11g, colorPtr->x11b,
+		  colorPtr->value, colorPtr->dist );
+	  Tcl_AppendResult( interp, buffer, NULL );
+	  return TCL_OK;
+	}
+      }
+      else if ( argc == 4 ) {
+      }
+      else {
+	Tcl_AppendResult( interp, "wrong # args: should be \"",
+	   argv[0], " name ?option?\"", (char *) NULL);
+	return TCL_ERROR;
       }
     } else {
       goto error;
@@ -1163,7 +1222,8 @@ Ck_ColorCmd(clientData, interp, argc, argv)
     if (strncmp(argv[1], "reset", len) == 0) {
       if ( argc == 2 ) {
 	/* reinit the curses COLORS to their ANSI default values */
-	/* @todo */
+	resetCells();
+	findBestCells();
       }
       else {
 	/* Bad number of arguments */
