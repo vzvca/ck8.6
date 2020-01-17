@@ -1,0 +1,4 @@
+.debhelper/
+ck.substvars
+ck/
+files

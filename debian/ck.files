@@ -1,5 +1,5 @@
 usr/bin
-usr/lib/ck8.4
+usr/lib/ck8.6
 usr/lib/*.so
 usr/share/man/man1/*.1*
 usr/share/man/man3/*.3ck*

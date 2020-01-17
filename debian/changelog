@@ -1,10 +1,10 @@
 ck (8.6-1) unstable; urgency=low
 
-	* Port to Tcl 8.6
-	* Added progress, playcard, terminal widgets
-	* Added <Alt-?> key bindings
-	* Added X11 colors
-	* Added resize support
+  * port to Tcl 8.6
+  * added progress, playcard, terminal widgets
+  * added <Alt-?> key bindings
+  * added X11 colors
+  * added resize support
 
  -- VCA <vca@somewhere.com>  Mon, 16 Dec 2019 20:00:00 +0100
 

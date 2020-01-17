@@ -20,6 +20,16 @@
 #define DEF_FRAME_TAKE_FOCUS             "0"
 #define DEF_FRAME_WIDTH                  "0"
 
+#define DEF_SPINBOX_ATTRIB                 "normal"
+#define DEF_SPINBOX_BG_COLOR               "black"
+#define DEF_SPINBOX_BG_MONO                "black"
+#define DEF_SPINBOX_FG_COLOR               "white"
+#define DEF_SPINBOX_FG_MONO                "white"
+#define DEF_SPINBOX_BORDER                 NULL
+#define DEF_SPINBOX_HEIGHT                 "0"
+#define DEF_SPINBOX_TAKE_FOCUS             "0"
+#define DEF_SPINBOX_WIDTH                  "0"
+
 #define DEF_PLAYCARD_ATTRIB                 "normal"
 #define DEF_PLAYCARD_BG_COLOR               "black"
 #define DEF_PLAYCARD_BG_MONO                "black"

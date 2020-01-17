@@ -197,7 +197,7 @@ CC_SWITCHES =	${CFLAGS} ${CK_CFLAGS} ${CK_SHLIB_CFLAGS} -I${SRC_DIR} \
 
 WIDGOBJS = ckButton.o ckEntry.o ckFrame.o ckListbox.o \
 	ckMenu.o ckMenubutton.o ckMessage.o ckScrollbar.o ckTree.o ckTerminal.o \
-	ckProgress.o ckPlaycard.o
+	ckProgress.o ckPlaycard.o ckSpinbox.o
 
 TEXTOBJS = ckText.o ckTextBTree.o ckTextDisp.o ckTextIndex.o \
 	ckTextMark.o ckTextTag.o
@@ -214,7 +214,7 @@ SRCS = ckBind.c ckBorder.c ckCmds.c ckConfig.c ckEvent.c ckFocus.c \
 	ckMenu.c ckMenubutton.c ckMessage.c ckScrollbar.c \
 	ckText.c ckTextBTree.c ckTextDisp.c ckTextIndex.c \
 	ckTextMark.c ckTextTag.c ckTree.c ckTerminal.c ckProgress.c ckPlaycard.c \
-	ckAppInit.c
+	ckSpinbox.c ckAppInit.c
 
 HDRS = default.h ks_names.h ck.h ckPort.h ckText.h
 
