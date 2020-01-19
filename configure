@@ -3783,7 +3783,7 @@ done
 if test "${with_tcl+set}" = set; then :
   withval=$with_tcl; TCL_BIN_DIR=$withval
 else
-  TCL_BIN_DIR=`cd ../tcl8.0/unix ; pwd`
+  TCL_BIN_DIR=`cd /usr/lib/tcl8.* ; pwd`
 fi
 
 if test ! -d $TCL_BIN_DIR ; then
@@ -4007,7 +4007,7 @@ fi
 
 echo checking for curses/ncurses library files
 CURSESLIBSW=nope
-dirs="../ncurses/lib /usr/lib /usr/lib64 /usr/lib/ncurses /usr/lib64/ncurses /usr/lib/$(uname -m)-linux-gnu /opt/ncurses/lib /usr/local/lib /usr/local/ncurses/lib"
+dirs="../ncurses/lib /usr/lib /usr/lib64 /usr/lib/ncurses /usr/lib64/ncurses /usr/lib/`uname -m`-linux-gnu /opt/ncurses/lib /usr/local/lib /usr/local/ncurses/lib"
 for i in $dirs ; do
   if test $USE_NCURSES = 0 ; then
     if test -r $i/libcurses.a || test -r $i/libcurses$SHLIB_SUFFIX ; then
@@ -4050,7 +4050,7 @@ rm -f core conftest.err conftest.$ac_objext \
 	fi
     fi
   else
-    if test -r $i/libncurses.a || test -r $i/libncurses$SHLIB_SUFFIX ; then
+    if test -r $i/libncursesw.a || test -r $i/libncursesw$SHLIB_SUFFIX ; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking ncurses library" >&5
 $as_echo_n "checking ncurses library... " >&6; }
 	tk_oldCFlags=$CFLAGS
