@@ -1,0 +1,69 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<title>n man page</title>
+<meta name="generator" content="roffit">
+<STYLE type="text/css">
+pre {
+  overflow: auto;
+  margin: 0;
+}
+
+P.level0, pre.level0 {
+ padding-left: 2em;
+}
+
+P.level1, pre.level1 {
+ padding-left: 4em;
+}
+
+P.level2, pre.level2 {
+ padding-left: 6em;
+}
+
+span.emphasis {
+ font-style: italic;
+}
+
+span.bold {
+ font-weight: bold;
+}
+
+span.manpage {
+ font-weight: bold;
+}
+
+h2.nroffsh {
+ background-color: #e0e0e0;
+}
+
+span.nroffip {
+ font-weight: bold;
+ font-size: 120%;
+ font-family: monospace;
+}
+
+p.roffit {
+ text-align: center;
+ font-size: 80%;
+}
+</STYLE>
+</head><body>
+See the man.macros man page.
+
+<p class="level0">
+<p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
+<p class="level0">update - Process pending events and/or when-idle handlers <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
+<p class="level0"><span Class="bold">update</span> ?<span Class="bold">idletasks|screen</span>? 
+<p class="level0">
+<p class="level0"><a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
+<p class="level0">
+<p class="level0">This command is used to bring the entire application world ``up to date.&#39;&#39; It flushes all pending output to the display,  waits for the server to process that output and return errors or events, handles all pending events of any sort (including when-idle handlers), and repeats this set of operations until there are no pending events, no pending when-idle handlers, no pending output to the server, and no operations still outstanding at the server.   
+<p class="level0">If the <span Class="bold">idletasks</span> keyword is specified as an argument to the command, then no new events or errors are processed;  only when-idle idlers are invoked. This causes operations that are normally deferred, such as display updates and window layout calculations, to be performed immediately. 
+<p class="level0">The <span Class="bold">update idletasks</span> command is useful in scripts where changes have been made to the application&#39;s state and you want those changes to appear on the display immediately, rather than waiting for the script to complete.  Most display updates are performed as idle handlers, so <span Class="bold">update idletasks</span> will cause them to run. However, there are some kinds of updates that only happen in response to events, such as those triggered by window size changes; these updates will not occur in <span Class="bold">update idletasks</span>. 
+<p class="level0">If the <span Class="bold">screen</span> keyword is specified as an argument to the command, then the entire screen is repainted from scratch without handling any other events. This is useful if the terminal&#39;s screen has been garbled by another process. 
+<p class="level0">The <span Class="bold">update</span> command with no options is useful in scripts where you are performing a long-running computation but you still want the application to respond to user interactions;  if you occasionally call <span Class="bold">update</span> then user input will be processed during the next call to <span Class="bold">update</span>. 
+<p class="level0"><a name="KEYWORDS"></a><h2 class="nroffsh">KEYWORDS</h2>
+<p class="level0">event, flush, handler, idle, update <p class="roffit">
+ This HTML page was made with <a href="http://daniel.haxx.se/projects/roffit/">roffit</a>.
+</body></html>

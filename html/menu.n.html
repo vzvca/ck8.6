@@ -1,0 +1,204 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<title>n man page</title>
+<meta name="generator" content="roffit">
+<STYLE type="text/css">
+pre {
+  overflow: auto;
+  margin: 0;
+}
+
+P.level0, pre.level0 {
+ padding-left: 2em;
+}
+
+P.level1, pre.level1 {
+ padding-left: 4em;
+}
+
+P.level2, pre.level2 {
+ padding-left: 6em;
+}
+
+span.emphasis {
+ font-style: italic;
+}
+
+span.bold {
+ font-weight: bold;
+}
+
+span.manpage {
+ font-weight: bold;
+}
+
+h2.nroffsh {
+ background-color: #e0e0e0;
+}
+
+span.nroffip {
+ font-weight: bold;
+ font-size: 120%;
+ font-family: monospace;
+}
+
+p.roffit {
+ text-align: center;
+ font-size: 80%;
+}
+</STYLE>
+</head><body>
+See the man.macros man page.
+
+<p class="level0">
+<p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
+<p class="level0">menu - Create and manipulate menu widgets <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
+<p class="level0"><span class="bold">menu<span class="emphasis"> <span Class="emphasis">pathName </span>?<span Class="emphasis">options</span>? <a name="STANDARD"></a><h2 class="nroffsh">STANDARD OPTIONS</h2>
+<p class="level0">
+<p class="level0"><pre class="level0">
+<span class="bold">activeAttributes</span>	<span class="bold">background</span>	<span class="bold">disabledForeground</span>	<span class="bold">underlineForeground</span>
+<span class="bold">activeBackground</span>	<span class="bold">border</span>	<span class="bold">foreground</span>
+<span class="bold">activeForeground</span>	<span class="bold">disabledAttributes</span>	<span class="bold">takeFocus</span>
+<span class="bold">attributes</span>	<span class="bold">disabledBackground</span>	<span class="bold">underlineAttributes</span>
+</pre>
+
+<p class="level0">
+<p class="level0">See the ``options&#39;&#39; manual entry for details on the standard options. <a name="WIDGET-SPECIFIC"></a><h2 class="nroffsh">WIDGET-SPECIFIC OPTIONS</h2>
+<p class="level0">
+<p class="level0">
+<p class="level0"><pre class="level0">
+Name:	<span class="bold">postCommand</span>
+Class:	<span class="bold">Command</span>
+Command-Line Switch:	<span class="bold">-postcommand</span>
+</pre>
+
+<p class="level0">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">If this option is specified then it provides a Tcl command to execute each time the menu is posted.  The command is invoked by the <span Class="bold">post</span> widget command before posting the menu. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">selectColor</span>
+Class:	<span class="bold">Background</span>
+Command-Line Switch:	<span class="bold">-selectcolor</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">For menu entries that are check buttons or radio buttons, this option specifies the color to display in the indicator when the check button or radio button is selected. On color terminals this defaults to red, on monochrome terminals to white. 
+<p class="level1">
+<p class="level1"><a name="INTRODUCTION"></a><h2 class="nroffsh">INTRODUCTION</h2>
+<p class="level0">
+<p class="level0">The <span Class="bold">menu</span> command creates a new top-level window (given by the <span Class="emphasis">pathName</span> argument) and makes it into a menu widget. Additional options, described above, may be specified on the command line or in the option database to configure aspects of the menu such as its colors and font. The <span Class="bold">menu</span> command returns its <span Class="emphasis">pathName</span> argument.  At the time this command is invoked, there must not exist a window named <span Class="emphasis">pathName</span>, but <span Class="emphasis">pathName</span>&#39;s parent must exist. 
+<p class="level0">A menu is a widget that displays a collection of one-line entries arranged in a column.  There exist several different types of entries, each with different properties.  Entries of different types may be combined in a single menu.  Menu entries are not the same as entry widgets. In fact, menu entries are not even distinct widgets; the entire menu is one widget. 
+<p class="level0">Menu entries are displayed with up to three separate fields. The main field is a label in the form of a text string. If the  <span Class="bold">-accelerator</span> option is specified for an entry then a second textual field is displayed to the right of the label.  The accelerator typically describes a keystroke sequence that may be typed in the application to cause the same result as invoking the menu entry. The third field is an <span Class="emphasis">indicator</span>.  The indicator is present only for checkbutton or radiobutton entries.  It indicates whether the entry is selected or not, and is displayed to the left of the entry&#39;s string. 
+<p class="level0">In normal use, an entry becomes active (displays itself differently) whenever the input focus is over the entry.  If a mouse button is pressed over the entry then the entry is <span Class="emphasis">invoked</span>. The effect of invocation is different for each type of entry; these effects are described below in the sections on individual entries. 
+<p class="level0">Entries may be <span Class="emphasis">disabled</span>, which causes their labels and accelerators to be displayed with other colors. The default menu bindings will not allow a disabled entry to be activated or invoked. Disabled entries may be re-enabled, at which point it becomes possible to activate and invoke them again. 
+<p class="level0"><a name="COMMAND"></a><h2 class="nroffsh">COMMAND ENTRIES</h2>
+<p class="level0">
+<p class="level0">The most common kind of menu entry is a command entry, which behaves much like a button widget.  When a command entry is invoked, a Tcl command is executed.  The Tcl command is specified with the <span Class="bold">-command</span> option. 
+<p class="level0"><a name="SEPARATOR"></a><h2 class="nroffsh">SEPARATOR ENTRIES</h2>
+<p class="level0">
+<p class="level0">A separator is an entry that is displayed as a horizontal dividing line.  A separator may not be activated or invoked, and it has no behavior other than its display appearance. 
+<p class="level0"><a name="CHECKBUTTON"></a><h2 class="nroffsh">CHECKBUTTON ENTRIES</h2>
+<p class="level0">
+<p class="level0">A checkbutton menu entry behaves much like a checkbutton widget. When it is invoked it toggles back and forth between the selected and deselected states.  When the entry is selected, a particular value is stored in a particular global variable (as determined by the <span Class="bold">-onvalue</span> and <span Class="bold">-variable</span> options for the entry);  when the entry is deselected another value (determined by the <span Class="bold">-offvalue</span> option) is stored in the global variable. An indicator box is displayed to the left of the label in a checkbutton entry.  If the entry is selected then the indicator&#39;s center is displayed in the color given by the <span Class="bold">-selectcolor</span> option for the entry; otherwise the indicator&#39;s center is displayed in the background color for the menu or menu entry. If a <span Class="bold">-command</span> option is specified for a checkbutton entry, then its value is evaluated as a Tcl command each time the entry is invoked;  this happens after toggling the entry&#39;s selected state. 
+<p class="level0"><a name="RADIOBUTTON"></a><h2 class="nroffsh">RADIOBUTTON ENTRIES</h2>
+<p class="level0">
+<p class="level0">A radiobutton menu entry behaves much like a radiobutton widget. Radiobutton entries are organized in groups of which only one entry may be selected at a time.  Whenever a particular entry becomes selected it stores a particular value into a particular global variable (as determined by the <span Class="bold">-value</span> and <span Class="bold">-variable</span> options for the entry).  This action causes any previously-selected entry in the same group to deselect itself. Once an entry has become selected, any change to the entry&#39;s associated variable will cause the entry to deselect itself. Grouping of radiobutton entries is determined by their associated variables:  if two entries have the same associated variable then they are in the same group. An indicator diamond is displayed to the left of the label in each radiobutton entry.  If the entry is selected then the indicator&#39;s center is displayed in the color given by the <span Class="bold">-selectcolor</span> option for the entry; otherwise the indicator&#39;s center is displayed in the background color for the menu or menu entry.  If a <span Class="bold">-command</span> option is specified for a radiobutton entry, then its value is evaluated as a Tcl command each time the entry is invoked;  this happens after selecting the entry. 
+<p class="level0"><a name="CASCADE"></a><h2 class="nroffsh">CASCADE ENTRIES</h2>
+<p class="level0">
+<p class="level0">A cascade entry is one with an associated menu (determined by the <span Class="bold">-menu</span> option).  Cascade entries allow the construction of cascading menus. The <span Class="bold">postcascade</span> widget command can be used to post and unpost the associated menu just to the right of the cascade entry. The associated menu must be a child of the menu containing the cascade entry (this is needed in order for menu traversal to work correctly). 
+<p class="level0">A cascade entry posts its associated menu by invoking a Tcl command of the form 
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1"><span class="emphasis">menu<span class="bold"> post <span Class="emphasis">x y</span> 
+<p class="level0">
+<p class="level0">where <span Class="emphasis">menu</span> is the path name of the associated menu, and <span Class="emphasis">x</span> and <span Class="emphasis">y</span> are the root-window coordinates of the upper-right corner of the cascade entry. The lower-level menu is unposted by executing a Tcl command with the form 
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1"><span class="emphasis">menu<span Class="bold"> unpost</span> 
+<p class="level0">
+<p class="level0">where <span Class="emphasis">menu</span> is the name of the associated menu. 
+<p class="level0">If a <span Class="bold">-command</span> option is specified for a cascade entry then it is evaluated as a Tcl command whenever the entry is invoked. 
+<p class="level0"><a name="WIDGET"></a><h2 class="nroffsh">WIDGET COMMAND</h2>
+<p class="level0">
+<p class="level0">The <span Class="bold">menu</span> command creates a new Tcl command whose name is <span Class="emphasis">pathName</span>.  This command may be used to invoke various operations on the widget.  It has the following general form: 
+<p class="level0"><span Class="emphasis">pathName option </span>?<span Class="emphasis">arg arg ...</span>? <span Class="emphasis">Option</span> and the <span Class="emphasis">arg</span>s determine the exact behavior of the command. 
+<p class="level0">Many of the widget commands for a menu take as one argument an indicator of which entry of the menu to operate on.  These indicators are called <span Class="emphasis">index</span>es and may be specified in any of the following forms: 
+<p class="level0"><span Class="emphasis">number</span> Specifies the entry numerically, where 0 corresponds to the top-most entry of the menu, 1 to the entry below it, and so on. 
+<p class="level0"><span Class="bold">active</span> Indicates the entry that is currently active.  If no entry is active then this form is equivalent to <span Class="bold">none</span>.  This form may not be abbreviated. 
+<p class="level0"><span Class="bold">end</span> Indicates the bottommost entry in the menu.  If there are no entries in the menu then this form is equivalent to <span Class="bold">none</span>. This form may not be abbreviated. 
+<p class="level0"><span Class="bold">last</span> Same as <span Class="bold">end</span>. 
+<p class="level0"><span Class="bold">none</span> Indicates ``no entry at all&#39;&#39;;  this is used most commonly with the <span Class="bold">activate</span> option to deactivate all the entries in the menu.  In most cases the specification of <span Class="bold">none</span> causes nothing to happen in the widget command. This form may not be abbreviated. 
+<p class="level0"><span class="bold">@<span Class="emphasis">number</span> In this form, <span Class="emphasis">number</span> is treated as a y-coordinate in the menu&#39;s window;  the entry closest to that y-coordinate is used. For example, ``<span Class="bold">@0</span>&#39;&#39; indicates the top-most entry in the window. 
+<p class="level0"><span Class="emphasis">pattern</span> If the index doesn&#39;t satisfy one of the above forms then this form is used.  <span Class="emphasis">Pattern</span> is pattern-matched against the label of each entry in the menu, in order from the top down, until a matching entry is found.  The rules of <span Class="bold">Tcl_StringMatch</span> are used. 
+<p class="level0">The following widget commands are possible for menu widgets: 
+<p class="level0"><span class="emphasis">pathName <span class="bold">activate <span Class="emphasis">index</span> Change the state of the entry indicated by <span Class="emphasis">index</span> to <span Class="bold">active</span> and redisplay it using its active colors. Any previously-active entry is deactivated.  If <span Class="emphasis">index</span> is specified as <span Class="bold">none</span>, or if the specified entry is disabled, then the menu ends up with no active entry. Returns an empty string. 
+<p class="level0"><span class="emphasis">pathName <span class="bold">add <span Class="emphasis">type </span>?<span Class="emphasis">option value option value ...</span>? Add a new entry to the bottom of the menu.  The new entry&#39;s type is given by <span Class="emphasis">type</span> and must be one of <span Class="bold">cascade</span>, <span Class="bold">checkbutton</span>, <span Class="bold">command</span>, <span Class="bold">radiobutton</span>, or <span Class="bold">separator</span>, or a unique abbreviation of one of the above.  If additional arguments are present, they specify any of the following options: 
+<p class="level1">
+<p class="level1"><span class="bold">-activeattributes <span Class="emphasis">value</span> Specifies video attributes to use for displaying this entry when it is active. If this option is specified as an empty string (the default), then the <span Class="bold">activeAttributes</span> option for the overall menu is used. This option is not available for separator entries. 
+<p class="level1"><span class="bold">-activebackground <span Class="emphasis">value</span> Specifies a background color to use for displaying this entry when it is active. If this option is specified as an empty string (the default), then the <span Class="bold">activeBackground</span> option for the overall menu is used. This option is not available for separator entries. 
+<p class="level1"><span class="bold">-activeforeground <span Class="emphasis">value</span> Specifies a foreground color to use for displaying this entry when it is active. If this option is specified as an empty string (the default), then the <span Class="bold">activeForeground</span> option for the overall menu is used. This option is not available for separator entries. 
+<p class="level1"><span class="bold">-accelerator <span Class="emphasis">value</span> Specifies a string to display at the right side of the menu entry. Normally describes an accelerator keystroke sequence that may be typed to invoke the same function as the menu entry.  This option is not available for separator entries. 
+<p class="level1"><span class="bold">-attributes <span Class="emphasis">value</span> Specifies video attributes to use for displaying this entry when it is in the normal state (neither active nor disabled). If this option is specified as an empty string (the default), then the <span Class="bold">attributes</span> option for the overall menu is used. This option is not available for separator entries. 
+<p class="level1"><span class="bold">-background <span Class="emphasis">value</span> Specifies a background color to use for displaying this entry when it is in the normal state (neither active nor disabled). If this option is specified as an empty string (the default), then the <span Class="bold">background</span> option for the overall menu is used. This option is not available for separator entries. 
+<p class="level1"><span class="bold">-command <span Class="emphasis">value</span> For command, checkbutton, and radiobutton entries, specifies a Tcl command to execute when the menu entry is invoked. For cascade entries, specifies a Tcl command to execute when the entry is activated (i.e. just before its submenu is posted). Not available for separator entries. 
+<p class="level1"><span class="bold">-foreground <span Class="emphasis">value</span> Specifies a foreground color to use for displaying this entry when it is in the normal state (neither active nor disabled). If this option is specified as an empty string (the default), then the <span Class="bold">foreground</span> option for the overall menu is used. This option is not available for separator entries. 
+<p class="level1"><span class="bold">-indicatoron <span Class="emphasis">value</span> Available only for checkbutton and radiobutton entries. <span Class="emphasis">Value</span> is a boolean that determines whether or not the indicator should be displayed. 
+<p class="level1"><span class="bold">-label <span Class="emphasis">value</span> Specifies a string to display as an identifying label in the menu entry. Not available for separator entries. 
+<p class="level1"><span class="bold">-menu <span Class="emphasis">value</span> Available only for cascade entries.  Specifies the path name of the submenu associated with this entry. The submenu must be a child of the menu. 
+<p class="level1"><span class="bold">-offvalue <span Class="emphasis">value</span> Available only for checkbutton entries.  Specifies the value to store in the entry&#39;s associated variable when the entry is deselected. 
+<p class="level1"><span class="bold">-onvalue <span Class="emphasis">value</span> Available only for checkbutton entries.  Specifies the value to store in the entry&#39;s associated variable when the entry is selected. 
+<p class="level1"><span class="bold">-selectcolor <span Class="emphasis">value</span> Available only for checkbutton and radiobutton entries. Specifies the color to display in the indicator when the entry is selected. If the value is an empty string (the default) then the <span Class="bold">selectColor</span> option for the menu determines the indicator color. 
+<p class="level1"><span class="bold">-state <span Class="emphasis">value</span> Specifies one of three states for the entry:  <span Class="bold">normal</span>, <span Class="bold">active</span>, or <span Class="bold">disabled</span>.  In normal state the entry is displayed using the <span Class="bold">attributes</span>, <span Class="bold">foreground</span>, and <span Class="bold">background</span> options for the entry or for the menu. The active state is typically used when the input focus is in the entry. In active state the entry is displayed using the <span Class="bold">activeAttributes</span>, <span Class="bold">activeForeground</span>, and <span Class="bold">activeBackground</span> options for the entry or for the menu. Disabled state means that the entry should be insensitive: the default bindings will refuse to activate or invoke the entry. In this state the entry is displayed according to the  <span Class="bold">disabledAttributes</span>, <span Class="bold">disabledForeground</span>, and <span Class="bold">disabledBackground</span> options for the menu. This option is not available for separator entries. 
+<p class="level1"><span class="bold">-underline <span Class="emphasis">value</span> Specifies the integer index of a character to underline in the entry. This option is also queried by the default bindings and used to implement keyboard traversal. 0 corresponds to the first character of the text displayed in the entry, 1 to the next character, and so on. This option is not available for separator entries. 
+<p class="level1"><span class="bold">-underlineAttributes <span Class="emphasis">value</span> Specifies video attributes to use for displaying the underlined character in this entry when it is in the normal state (neither active nor disabled). If this option is specified as an empty string (the default), then the <span Class="bold">underlineAttributes</span> option for the overall menu is used. This option is not available for separator entries. 
+<p class="level1"><span class="bold">-underlineForeground <span Class="emphasis">value</span> Specifies a foreground color to use for displaying the underlined character in this entry when it is in the normal state (neither active nor disabled). If this option is specified as an empty string (the default), then the <span Class="bold">underlineForeground</span> option for the overall menu is used. This option is not available for separator entries. 
+<p class="level1"><span class="bold">-value <span Class="emphasis">value</span> Available only for radiobutton entries.  Specifies the value to store in the entry&#39;s associated variable when the entry is selected. 
+<p class="level1"><span class="bold">-variable <span Class="emphasis">value</span> Available only for checkbutton and radiobutton entries.  Specifies the name of a global value to set when the entry is selected. For checkbutton entries the variable is also set when the entry is deselected.  For radiobutton entries, changing the variable causes the currently-selected entry to deselect itself. 
+<p class="level1">The <span Class="bold">add</span> widget command returns an empty string. 
+<p class="level0">
+<p class="level0"><span class="emphasis">pathName <span Class="bold">cget</span> <span Class="emphasis">option</span> Returns the current value of the configuration option given by <span Class="emphasis">option</span>. <span Class="emphasis">Option</span> may have any of the values accepted by the <span Class="bold">menu</span> command. 
+<p class="level0"><span class="emphasis">pathName <span Class="bold">configure</span> ?<span Class="emphasis">option</span>? ?<span Class="emphasis">value option value ...</span>? Query or modify the configuration options of the widget. If no <span Class="emphasis">option</span> is specified, returns a list describing all of the available options for <span Class="emphasis">pathName</span>. If <span Class="emphasis">option</span> is specified with no <span Class="emphasis">value</span>, then the command returns a list describing the one named option (this list will be identical to the corresponding sublist of the value returned if no <span Class="emphasis">option</span> is specified).  If one or more <span Class="emphasis">option-value</span> pairs are specified, then the command modifies the given widget option(s) to have the given value(s);  in this case the command returns an empty string. <span Class="emphasis">Option</span> may have any of the values accepted by the <span Class="bold">menu</span> command. 
+<p class="level0"><span class="emphasis">pathName <span class="bold">delete <span Class="emphasis">index1</span> ?<span Class="emphasis">index2</span>? Delete all of the menu entries between <span Class="emphasis">index1</span> and <span Class="emphasis">index2</span> inclusive. If <span Class="emphasis">index2</span> is omitted then it defaults to <span Class="emphasis">index1</span>. 
+<p class="level0"><span class="emphasis">pathName <span Class="bold">entrycget</span> <span Class="emphasis">index option</span> Returns the current value of a configuration option for the entry given by <span Class="emphasis">index</span>. <span Class="emphasis">Option</span> may have any of the values accepted by the <span Class="bold">add</span> widget command. 
+<p class="level0"><span class="emphasis">pathName <span class="bold">entryconfigure <span Class="emphasis">index </span>?<span Class="emphasis">options</span>? This command is similar to the <span Class="bold">configure</span> command, except that it applies to the options for an individual entry, whereas <span Class="bold">configure</span> applies to the options for the menu as a whole. <span Class="emphasis">Options</span> may have any of the values accepted by the <span Class="bold">add</span> widget command.  If <span Class="emphasis">options</span> are specified, options are modified as indicated in the command and the command returns an empty string. If no <span Class="emphasis">options</span> are specified, returns a list describing the current options for entry <span Class="emphasis">index</span>. 
+<p class="level0"><span class="emphasis">pathName <span class="bold">index <span Class="emphasis">index</span> Returns the numerical index corresponding to <span Class="emphasis">index</span>, or <span Class="bold">none</span> if <span Class="emphasis">index</span> was specified as <span Class="bold">none</span>. 
+<p class="level0"><span class="emphasis">pathName <span class="bold">insert <span Class="emphasis">index</span> <span Class="emphasis">type </span>?<span Class="emphasis">option value option value ...</span>? Same as the <span Class="bold">add</span> widget command except that it inserts the new entry just before the entry given by <span Class="emphasis">index</span>, instead of appending to the end of the menu.  The <span Class="emphasis">type</span>, <span Class="emphasis">option</span>, and <span Class="emphasis">value</span> arguments have the same interpretation as for the <span Class="bold">add</span> widget command.  It is not possible to insert new menu entries before the tear-off entry, if the menu has one. 
+<p class="level0"><span class="emphasis">pathName <span class="bold">invoke <span Class="emphasis">index</span> Invoke the action of the menu entry.  See the sections on the individual entries above for details on what happens.  If the menu entry is disabled then nothing happens.  If the entry has a command associated with it then the result of that command is returned as the result of the <span Class="bold">invoke</span> widget command.  Otherwise the result is an empty string.  Note:  invoking a menu entry does not automatically unpost the menu;  the default bindings normally take care of this before invoking the <span Class="bold">invoke</span> widget command. 
+<p class="level0"><span class="emphasis">pathName <span class="bold">post <span Class="emphasis">x y</span> Arrange for the menu to be displayed on the screen at the root-window coordinates given by <span Class="emphasis">x</span> and <span Class="emphasis">y</span>.  These coordinates are adjusted if necessary to guarantee that the entire menu is visible on the screen.  This command normally returns an empty string. If the <span Class="bold">postCommand</span> option has been specified, then its value is executed as a Tcl script before posting the menu and the result of that script is returned as the result of the <span Class="bold">post</span> widget command. If an error returns while executing the command, then the error is returned without posting the menu. 
+<p class="level0"><span class="emphasis">pathName <span class="bold">postcascade <span Class="emphasis">index</span> Posts the submenu associated with the cascade entry given by <span Class="emphasis">index</span>, and unposts any previously posted submenu. If <span Class="emphasis">index</span> doesn&#39;t correspond to a cascade entry, or if <span Class="emphasis">pathName</span> isn&#39;t posted, the command has no effect except to unpost any currently posted submenu. 
+<p class="level0"><span class="emphasis">pathName <span class="bold">type <span Class="emphasis">index</span> Returns the type of the menu entry given by <span Class="emphasis">index</span>. This is the <span Class="emphasis">type</span> argument passed to the <span Class="bold">add</span> widget command when the entry was created, such as <span Class="bold">command</span> or <span Class="bold">separator</span>. 
+<p class="level0"><span class="emphasis">pathName <span Class="bold">unpost</span> Unmap the window so that it is no longer displayed.  If a lower-level cascaded menu is posted, unpost that menu.  Returns an empty string. 
+<p class="level0"><span class="emphasis">pathName <span class="bold">yposition <span Class="emphasis">index</span> Returns a decimal string giving the y-coordinate within the menu window of the line in the entry specified by <span Class="emphasis">index</span>. 
+<p class="level0"><a name="MENU"></a><h2 class="nroffsh">MENU CONFIGURATIONS</h2>
+<p class="level0">
+<p class="level0">The default bindings support two different ways of using menus: 
+<p class="level0"><span Class="bold">Pulldown Menus</span> This is the most common case.  You create one menubutton widget for each top-level menu, and typically you arrange a series of menubuttons in a row in a menubar window.  You also create the top-level menus and any cascaded submenus, and tie them together with <span Class="bold">-menu</span> options in menubuttons and cascade menu entries.  The top-level menu must be a child of the menubutton, and each submenu must be a child of the menu that refers to it.  Once you have done this, the default bindings will allow users to traverse and invoke the tree of menus via its menubutton;  see the <span Class="bold">menubutton</span> manual entry for details. 
+<p class="level0"><span Class="bold">Option Menus</span> An option menu consists of a menubutton with an associated menu that allows you to select one of several values.  The current value is displayed in the menubutton and is also stored in a global variable.  Use the <span Class="bold">ck_optionMenu</span> procedure to create option menubuttons and their menus. 
+<p class="level0"><a name="DEFAULT"></a><h2 class="nroffsh">DEFAULT BINDINGS</h2>
+<p class="level0">
+<p class="level0">Ck automatically creates class bindings for menus that give them the following default behavior: 
+<p class="level0"><a name="1"></a><span class="nroffip">[1]</span> 
+<p class="level1">When button 1 is pressed on a menu, the active entry (if any) is invoked. The menu also unposts. 
+<p class="level0"><a name="2"></a><span class="nroffip">[2]</span> 
+<p class="level1">The Space and Return keys invoke the active entry and unpost the menu. 
+<p class="level0"><a name="3"></a><span class="nroffip">[3]</span> 
+<p class="level1">If any of the entries in a menu have letters underlined with with <span Class="bold">-underline</span> option, then pressing one of the underlined letters (or its upper-case or lower-case equivalent) invokes that entry and unposts the menu. 
+<p class="level0"><a name="4"></a><span class="nroffip">[4]</span> 
+<p class="level1">The Escape key aborts a menu selection in progress without invoking any entry. It also unposts the menu. 
+<p class="level0"><a name="5"></a><span class="nroffip">[5]</span> 
+<p class="level1">The Up and Down keys activate the next higher or lower entry in the menu.  When one end of the menu is reached, the active entry wraps around to the other end. 
+<p class="level0"><a name="6"></a><span class="nroffip">[6]</span> 
+<p class="level1">The Left key moves to the next menu to the left. If the current menu is a cascaded submenu, then the submenu is unposted and the current menu entry becomes the cascade entry in the parent. If the current menu is a top-level menu posted from a menubutton, then the current menubutton is unposted and the next menubutton to the left is posted. Otherwise the key has no effect. The left-right order of menubuttons is determined by their stacking order:  Ck assumes that the lowest menubutton (which by default is the first one created) is on the left. 
+<p class="level0"><a name="7"></a><span class="nroffip">[7]</span> 
+<p class="level1">The Right key moves to the next menu to the right. If the current entry is a cascade entry, then the submenu is posted and the  current menu entry becomes the first entry in the submenu. Otherwise, if the current menu was posted from a menubutton, then the current menubutton is unposted and the next menubutton to the right is posted. 
+<p class="level1">Disabled menu entries are non-responsive:  they don&#39;t activate and they ignore mouse button presses and releases. 
+<p class="level1">The behavior of menus can be changed by defining new bindings for individual widgets or by redefining the class bindings. 
+<p class="level1"><a name="BUGS"></a><h2 class="nroffsh">BUGS</h2>
+<p class="level0">
+<p class="level0">At present it isn&#39;t possible to use the option database to specify values for the options to individual entries. 
+<p class="level0"><a name="KEYWORDS"></a><h2 class="nroffsh">KEYWORDS</h2>
+<p class="level0">menu, widget <p class="roffit">
+ This HTML page was made with <a href="http://daniel.haxx.se/projects/roffit/">roffit</a>.
+</body></html>

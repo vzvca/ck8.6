@@ -13,7 +13,7 @@
 .SH NAME
 button \- Create and manipulate button widgets
 .SH SYNOPSIS
-\fBbutton\fI \fIpathName \fR?\fIoptions\fR?
+\fBbutton \fIpathName \fR?\fIoptions\fR?\fR\fR
 .SH "STANDARD OPTIONS"
 .LP
 .nf

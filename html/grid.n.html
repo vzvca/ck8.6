@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<title>n man page</title>
+<meta name="generator" content="roffit">
+<STYLE type="text/css">
+pre {
+  overflow: auto;
+  margin: 0;
+}
+
+P.level0, pre.level0 {
+ padding-left: 2em;
+}
+
+P.level1, pre.level1 {
+ padding-left: 4em;
+}
+
+P.level2, pre.level2 {
+ padding-left: 6em;
+}
+
+span.emphasis {
+ font-style: italic;
+}
+
+span.bold {
+ font-weight: bold;
+}
+
+span.manpage {
+ font-weight: bold;
+}
+
+h2.nroffsh {
+ background-color: #e0e0e0;
+}
+
+span.nroffip {
+ font-weight: bold;
+ font-size: 120%;
+ font-family: monospace;
+}
+
+p.roffit {
+ text-align: center;
+ font-size: 80%;
+}
+</STYLE>
+</head><body>
+See the man.macros man page.
+
+<p class="level0">
+<p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
+<p class="level0">grid - Geometry manager that arranges widgets in a grid <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
+<p class="level0"><span class="bold">grid <span Class="emphasis">option arg </span>?<span Class="emphasis">arg ...</span>? 
+<p class="level0">
+<p class="level0"><a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
+<p class="level0">
+<p class="level0">The <span Class="bold">grid</span> command is used to communicate with the grid geometry manager that arranges widgets in rows and columns inside of another window, called the geometry master (or master window). The <span Class="bold">grid</span> command can have any of several forms, depending on the <span Class="emphasis">option</span> argument: 
+<p class="level0"><span class="bold">grid <span Class="emphasis">slave </span>?<span Class="emphasis">slave ...</span>? ?<span Class="emphasis">options</span>? If the first argument to <span Class="bold">grid</span> is a window name (any value starting with ``.&#39;&#39;), then the command is processed in the same way as <span Class="bold">grid configure</span>. 
+<p class="level0"><span class="bold">grid bbox <span Class="emphasis">master column row</span> The bounding box (in rows or columns) is returned for the space occupied by the grid position indicated by <span Class="emphasis">column</span> and <span Class="emphasis">row</span>.  The return value consists of 4 integers.  The first two are the column/row offset from the master window (x then y) of the top-left corner of the grid cell, and the second two are the width and height of the cell. 
+<p class="level0"><span class="bold">grid columnconfigure <span Class="emphasis">master index </span>?<span Class="emphasis">-option value...</span>? Query or set the column properties of the <span Class="emphasis">index</span> column of the  geometry master, <span Class="emphasis">master</span>. The valid options are <span Class="bold">-minsize</span> and <span Class="bold">-weight</span>. The <span Class="bold">-minsize</span> option sets the minimum column size, and the <span Class="bold">-weight</span> option (a floating point value) sets the relative weight for apportioning any extra spaces among columns.  If no value is specified, the current value is returned. 
+<p class="level0"><span class="bold">grid configure <span Class="emphasis">slave </span>?<span Class="emphasis">slave ...</span>? ?<span Class="emphasis">options</span>? The arguments consist of the names of one or more slave windows followed by pairs of arguments that specify how to manage the slaves. The characters <span Class="bold">-</span>,  <span Class="bold">x</span> and <span Class="bold">^</span>,  can be specified instead of a window name to alter the default location of a <span Class="emphasis">slave</span>, as described in the ``RELATIVE PLACEMENT&#39;&#39; section, below. The following options are supported: 
+<p class="level1">
+<p class="level1"><span class="bold">-column <span Class="emphasis">n</span> Insert the slave so that it occupies the <span Class="emphasis">n</span>th column in the grid. Column numbers start with 0.  If this option is not supplied, then the slave is arranged just to the right of previous slave specified on this call to <span Class="emphasis">grid</span>, or column &quot;0&quot; if it is the first slave.  For each <span Class="bold">x</span> that immediately precedes the <span Class="emphasis">slave</span>, the column position is incremented by one.  Thus the <span Class="bold">x</span> represents a blank column for this row in the grid. 
+<p class="level1"><span class="bold">-columnspan <span Class="emphasis">n</span> Insert the slave so that it occupies <span Class="emphasis">n</span> columns in the grid. The default is one column, unless the window name is followed by a <span Class="bold">-</span>, in which case the columnspan is incremented once for each immediately following <span Class="bold">-</span>. 
+<p class="level1"><span class="bold">-ipadx <span Class="emphasis">amount</span> The <span Class="emphasis">amount</span> specifies how much horizontal internal padding to leave on each side of the slave(s). <span Class="emphasis">Amount</span> is specified in terminal columns. It defaults to 0. 
+<p class="level1"><span class="bold">-ipady <span Class="emphasis">amount</span> The <span Class="emphasis">amount</span> specifies how much vertical internal padding to leave on on the top and bottom of the slave(s). <span Class="emphasis">Amount</span> is specified in terminal rows. It defaults to 0. 
+<p class="level1"><span class="bold">-padx <span Class="emphasis">amount</span> The <span Class="emphasis">amount</span> specifies how much horizontal external padding to leave on each side of the slave(s). The <span Class="emphasis">amount</span> defaults to 0. 
+<p class="level1"><span class="bold">-pady <span Class="emphasis">amount</span> The <span Class="emphasis">amount</span> specifies how much vertical external padding to leave on the top and bottom of the slave(s). The <span Class="emphasis">amount</span> defaults to 0. 
+<p class="level1"><span class="bold">-row <span Class="emphasis">n</span> Insert the slave so that it occupies the <span Class="emphasis">n</span>th row in the grid. Row numbers start with 0.  If this option is not supplied, then the slave is arranged on the same row as the previous slave specified on this call to <span Class="bold">grid</span>, or the first unoccupied row if this is the first slave. 
+<p class="level1"><span class="bold">-rowspan <span Class="emphasis">n</span> Insert the slave so that it occupies <span Class="emphasis">n</span> rows in the grid. The default is one row.  If the next <span Class="bold">grid</span> command contains <span Class="bold">^</span> characters instead of <span Class="emphasis">slaves</span> that line up with the columns of this <span Class="emphasis">slave</span>, then the <span Class="bold">rowspan</span> of this <span Class="emphasis">slave</span> is extended by one. 
+<p class="level1"><span class="bold">-sticky <span Class="emphasis">style</span> If a slave&#39;s parcel is larger than its requested dimensions, this option may be used to position (or stretch) the slave within its cavity. <span Class="emphasis">Style</span>  is a string that contains zero or more of the characters <span Class="bold">n</span>, <span Class="bold">s</span>, <span Class="bold">e</span> or <span Class="bold">w</span>. The string can optionally contains spaces or commas, but they are ignored.  Each letter refers to a side (north, south, east, or west) that the slave will &quot;stick&quot; to.  If both <span Class="bold">n</span> and <span Class="bold">s</span> (or <span Class="bold">e</span> and <span Class="bold">w</span>) are specified, the slave will be stretched to fill the entire height (or width) of its cavity.  The <span Class="bold">sticky</span> option subsumes the combination of <span Class="bold">-anchor</span> and <span Class="bold">-fill</span> that is used by <span Class="bold">pack</span>. The default is <span Class="bold">{}</span>, which causes the slave to be centered in its cavity, at its requested size. 
+<p class="level1">If any of the slaves are already managed by the geometry manager then any unspecified options for them retain their previous values rather than receiving default values. 
+<p class="level0">
+<p class="level0"><span class="bold">grid forget <span Class="emphasis">slave </span>?<span Class="emphasis">slave ...</span>? Removes each of the <span Class="emphasis">slave</span>s from grid for its master and unmaps their windows. The slaves will no longer be managed by the grid geometry manager. 
+<p class="level0"><span class="bold">grid info <span Class="emphasis">slave</span> Returns a list whose elements are the current configuration state of the slave given by <span Class="emphasis">slave</span> in the same option-value form that might be specified to <span Class="bold">grid configure</span>. 
+<p class="level0"><span class="bold">grid location <span Class="emphasis">master x y</span> Given <span Class="emphasis">x</span> and <span Class="emphasis">y</span> values in terminal columns/rows relative to the master window, the column and row number at that <span Class="emphasis">x</span> and <span Class="emphasis">y</span> location is returned. For locations that are above or to the left of the grid, <span Class="bold">-1</span> is returned. 
+<p class="level0"><span class="bold">grid propagate <span Class="emphasis">master</span> ?<span Class="emphasis">boolean</span>? If <span Class="emphasis">boolean</span> has a true boolean value such as <span Class="bold">1</span> or <span Class="bold">on</span> then propagation is enabled for <span Class="emphasis">master</span>, which must be a window name (see ``GEOMETRY PROPAGATION&#39;&#39; below). If <span Class="emphasis">boolean</span> has a false boolean value then propagation is disabled for <span Class="emphasis">master</span>. In either of these cases an empty string is returned. If <span Class="emphasis">boolean</span> is omitted then the command returns <span Class="bold">0</span> or <span Class="bold">1</span> to indicate whether propagation is currently enabled for <span Class="emphasis">master</span>. Propagation is enabled by default. 
+<p class="level0"><span Class="bold">grid </span>rowconfigure <span Class="emphasis">master index </span>?<span Class="emphasis">-option value...</span>? Query or set the row properties of the <span Class="emphasis">index</span> row of the  geometry master, <span Class="emphasis">master</span>. The valid options are <span Class="bold">-minsize</span> and <span Class="bold">-weight</span>. <span Class="bold">Minsize</span> sets the minimum row size, in screen units, and <span Class="bold">weight</span> sets the relative weight for apportioning any extra spaces among rows.  If no value is specified, the current value is returned. 
+<p class="level0"><span class="bold">grid size <span Class="emphasis">master</span> Returns the size of the grid (in columns then rows) for <span Class="emphasis">master</span>. The size is determined either by the <span Class="emphasis">slave</span> occupying the largest row or column, or the largest column or row with a <span Class="bold">minsize</span> or <span Class="bold">weight</span>. 
+<p class="level0"><span class="bold">grid slaves <span Class="emphasis">master</span> ?<span Class="emphasis">-option value</span>? If no options are supplied, a list of all of the slaves in <span Class="emphasis">master</span> are returned. <span Class="emphasis">Option</span> can be either <span Class="bold">-row</span> or <span Class="bold">-column</span> which causes only the slaves in the row (or column) specified by <span Class="emphasis">value</span> to be returned. <a name="RELATIVE"></a><h2 class="nroffsh">RELATIVE PLACEMENT</h2>
+<p class="level0">
+<p class="level0">The <span Class="bold">grid</span> command contains a limited set of capabilities that permit layouts to be created without specifying the row and column  information for each slave.  This permits slaves to be rearranged,  added, or removed without the need to explicitly specify row and column information. When no column or row information is specified for a <span Class="emphasis">slave</span>,  default values are chosen for <span Class="bold">column</span>, <span Class="bold">row</span>, </span>columnspan</span> and </span>rowspan</span> at the time the <span Class="emphasis">slave</span> is managed. The values are chosen based upon the current layout of the grid, the position of the <span Class="emphasis">slave</span> relative to other <span Class="emphasis">slave</span>s in the same grid command, and the presence of the characters <span Class="bold">-</span>, <span Class="bold">^</span>, and <span Class="bold">^</span> in <span Class="bold">grid</span> command where <span Class="emphasis">slave</span> names are normally expected. 
+<p class="level1">
+<p class="level1"><span Class="bold">-</span> This increases the columnspan of the <span Class="emphasis">slave</span> to the left.  Several <span Class="bold">-</span>&#39;s in a row will successively increase the columnspan. S <span Class="bold">-</span> may not follow a <span Class="bold">^</span> or a <span Class="bold">x</span>. 
+<p class="level1"><span Class="bold">x</span> This leaves an empty column between the <span Class="emphasis">slave</span> on the left and the <span Class="emphasis">slave</span> on the right. 
+<p class="level1"><span Class="bold">^</span> This extends the <span Class="bold">rowspan</span> of the <span Class="emphasis">slave</span> above the <span Class="bold">^</span>&#39;s in the grid.  The number of <span Class="bold">^</span>&#39;s in a row must match the number of columns spanned by the <span Class="emphasis">slave</span> above it. 
+<p class="level0"><a name="GEOMETRY"></a><h2 class="nroffsh">GEOMETRY PROPAGATION</h2>
+<p class="level0">
+<p class="level0">Grid normally computes how large a master must be to just exactly meet the needs of its slaves, and it sets the requested width and height of the master to these dimensions. This causes geometry information to propagate up through a window hierarchy to a top-level window so that the entire sub-tree sizes itself to fit the needs of the leaf windows. However, the <span Class="bold">grid propagate</span> command may be used to turn off propagation for one or more masters. If propagation is disabled then grid will not set the requested width and height of the master window. This may be useful if, for example, you wish for a master window to have a fixed size that you specify. 
+<p class="level0"><a name="RESTRICTIONS"></a><h2 class="nroffsh">RESTRICTIONS ON MASTER WINDOWS</h2>
+<p class="level0">
+<p class="level0">The master for each slave must be the slave&#39;s parent. This restriction is necessary to guarantee that the slave can be placed over any part of its master that is visible without danger of the slave being clipped by its parent. 
+<p class="level0"><a name="CREDITS"></a><h2 class="nroffsh">CREDITS</h2>
+<p class="level0">
+<p class="level0">The <span Class="bold">grid</span> command is based on the <span Class="emphasis">GridBag</span> geometry manager written by D. Stein. 
+<p class="level0"><a name="KEYWORDS"></a><h2 class="nroffsh">KEYWORDS</h2>
+<p class="level0">geometry manager, location, grid, parcel, propagation, size, pack <p class="roffit">
+ This HTML page was made with <a href="http://daniel.haxx.se/projects/roffit/">roffit</a>.
+</body></html>

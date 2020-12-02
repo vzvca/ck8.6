@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<title>n man page</title>
+<meta name="generator" content="roffit">
+<STYLE type="text/css">
+pre {
+  overflow: auto;
+  margin: 0;
+}
+
+P.level0, pre.level0 {
+ padding-left: 2em;
+}
+
+P.level1, pre.level1 {
+ padding-left: 4em;
+}
+
+P.level2, pre.level2 {
+ padding-left: 6em;
+}
+
+span.emphasis {
+ font-style: italic;
+}
+
+span.bold {
+ font-weight: bold;
+}
+
+span.manpage {
+ font-weight: bold;
+}
+
+h2.nroffsh {
+ background-color: #e0e0e0;
+}
+
+span.nroffip {
+ font-weight: bold;
+ font-size: 120%;
+ font-family: monospace;
+}
+
+p.roffit {
+ text-align: center;
+ font-size: 80%;
+}
+</STYLE>
+</head><body>
+See the man.macros man page.
+
+<p class="level0">
+<p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
+<p class="level0">place - Geometry manager for fixed or rubber-sheet placement <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
+<p class="level0"><span class="bold">place <span Class="emphasis">window option value </span>?<span Class="emphasis">option value ...</span>? 
+<p class="level0"><span class="bold">place configure <span Class="emphasis">window option value </span>?<span Class="emphasis">option value ...</span>? 
+<p class="level0"><span class="bold">place forget <span Class="emphasis">window</span> 
+<p class="level0"><span class="bold">place info <span Class="emphasis">window</span> 
+<p class="level0"><span class="bold">place slaves <span Class="emphasis">window</span> 
+<p class="level0">
+<p class="level0"><a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
+<p class="level0">
+<p class="level0">The placer is a geometry manager for Ck. It provides simple fixed placement of windows, where you specify the exact size and location of one window, called the <span Class="emphasis">slave</span>, within another window, called the <span Class="emphasis">master</span>. The placer also provides rubber-sheet placement, where you specify the size and location of the slave in terms of the dimensions of the master, so that the slave changes size and location in response to changes in the size of the master. Lastly, the placer allows you to mix these styles of placement so that, for example, the slave has a fixed width and height but is centered inside the master. 
+<p class="level0">If the first argument to the <span Class="bold">place</span> command is a window path name or <span Class="bold">configure</span> then the command arranges for the placer to manage the geometry of a slave whose path name is <span Class="emphasis">window</span>. The remaining arguments consist of one or more <span Class="emphasis">option-value</span> pairs that specify the way in which <span Class="emphasis">window</span>&#39;s geometry is managed. If the placer is already managing <span Class="emphasis">window</span>, then the <span Class="emphasis">option-value</span> pairs modify the configuration for <span Class="emphasis">window</span>. In this form the <span Class="bold">place</span> command returns an empty string as result. The following <span Class="emphasis">option-value</span> pairs are supported: 
+<p class="level0"><span class="bold">-x <span Class="emphasis">location</span> <span Class="emphasis">Location</span> specifies the x-coordinate within the master window of the anchor point for <span Class="emphasis">window</span>. The location is specified in screen columns and need not lie within the bounds of the master window. 
+<p class="level0"><span class="bold">-relx <span Class="emphasis">location</span> <span Class="emphasis">Location</span> specifies the x-coordinate within the master window of the anchor point for <span Class="emphasis">window</span>. In this case the location is specified in a relative fashion as a floating-point number:  0.0 corresponds to the left edge of the master and 1.0 corresponds to the right edge of the master. <span Class="emphasis">Location</span> need not be in the range 0.0-1.0. If both <span Class="bold">-x</span> and <span Class="bold">-relx</span> are specified for a slave then their values are summed.  For example, <span Class="bold">-relx 0.5 -x -2</span> positions the left edge of the slave 2 columns to the left of the center of its master. 
+<p class="level0"><span class="bold">-y <span Class="emphasis">location</span> <span Class="emphasis">Location</span> specifies the y-coordinate within the master window of the anchor point for <span Class="emphasis">window</span>. The location is specified in screen lines and need not lie within the bounds of the master window. 
+<p class="level0"><span class="bold">-rely <span Class="emphasis">location</span> <span Class="emphasis">Location</span> specifies the y-coordinate within the master window of the anchor point for <span Class="emphasis">window</span>. In this case the value is specified in a relative fashion as a floating-point number:  0.0 corresponds to the top edge of the master and 1.0 corresponds to the bottom edge of the master. <span Class="emphasis">Location</span> need not be in the range 0.0-1.0. If both <span Class="bold">-y</span> and <span Class="bold">-rely</span> are specified for a slave then their values are summed.  For example, <span Class="bold">-rely 0.5 -x 3</span> positions the top edge of the slave 3 lines below the center of its master. 
+<p class="level0"><span class="bold">-anchor <span Class="emphasis">where</span> <span Class="emphasis">Where</span> specifies which point of <span Class="emphasis">window</span> is to be positioned at the (x,y) location selected by the <span Class="bold">-x</span>, <span Class="bold">-y</span>, <span Class="bold">-relx</span>, and <span Class="bold">-rely</span> options. The anchor point is in terms of the outer area of <span Class="emphasis">window</span> including its border, if any. Thus if <span Class="emphasis">where</span> is <span Class="bold">se</span> then the lower-right corner of <span Class="emphasis">window</span>&#39;s border will appear at the given (x,y) location in the master. The anchor position defaults to <span Class="bold">nw</span>. 
+<p class="level0"><span class="bold">-width <span Class="emphasis">size</span> <span Class="emphasis">Size</span> specifies the width for <span Class="emphasis">window</span> in screen columns. The width will be the outer width of <span Class="emphasis">window</span> including its border, if any. If <span Class="emphasis">size</span> is an empty string, or if no <span Class="bold">-width</span> or <span Class="bold">-relwidth</span> option is specified, then the width requested internally by the window will be used. 
+<p class="level0"><span class="bold">-relwidth <span Class="emphasis">size</span> <span Class="emphasis">Size</span> specifies the width for <span Class="emphasis">window</span>. In this case the width is specified as a floating-point number relative to the width of the master: 0.5 means <span Class="emphasis">window</span> will be half as wide as the master, 1.0 means <span Class="emphasis">window</span> will have the same width as the master, and so on. If both <span Class="bold">-width</span> and <span Class="bold">-relwidth</span> are specified for a slave, their values are summed.  For example, <span Class="bold">-relwidth 1.0 -width 5</span> makes the slave 5 columns wider than the master. 
+<p class="level0"><span class="bold">-height <span Class="emphasis">size</span> <span Class="emphasis">Size</span> specifies the height for <span Class="emphasis">window</span> in screen lines. The height will be the outer dimension of <span Class="emphasis">window</span> including its border, if any. If <span Class="emphasis">size</span> is an empty string, or if no <span Class="bold">-height</span> or <span Class="bold">-relheight</span> option is specified, then the height requested internally by the window will be used. 
+<p class="level0"><span class="bold">-relheight <span Class="emphasis">size</span> <span Class="emphasis">Size</span> specifies the height for <span Class="emphasis">window</span>. In this case the height is specified as a floating-point number relative to the height of the master: 0.5 means <span Class="emphasis">window</span> will be half as high as the master, 1.0 means <span Class="emphasis">window</span> will have the same height as the master, and so on. If both <span Class="bold">-height</span> and <span Class="bold">-relheight</span> are specified for a slave, their values are summed.  For example, <span Class="bold">-relheight 1.0 -height -2</span> makes the slave 2 lines shorter than the master. 
+<p class="level0"><span class="bold">-bordermode <span Class="emphasis">mode</span> <span Class="emphasis">Mode</span> determines the degree to which borders within the master are used in determining the placement of the slave. The default and most common value is <span Class="bold">inside</span>. In this case the placer considers the area of the master to be the innermost area of the master, inside any border: an option of <span Class="bold">-x 0</span> corresponds to an x-coordinate just inside the border and an option of <span Class="bold">-relwidth 1.0</span> means <span Class="emphasis">window</span> will fill the area inside the master&#39;s border. If <span Class="emphasis">mode</span> is <span Class="bold">ignore</span>, borders are ignored: the area of the master is considered to be its official area, which includes any internal border. 
+<p class="level0">If the same value is specified separately with two different options, such as <span Class="bold">-x</span> and <span Class="bold">-relx</span>, then the most recent option is used and the older one is ignored. 
+<p class="level0">The <span Class="bold">place slaves</span> command returns a list of all the slave windows for which <span Class="emphasis">window</span> is the master. If there are no slaves for <span Class="emphasis">window</span> then an empty string is returned. 
+<p class="level0">The <span Class="bold">place forget</span> command causes the placer to stop managing the geometry of <span Class="emphasis">window</span>.  As a side effect of this command <span Class="emphasis">window</span> will be unmapped so that it doesn&#39;t appear on the screen. If <span Class="emphasis">window</span> isn&#39;t currently managed by the placer then the command has no effect. <span Class="bold">Place forget</span> returns an empty string as result. 
+<p class="level0">The <span Class="bold">place info</span> command returns a list giving the current configuration of <span Class="emphasis">window</span>. The list consists of <span Class="emphasis">option-value</span> pairs in exactly the same form as might be specified to the <span Class="bold">place configure</span> command. If the configuration of a window has been retrieved with <span Class="bold">place info</span>, that configuration can be restored later by first using <span Class="bold">place forget</span> to erase any existing information for the window and then invoking <span Class="bold">place configure</span> with the saved information. 
+<p class="level0"><a name="FINE"></a><h2 class="nroffsh">FINE POINTS</h2>
+<p class="level0">
+<p class="level0">Unlike many other geometry managers (such as the packer) the placer does not make any attempt to manipulate the geometry of the master windows or the parents of slave windows (i.e. it doesn&#39;t set their requested sizes). To control the sizes of these windows, make them windows like frames and canvases that provide configuration options for this purpose. 
+<p class="level0">The <span Class="bold">place</span> command is the only way to position toplevel windows on the screen. In this special case, the master of a toplevel window is assumed to be the entire screen area and the toplevel&#39;s location and area is computed based on the screen&#39;s area. 
+<p class="level0"><a name="KEYWORDS"></a><h2 class="nroffsh">KEYWORDS</h2>
+<p class="level0">geometry manager, height, location, master, place, rubber sheet, slave, width, toplevel <p class="roffit">
+ This HTML page was made with <a href="http://daniel.haxx.se/projects/roffit/">roffit</a>.
+</body></html>

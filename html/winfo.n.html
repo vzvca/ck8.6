@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<title>n man page</title>
+<meta name="generator" content="roffit">
+<STYLE type="text/css">
+pre {
+  overflow: auto;
+  margin: 0;
+}
+
+P.level0, pre.level0 {
+ padding-left: 2em;
+}
+
+P.level1, pre.level1 {
+ padding-left: 4em;
+}
+
+P.level2, pre.level2 {
+ padding-left: 6em;
+}
+
+span.emphasis {
+ font-style: italic;
+}
+
+span.bold {
+ font-weight: bold;
+}
+
+span.manpage {
+ font-weight: bold;
+}
+
+h2.nroffsh {
+ background-color: #e0e0e0;
+}
+
+span.nroffip {
+ font-weight: bold;
+ font-size: 120%;
+ font-family: monospace;
+}
+
+p.roffit {
+ text-align: center;
+ font-size: 80%;
+}
+</STYLE>
+</head><body>
+See the man.macros man page.
+
+<p class="level0">
+<p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
+<p class="level0">winfo - Return window-related information <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
+<p class="level0"><span Class="bold">winfo</span> <span Class="emphasis">option </span>?<span Class="emphasis">arg arg ...</span>? 
+<p class="level0">
+<p class="level0"><a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
+<p class="level0">
+<p class="level0">The <span Class="bold">winfo</span> command is used to retrieve information about windows managed by Ck.  It can take any of a number of different forms, depending on the <span Class="emphasis">option</span> argument.  The legal forms are: 
+<p class="level0"><span class="bold">winfo children <span Class="emphasis">window</span> Returns a list containing the path names of all the children of <span Class="emphasis">window</span>.  Top-level windows are returned as children of their logical parents. 
+<p class="level0"><span class="bold">winfo class <span Class="emphasis">window</span> Returns the class name for <span Class="emphasis">window</span>. 
+<p class="level0"><span class="bold">winfo containing <span Class="emphasis">rootX rootY</span> Returns the path name for the window containing the point given by <span Class="emphasis">rootX</span> and <span Class="emphasis">rootY</span>. <span Class="emphasis">RootX</span> and <span Class="emphasis">rootY</span> are specified as cursor position in the coordinate system of the terminal. If no window in this application contains the point then an empty string is returned. In selecting the containing window, children are given higher priority than parents and among siblings the highest one in the stacking order is chosen. 
+<p class="level0"><span class="bold">winfo depth <span Class="emphasis">window</span> Returns a decimal string giving the depth of <span Class="emphasis">window</span>. 1 means the terminal&#39;s screen is monochrome. Any number higher than 1 means that the terminal supports colors. 
+<p class="level0"><span class="bold">winfo exists <span Class="emphasis">window</span> Returns 1 if there exists a window named <span Class="emphasis">window</span>, 0 if no such window exists. 
+<p class="level0"><span class="bold">winfo geometry <span Class="emphasis">window</span> Returns the geometry for <span Class="emphasis">window</span>, in the form <span class="emphasis">width<span class="bold">x<span class="emphasis">height<span class="bold">+<span class="emphasis">x<span class="bold">+<span Class="emphasis">y</span>.  All dimensions are in terminal coordinates. 
+<p class="level0"><span class="bold">winfo height <span Class="emphasis">window</span> Returns a decimal string giving <span Class="emphasis">window</span>&#39;s height in terminal lines. When a window is first created its height will be 1;  the height will eventually be changed by a geometry manager to fulfill the window&#39;s needs. If you need the true height immediately after creating a widget, invoke <span Class="bold">update</span> to force the geometry manager to arrange it, or use <span Class="bold">winfo reqheight</span> to get the window&#39;s requested height instead of its actual height. 
+<p class="level0"><span class="bold">winfo ismapped <span Class="emphasis">window</span> Returns <span Class="bold">1</span> if <span Class="emphasis">window</span> is currently mapped, <span Class="bold">0</span> otherwise. 
+<p class="level0"><span class="bold">winfo manager <span Class="emphasis">window</span> Returns the name of the geometry manager currently responsible for <span Class="emphasis">window</span>, or an empty string if <span Class="emphasis">window</span> isn&#39;t managed by any geometry manager. The name is usually the name of the Tcl command for the geometry manager, such as <span Class="bold">pack</span> or <span Class="bold">place</span>. 
+<p class="level0"><span class="bold">winfo name <span Class="emphasis">window</span> Returns <span Class="emphasis">window</span>&#39;s name (i.e. its name within its parent, as opposed to its full path name). The command <span Class="bold">winfo name .</span> will return the name of the application. 
+<p class="level0"><span class="bold">winfo parent <span Class="emphasis">window</span> Returns the path name of <span Class="emphasis">window</span>&#39;s parent, or an empty string if <span Class="emphasis">window</span> is the main window of the application. 
+<p class="level0"><span class="bold">winfo reqheight <span Class="emphasis">window</span> Returns a decimal string giving <span Class="emphasis">window</span>&#39;s requested height, in lines.  This is the value used by <span Class="emphasis">window</span>&#39;s geometry manager to compute its geometry. 
+<p class="level0"><span class="bold">winfo reqwidth <span Class="emphasis">window</span> Returns a decimal string giving <span Class="emphasis">window</span>&#39;s requested width, in columns.  This is the value used by <span Class="emphasis">window</span>&#39;s geometry manager to compute its geometry. 
+<p class="level0"><span class="bold">winfo rootx <span Class="emphasis">window</span> Returns a decimal string giving the x-coordinate, in the root window of the screen, of the upper-left corner of <span Class="emphasis">window</span>&#39;s border (or <span Class="emphasis">window</span> if it has no border). 
+<p class="level0"><span class="bold">winfo rooty <span Class="emphasis">window</span> Returns a decimal string giving the y-coordinate, in the root window of the screen, of the upper-left corner of <span Class="emphasis">window</span>&#39;s border (or <span Class="emphasis">window</span> if it has no border). 
+<p class="level0"><span class="bold">winfo screenheight <span Class="emphasis">window</span> Returns a decimal string giving the height of <span Class="emphasis">window</span>&#39;s terminal screen, in lines. 
+<p class="level0"><span class="bold">winfo screenwidth <span Class="emphasis">window</span> Returns a decimal string giving the width of <span Class="emphasis">window</span>&#39;s terminal screen, in columns. 
+<p class="level0"><span class="bold">winfo toplevel <span Class="emphasis">window</span> Returns the path name of the top-level window containing <span Class="emphasis">window</span>. 
+<p class="level0"><span class="bold">winfo width <span Class="emphasis">window</span> Returns a decimal string giving <span Class="emphasis">window</span>&#39;s width in columns. When a window is first created its width will be 1;  the width will eventually be changed by a geometry manager to fulfill the window&#39;s needs. If you need the true width immediately after creating a widget, invoke <span Class="bold">update</span> to force the geometry manager to arrange it, or use <span Class="bold">winfo reqwidth</span> to get the window&#39;s requested width instead of its actual width. 
+<p class="level0"><span class="bold">winfo x <span Class="emphasis">window</span> Returns a decimal string giving the x-coordinate, in <span Class="emphasis">window</span>&#39;s parent, of the upper-left corner of <span Class="emphasis">window</span>&#39;s border (or <span Class="emphasis">window</span> if it has no border). 
+<p class="level0"><span class="bold">winfo y <span Class="emphasis">window</span> Returns a decimal string giving the y-coordinate, in <span Class="emphasis">window</span>&#39;s parent, of the upper-left corner of <span Class="emphasis">window</span>&#39;s border (or <span Class="emphasis">window</span> if it has no border). 
+<p class="level0"><a name="KEYWORDS"></a><h2 class="nroffsh">KEYWORDS</h2>
+<p class="level0">children, class, geometry, height, identifier, information, mapped, parent, path name, screen, terminal, width, window <p class="roffit">
+ This HTML page was made with <a href="http://daniel.haxx.se/projects/roffit/">roffit</a>.
+</body></html>

@@ -13,7 +13,7 @@
 .SH NAME
 bindtags \- Determine which bindings apply to a window, and order of evaluation
 .SH SYNOPSIS
-\fBbindtags \fIwindow \fR?\fItagList\fR?
+\fBbindtags \fIwindow \fR?\fItagList\fR?\fR
 .BE
 
 .SH DESCRIPTION

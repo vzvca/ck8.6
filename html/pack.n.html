@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<title>n man page</title>
+<meta name="generator" content="roffit">
+<STYLE type="text/css">
+pre {
+  overflow: auto;
+  margin: 0;
+}
+
+P.level0, pre.level0 {
+ padding-left: 2em;
+}
+
+P.level1, pre.level1 {
+ padding-left: 4em;
+}
+
+P.level2, pre.level2 {
+ padding-left: 6em;
+}
+
+span.emphasis {
+ font-style: italic;
+}
+
+span.bold {
+ font-weight: bold;
+}
+
+span.manpage {
+ font-weight: bold;
+}
+
+h2.nroffsh {
+ background-color: #e0e0e0;
+}
+
+span.nroffip {
+ font-weight: bold;
+ font-size: 120%;
+ font-family: monospace;
+}
+
+p.roffit {
+ text-align: center;
+ font-size: 80%;
+}
+</STYLE>
+</head><body>
+See the man.macros man page.
+
+<p class="level0">
+<p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
+<p class="level0">pack - Geometry manager that packs around edges of cavity <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
+<p class="level0"><span class="bold">pack <span Class="emphasis">option arg </span>?<span Class="emphasis">arg ...</span>? 
+<p class="level0">
+<p class="level0"><a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
+<p class="level0">
+<p class="level0">The <span Class="bold">pack</span> command is used to communicate with the packer, a geometry manager that arranges the children of a parent by packing them in order around the edges of the parent. The <span Class="bold">pack</span> command can have any of several forms, depending on the <span Class="emphasis">option</span> argument: 
+<p class="level0"><span class="bold">pack <span Class="emphasis">slave </span>?<span Class="emphasis">slave ...</span>? ?<span Class="emphasis">options</span>? If the first argument to <span Class="bold">pack</span> is a window name (any value starting with ``.&#39;&#39;), then the command is processed in the same way as <span Class="bold">pack configure</span>. 
+<p class="level0"><span class="bold">pack configure <span Class="emphasis">slave </span>?<span Class="emphasis">slave ...</span>? ?<span Class="emphasis">options</span>? The arguments consist of the names of one or more slave windows followed by pairs of arguments that specify how to manage the slaves. See ``THE PACKER ALGORITHM&#39;&#39; below for details on how the options are used by the packer. The following options are supported: 
+<p class="level1">
+<p class="level1"><span class="bold">-after <span Class="emphasis">other</span> <span Class="emphasis">Other</span> must the name of another window. Use its master as the master for the slaves, and insert the slaves just after <span Class="emphasis">other</span> in the packing order. 
+<p class="level1"><span class="bold">-anchor <span Class="emphasis">anchor</span> <span Class="emphasis">Anchor</span> must be a valid anchor position such as <span Class="bold">n</span> or <span Class="bold">sw</span>; it specifies where to position each slave in its parcel. Defaults to <span Class="bold">center</span>. 
+<p class="level1"><span class="bold">-before <span Class="emphasis">other</span> <span Class="emphasis">Other</span> must the name of another window. Use its master as the master for the slaves, and insert the slaves just before <span Class="emphasis">other</span> in the packing order. 
+<p class="level1"><span class="bold">-expand <span Class="emphasis">boolean</span> Specifies whether the slaves should be expanded to consume extra space in their master. <span Class="emphasis">Boolean</span> may have any proper boolean value, such as <a class="bold" href="#1">1</a> or <span Class="bold">no</span>. Defaults to 0. 
+<p class="level1"><span class="bold">-fill <span Class="emphasis">style</span> If a slave&#39;s parcel is larger than its requested dimensions, this option may be used to stretch the slave. <span Class="emphasis">Style</span> must have one of the following values: 
+<p class="level2">
+<p class="level2"><span Class="bold">none</span> Give the slave its requested dimensions plus any internal padding requested with <span Class="bold">-ipadx</span> or <span Class="bold">-ipady</span>.  This is the default. 
+<p class="level2"><span Class="bold">x</span> Stretch the slave horizontally to fill the entire width of its parcel (except leave external padding as specified by <span Class="bold">-padx</span>). 
+<p class="level2"><span Class="bold">y</span> Stretch the slave vertically to fill the entire height of its parcel (except leave external padding as specified by <span Class="bold">-pady</span>). 
+<p class="level2"><span Class="bold">both</span> Stretch the slave both horizontally and vertically. 
+<p class="level1">
+<p class="level1"><span class="bold">-ipadx <span Class="emphasis">amount</span> <span Class="emphasis">Amount</span> specifies how much horizontal internal padding to leave on each side of the slave(s). <span Class="emphasis">Amount</span> must be a valid screen distance, such as <a class="bold" href="#2">2</a> or <span Class="bold">.5c</span>. It defaults to 0. 
+<p class="level1"><span class="bold">-ipady <span Class="emphasis">amount</span> <span Class="emphasis">Amount</span> specifies how much vertical internal padding to leave on each side of the slave(s). <span Class="emphasis">Amount</span>  defaults to 0. 
+<p class="level1"><span class="bold">-padx <span Class="emphasis">amount</span> <span Class="emphasis">Amount</span> specifies how much horizontal external padding to leave on each side of the slave(s). <span Class="emphasis">Amount</span> defaults to 0. 
+<p class="level1"><span class="bold">-pady <span Class="emphasis">amount</span> <span Class="emphasis">Amount</span> specifies how much vertical external padding to leave on each side of the slave(s). <span Class="emphasis">Amount</span> defaults to 0. 
+<p class="level1"><span class="bold">-side <span Class="emphasis">side</span> Specifies which side of the master the slave(s) will be packed against. Must be <span Class="bold">left</span>, <span Class="bold">right</span>, <span Class="bold">top</span>, or <span Class="bold">bottom</span>. Defaults to <span Class="bold">top</span>. 
+<p class="level1">If no <span Class="bold">-after</span> or <span Class="bold">-before</span> option is specified then each of the slaves will be inserted at the end of the packing list for its parent unless it is already managed by the packer (in which case it will be left where it is). If one of these options is specified then all the slaves will be inserted at the specified point. If any of the slaves are already managed by the geometry manager then any unspecified options for them retain their previous values rather than receiving default values. 
+<p class="level0">
+<p class="level0"><span class="bold">pack forget <span Class="emphasis">slave </span>?<span Class="emphasis">slave ...</span>? Removes each of the <span Class="emphasis">slave</span>s from the packing order for its master and unmaps their windows. The slaves will no longer be managed by the packer. 
+<p class="level0"><span class="bold">pack info <span Class="emphasis">slave</span> Returns a list whose elements are the current configuration state of the slave given by <span Class="emphasis">slave</span> in the same option-value form that might be specified to <span Class="bold">pack configure</span>. The first two elements of the list are ``<span class="bold">-in <span Class="emphasis">master</span>&#39;&#39; where <span Class="emphasis">master</span> is the slave&#39;s master. 
+<p class="level0"><span class="bold">pack propagate <span Class="emphasis">master</span> ?<span Class="emphasis">boolean</span>? If <span Class="emphasis">boolean</span> has a true boolean value such as <a class="bold" href="#1">1</a> or <span Class="bold">on</span> then propagation is enabled for <span Class="emphasis">master</span>, which must be a window name (see ``GEOMETRY PROPAGATION&#39;&#39; below). If <span Class="emphasis">boolean</span> has a false boolean value then propagation is disabled for <span Class="emphasis">master</span>. In either of these cases an empty string is returned. If <span Class="emphasis">boolean</span> is omitted then the command returns <span Class="bold">0</span> or <a class="bold" href="#1">1</a> to indicate whether propagation is currently enabled for <span Class="emphasis">master</span>. Propagation is enabled by default. 
+<p class="level0"><span class="bold">pack slaves <span Class="emphasis">master</span> Returns a list of all of the slaves in the packing order for <span Class="emphasis">master</span>. The order of the slaves in the list is the same as their order in the packing order. If <span Class="emphasis">master</span> has no slaves then an empty string is returned. 
+<p class="level0"><a name="THE"></a><h2 class="nroffsh">THE PACKER ALGORITHM</h2>
+<p class="level0">
+<p class="level0">For each master the packer maintains an ordered list of slaves called the <span Class="emphasis">packing list</span>. The <span Class="bold">-in</span>, <span Class="bold">-after</span>, and <span Class="bold">-before</span> configuration options are used to specify the master for each slave and the slave&#39;s position in the packing list. If none of these options is given for a slave then the slave is added to the end of the packing list for its parent. 
+<p class="level0">The packer arranges the slaves for a master by scanning the packing list in order. At the time it processes each slave, a rectangular area within the master is still unallocated. This area is called the <span Class="emphasis">cavity</span>;  for the first slave it is the entire area of the master. 
+<p class="level0">For each slave the packer carries out the following steps: 
+<p class="level0"><a name="1"></a><span class="nroffip">[1]</span> 
+<p class="level1">The packer allocates a rectangular <span Class="emphasis">parcel</span> for the slave along the side of the cavity given by the slave&#39;s <span Class="bold">-side</span> option. If the side is top or bottom then the width of the parcel is the width of the cavity and its height is the requested height of the slave plus the <span Class="bold">-ipady</span> and <span Class="bold">-pady</span> options. For the left or right side the height of the parcel is the height of the cavity and the width is the requested width of the slave plus the <span Class="bold">-ipadx</span> and <span Class="bold">-padx</span> options. The parcel may be enlarged further because of the <span Class="bold">-expand</span> option (see ``EXPANSION&#39;&#39; below) 
+<p class="level0"><a name="2"></a><span class="nroffip">[2]</span> 
+<p class="level1">The packer chooses the dimensions of the slave. The width will normally be the slave&#39;s requested width plus twice its <span Class="bold">-ipadx</span> option and the height will normally be the slave&#39;s requested height plus twice its <span Class="bold">-ipady</span> option. However, if the <span Class="bold">-fill</span> option is <span Class="bold">x</span> or <span Class="bold">both</span> then the width of the slave is expanded to fill the width of the parcel, minus twice the <span Class="bold">-padx</span> option. If the <span Class="bold">-fill</span> option is <span Class="bold">y</span> or <span Class="bold">both</span> then the height of the slave is expanded to fill the width of the parcel, minus twice the <span Class="bold">-pady</span> option. 
+<p class="level0"><a name="3"></a><span class="nroffip">[3]</span> 
+<p class="level1">The packer positions the slave over its parcel. If the slave is smaller than the parcel then the <span Class="bold">-anchor</span> option determines where in the parcel the slave will be placed. If <span Class="bold">-padx</span> or <span Class="bold">-pady</span> is non-zero, then the given amount of external padding will always be left between the slave and the edges of the parcel. 
+<p class="level1">Once a given slave has been packed, the area of its parcel is subtracted from the cavity, leaving a smaller rectangular cavity for the next slave. If a slave doesn&#39;t use all of its parcel, the unused space in the parcel will not be used by subsequent slaves. If the cavity should become too small to meet the needs of a slave then the slave will be given whatever space is left in the cavity. If the cavity shrinks to zero size, then all remaining slaves on the packing list will be unmapped from the screen until the master window becomes large enough to hold them again. 
+<p class="level1"><a name="EXPANSION"></a><h2 class="nroffsh">EXPANSION</h2>
+<p class="level0">
+<p class="level0">If a master window is so large that there will be extra space left over after all of its slaves have been packed, then the extra space is distributed uniformly among all of the slaves for which the <span Class="bold">-expand</span> option is set. Extra horizontal space is distributed among the expandable slaves whose <span Class="bold">-side</span> is <span Class="bold">left</span> or <span Class="bold">right</span>, and extra vertical space is distributed among the expandable slaves whose <span Class="bold">-side</span> is <span Class="bold">top</span> or <span Class="bold">bottom</span>. 
+<p class="level0"><a name="GEOMETRY"></a><h2 class="nroffsh">GEOMETRY PROPAGATION</h2>
+<p class="level0">
+<p class="level0">The packer normally computes how large a master must be to just exactly meet the needs of its slaves, and it sets the requested width and height of the master to these dimensions. This causes geometry information to propagate up through a window hierarchy to a top-level window so that the entire sub-tree sizes itself to fit the needs of the leaf windows. However, the <span Class="bold">pack propagate</span> command may be used to turn off propagation for one or more masters. If propagation is disabled then the packer will not set the requested width and height of the packer. This may be useful if, for example, you wish for a master window to have a fixed size that you specify. 
+<p class="level0"><a name="RESTRICTIONS"></a><h2 class="nroffsh">RESTRICTIONS ON MASTER WINDOWS</h2>
+<p class="level0">
+<p class="level0">The master for each slave must be the slave&#39;s parent This restriction is necessary to guarantee that the slave can be placed over any part of its master that is visible without danger of the slave being clipped by its parent. 
+<p class="level0"><a name="KEYWORDS"></a><h2 class="nroffsh">KEYWORDS</h2>
+<p class="level0">geometry manager, location, packer, parcel, propagation, size <p class="roffit">
+ This HTML page was made with <a href="http://daniel.haxx.se/projects/roffit/">roffit</a>.
+</body></html>

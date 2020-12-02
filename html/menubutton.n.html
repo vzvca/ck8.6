@@ -1,0 +1,154 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<title>n man page</title>
+<meta name="generator" content="roffit">
+<STYLE type="text/css">
+pre {
+  overflow: auto;
+  margin: 0;
+}
+
+P.level0, pre.level0 {
+ padding-left: 2em;
+}
+
+P.level1, pre.level1 {
+ padding-left: 4em;
+}
+
+P.level2, pre.level2 {
+ padding-left: 6em;
+}
+
+span.emphasis {
+ font-style: italic;
+}
+
+span.bold {
+ font-weight: bold;
+}
+
+span.manpage {
+ font-weight: bold;
+}
+
+h2.nroffsh {
+ background-color: #e0e0e0;
+}
+
+span.nroffip {
+ font-weight: bold;
+ font-size: 120%;
+ font-family: monospace;
+}
+
+p.roffit {
+ text-align: center;
+ font-size: 80%;
+}
+</STYLE>
+</head><body>
+See the man.macros man page.
+
+<p class="level0">
+<p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
+<p class="level0">menubutton - Create and manipulate menubutton widgets <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
+<p class="level0"><span class="bold">menubutton<span class="emphasis"> <span Class="emphasis">pathName </span>?<span Class="emphasis">options</span>? <a name="STANDARD"></a><h2 class="nroffsh">STANDARD OPTIONS</h2>
+<p class="level0">
+<p class="level0"><pre class="level0">
+<span class="bold">activeAttributes</span>	<span class="bold">attributes</span>	<span class="bold">disabledForeground</span>	<span class="bold">textVariable</span>
+<span class="bold">activeBackground</span>	<span class="bold">background</span>	<span class="bold">foreground</span>	<span class="bold">underline</span>
+<span class="bold">activeForeground</span>	<span class="bold">disabledAttributes</span>	<span class="bold">takeFocus</span>	<span class="bold">underlineAttributes</span>
+<span class="bold">anchor</span>	<span class="bold">disabledBackground</span>	<span class="bold">text</span>	<span class="bold">underlineForeground</span>
+</pre>
+
+<p class="level0">
+<p class="level0">See the ``options&#39;&#39; manual entry for details on the standard options. <a name="WIDGET-SPECIFIC"></a><h2 class="nroffsh">WIDGET-SPECIFIC OPTIONS</h2>
+<p class="level0">
+<p class="level0">
+<p class="level0"><pre class="level0">
+Name:	<span class="bold">height</span>
+Class:	<span class="bold">Height</span>
+Command-Line Switch:	<span class="bold">-height</span>
+</pre>
+
+<p class="level0">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies a desired height for the menubutton in screen lines. If this option isn&#39;t specified, the menubutton&#39;s desired height is 1 line. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">indicatorForeground</span>
+Class:	<span class="bold">IndicatorForeground</span>
+Command-Line Switch:	<span class="bold">-indicatorforeground</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Color in which the indicator rectangle, if any, is drawn. On color terminals this defaults to red, on monochrome terminals to white. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">indicatorOn</span>
+Class:	<span class="bold">IndicatorOn</span>
+Command-Line Switch:	<span class="bold">-indicatoron</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">The value must be a proper boolean value.  If it is true then a small indicator rectangle will be displayed on the right side of the menubutton and the default menu bindings will treat this as an option menubutton.  If false then no indicator will be displayed. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">menu</span>
+Class:	<span class="bold">MenuName</span>
+Command-Line Switch:	<span class="bold">-menu</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies the path name of the menu associated with this menubutton. The menu must be a child of the menubutton. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">state</span>
+Class:	<span class="bold">State</span>
+Command-Line Switch:	<span class="bold">-state</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies one of three states for the menubutton:  <span Class="bold">normal</span>, <span Class="bold">active</span>, or <span Class="bold">disabled</span>.  In normal state the menubutton is displayed using the <span Class="bold">attributes</span>, <span Class="bold">foreground</span>, and <span Class="bold">background</span> options. The active state is typically used when the input focus is in the menubutton. In active state the menubutton is displayed using the <span Class="bold">activeAttributes</span>, <span Class="bold">activeForeground</span>, and <span Class="bold">activeBackground</span> options. Disabled state means that the menubutton should be insensitive: the default bindings will refuse to activate the widget and will ignore mouse button presses. In this state the <span Class="bold">disabledAttributes</span>, <span Class="bold">disabledForeground</span>, and <span Class="bold">disabledBackground</span> options determine how the button is displayed. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">width</span>
+Class:	<span class="bold">Width</span>
+Command-Line Switch:	<span class="bold">-width</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies a desired width for the menubutton in screen columns. If this option isn&#39;t specified, the menubutton&#39;s desired width is computed from the size of the text being displayed in it. 
+<p class="level1">
+<p class="level1"><a name="INTRODUCTION"></a><h2 class="nroffsh">INTRODUCTION</h2>
+<p class="level0">
+<p class="level0">The <span Class="bold">menubutton</span> command creates a new window (given by the <span Class="emphasis">pathName</span> argument) and makes it into a menubutton widget. Additional options, described above, may be specified on the command line or in the option database to configure aspects of the menubutton such as its colors, attributes, and text.  The <span Class="bold">menubutton</span> command returns its <span Class="emphasis">pathName</span> argument.  At the time this command is invoked, there must not exist a window named <span Class="emphasis">pathName</span>, but <span Class="emphasis">pathName</span>&#39;s parent must exist. 
+<p class="level0">A menubutton is a widget that displays a textual string and is associated with a menu widget. One of the characters may optionally be underlined using the <span Class="bold">underline</span>, <span Class="bold">underlineAttributes</span>, and <span Class="bold">underlineForeground</span> options. In normal usage, pressing mouse button 1 over the menubutton causes the associated menu to be posted just underneath the menubutton. 
+<p class="level0">There are several interactions between menubuttons and menus;  see the <span Class="bold">menu</span> manual entry for information on various menu configurations, such as pulldown menus and option menus. 
+<p class="level0"><a name="WIDGET"></a><h2 class="nroffsh">WIDGET COMMAND</h2>
+<p class="level0">
+<p class="level0">The <span Class="bold">menubutton</span> command creates a new Tcl command whose name is <span Class="emphasis">pathName</span>.  This command may be used to invoke various operations on the widget.  It has the following general form: 
+<p class="level0"><span Class="emphasis">pathName option </span>?<span Class="emphasis">arg arg ...</span>? <span Class="emphasis">Option</span> and the <span Class="emphasis">arg</span>s determine the exact behavior of the command.  The following commands are possible for menubutton widgets: 
+<p class="level0"><span class="emphasis">pathName <span Class="bold">cget</span> <span Class="emphasis">option</span> Returns the current value of the configuration option given by <span Class="emphasis">option</span>. <span Class="emphasis">Option</span> may have any of the values accepted by the <span Class="bold">menubutton</span> command. 
+<p class="level0"><span class="emphasis">pathName <span Class="bold">configure</span> ?<span Class="emphasis">option</span>? ?<span Class="emphasis">value option value ...</span>? Query or modify the configuration options of the widget. If no <span Class="emphasis">option</span> is specified, returns a list describing all of the available options for <span Class="emphasis">pathName</span>. If <span Class="emphasis">option</span> is specified with no <span Class="emphasis">value</span>, then the command returns a list describing the one named option (this list will be identical to the corresponding sublist of the value returned if no <span Class="emphasis">option</span> is specified).  If one or more <span Class="emphasis">option-value</span> pairs are specified, then the command modifies the given widget option(s) to have the given value(s);  in this case the command returns an empty string. <span Class="emphasis">Option</span> may have any of the values accepted by the <span Class="bold">menubutton</span> command. 
+<p class="level0"><a name="DEFAULT"></a><h2 class="nroffsh">DEFAULT BINDINGS</h2>
+<p class="level0">
+<p class="level0">Ck automatically creates class bindings for menubuttons that give them the following default behavior: 
+<p class="level0"><a name="1"></a><span class="nroffip">[1]</span> 
+<p class="level1">A menubutton activates whenever it gets the input focus and deactivates whenever it loses the input focus. 
+<p class="level0"><a name="2"></a><span class="nroffip">[2]</span> 
+<p class="level1">Pressing mouse button 1 over a menubutton posts the menubutton: its associated menu is posted under the menubutton. Once a menu entry has been invoked, the menubutton unposts itself. 
+<p class="level0"><a name="3"></a><span class="nroffip">[3]</span> 
+<p class="level1">When a menubutton is posted, its associated menu claims the input focus to allow keyboard traversal of the menu and its submenus. See the <span Class="bold">menu</span> manual entry for details on these bindings. 
+<p class="level0"><a name="4"></a><span class="nroffip">[4]</span> 
+<p class="level1">The F10 key may be typed in any window to post the first menubutton under its toplevel window that isn&#39;t disabled. 
+<p class="level0"><a name="5"></a><span class="nroffip">[5]</span> 
+<p class="level1">If a menubutton has the input focus, the space and return keys post the menubutton. 
+<p class="level1">If the menubutton&#39;s state is <span Class="bold">disabled</span> then none of the above actions occur:  the menubutton is completely non-responsive. 
+<p class="level1">The behavior of menubuttons can be changed by defining new bindings for individual widgets or by redefining the class bindings. 
+<p class="level1"><a name="KEYWORDS"></a><h2 class="nroffsh">KEYWORDS</h2>
+<p class="level0">menubutton, widget <p class="roffit">
+ This HTML page was made with <a href="http://daniel.haxx.se/projects/roffit/">roffit</a>.
+</body></html>

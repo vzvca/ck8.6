@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<title>n man page</title>
+<meta name="generator" content="roffit">
+<STYLE type="text/css">
+pre {
+  overflow: auto;
+  margin: 0;
+}
+
+P.level0, pre.level0 {
+ padding-left: 2em;
+}
+
+P.level1, pre.level1 {
+ padding-left: 4em;
+}
+
+P.level2, pre.level2 {
+ padding-left: 6em;
+}
+
+span.emphasis {
+ font-style: italic;
+}
+
+span.bold {
+ font-weight: bold;
+}
+
+span.manpage {
+ font-weight: bold;
+}
+
+h2.nroffsh {
+ background-color: #e0e0e0;
+}
+
+span.nroffip {
+ font-weight: bold;
+ font-size: 120%;
+ font-family: monospace;
+}
+
+p.roffit {
+ text-align: center;
+ font-size: 80%;
+}
+</STYLE>
+</head><body>
+See the man.macros man page.
+
+<p class="level0">
+<p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
+<p class="level0">tkerror - Command invoked to process background errors <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
+<p class="level0"><span class="bold">tkerror <span Class="emphasis">message</span> 
+<p class="level0">
+<p class="level0"><a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
+<p class="level0">
+<p class="level0">The <span Class="bold">tkerror</span> command doesn&#39;t exist as built-in part of Ck.  Instead, individual applications or users can define a <span Class="bold">tkerror</span> command (e.g. as a Tcl procedure) if they wish to handle background errors. 
+<p class="level0">A background error is one that occurs in a command that didn&#39;t originate with the application.  For example, if an error occurs while executing a command specified with a <span Class="bold">bind</span> or <span Class="bold">after</span> command, then it is a background error.  For a non-background error, the error can simply be returned up through nested Tcl command evaluations until it reaches the top-level code in the application; then the application can report the error in whatever way it wishes.  When a background error occurs, the unwinding ends in the Ck library and there is no obvious way for Ck to report the error. 
+<p class="level0">When Ck detects a background error, it saves information about the error and invokes the <span Class="bold">tkerror</span> command later when Ck is idle. Before invoking <span Class="bold">tkerror</span>, Ck restores the <span Class="bold">errorInfo</span> and <span Class="bold">errorCode</span> variables to their values at the time the error occurred, then it invokes <span Class="bold">tkerror</span> with the error message as its only argument. Ck assumes that the application has implemented the <span Class="bold">tkerror</span> command, and that the command will report the error in a way that makes sense for the application.  Ck will ignore any result returned by the <span Class="bold">tkerror</span> command. 
+<p class="level0">If another Tcl error occurs within the <span Class="bold">tkerror</span> command (for example, because no <span Class="bold">tkerror</span> command has been defined) then Ck reports the error itself by writing a message to stderr. 
+<p class="level0">If several background errors accumulate before <span Class="bold">tkerror</span> is invoked to process them, <span Class="bold">tkerror</span> will be invoked once for each error, in the order they occurred. However, if <span Class="bold">tkerror</span> returns with a break exception, then any remaining errors are skipped without calling <span Class="bold">tkerror</span>. 
+<p class="level0">The Ck script library includes a default <span Class="bold">tkerror</span> procedure that posts a dialog box containing the error message and offers the user a chance to see a stack trace showing where the error occurred. 
+<p class="level0"><a name="KEYWORDS"></a><h2 class="nroffsh">KEYWORDS</h2>
+<p class="level0">background error, reporting <p class="roffit">
+ This HTML page was made with <a href="http://daniel.haxx.se/projects/roffit/">roffit</a>.
+</body></html>

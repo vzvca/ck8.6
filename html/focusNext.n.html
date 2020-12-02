@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<title>n man page</title>
+<meta name="generator" content="roffit">
+<STYLE type="text/css">
+pre {
+  overflow: auto;
+  margin: 0;
+}
+
+P.level0, pre.level0 {
+ padding-left: 2em;
+}
+
+P.level1, pre.level1 {
+ padding-left: 4em;
+}
+
+P.level2, pre.level2 {
+ padding-left: 6em;
+}
+
+span.emphasis {
+ font-style: italic;
+}
+
+span.bold {
+ font-weight: bold;
+}
+
+span.manpage {
+ font-weight: bold;
+}
+
+h2.nroffsh {
+ background-color: #e0e0e0;
+}
+
+span.nroffip {
+ font-weight: bold;
+ font-size: 120%;
+ font-family: monospace;
+}
+
+p.roffit {
+ text-align: center;
+ font-size: 80%;
+}
+</STYLE>
+</head><body>
+See the man.macros man page.
+
+<p class="level0">
+<p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
+<p class="level0">ck_focusNext, ck_focusPrev - Utility procedures for managing the input focus. <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
+<p class="level0"><span class="bold">ck_focusNext <span Class="emphasis">window</span> <br><span class="bold">ck_focusPrev <span Class="emphasis">window</span> 
+<p class="level0">
+<p class="level0"><a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
+<p class="level0">
+<p class="level0"><span Class="bold">ck_focusNext</span> is a utility procedure used for keyboard traversal. It returns the ``next&#39;&#39; window after <span Class="emphasis">window</span> in focus order. The focus order is determined by the stacking order of windows and the structure of the window hierarchy. Among siblings, the focus order is the same as the stacking order, with the lowest window being first. If a window has children, the window is visited first, followed by its children (recursively), followed by its next sibling. Top-level windows other than <span Class="emphasis">window</span> are skipped, so that <span Class="bold">ck_focusNext</span> never returns a window in a different top-level from <span Class="emphasis">window</span>. 
+<p class="level0">After computing the next window, <span Class="bold">ck_focusNext</span> examines the window&#39;s <span Class="bold">-takefocus</span> option to see whether it should be skipped. If so, <span Class="bold">ck_focusNext</span> continues on to the next window in the focus order, until it eventually finds a window that will accept the focus or returns back to <span Class="emphasis">window</span>. 
+<p class="level0"><span Class="bold">ck_focusPrev</span> is similar to <span Class="bold">ck_focusNext</span> except that it returns the window just before <span Class="emphasis">window</span> in the focus order. 
+<p class="level0"><a name="KEYWORDS"></a><h2 class="nroffsh">KEYWORDS</h2>
+<p class="level0">focus, keyboard traversal, toplevel <p class="roffit">
+ This HTML page was made with <a href="http://daniel.haxx.se/projects/roffit/">roffit</a>.
+</body></html>

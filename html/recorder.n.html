@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<title>n man page</title>
+<meta name="generator" content="roffit">
+<STYLE type="text/css">
+pre {
+  overflow: auto;
+  margin: 0;
+}
+
+P.level0, pre.level0 {
+ padding-left: 2em;
+}
+
+P.level1, pre.level1 {
+ padding-left: 4em;
+}
+
+P.level2, pre.level2 {
+ padding-left: 6em;
+}
+
+span.emphasis {
+ font-style: italic;
+}
+
+span.bold {
+ font-weight: bold;
+}
+
+span.manpage {
+ font-weight: bold;
+}
+
+h2.nroffsh {
+ background-color: #e0e0e0;
+}
+
+span.nroffip {
+ font-weight: bold;
+ font-size: 120%;
+ font-family: monospace;
+}
+
+p.roffit {
+ text-align: center;
+ font-size: 80%;
+}
+</STYLE>
+</head><body>
+See the man.macros man page.
+
+<p class="level0">
+<p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
+<p class="level0">recorder - Simple event recorder/player <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
+<p class="level0"><span class="bold">recorder replay <span Class="emphasis">fileName</span> <br><span Class="bold">recorder start </span>?<span Class="emphasis">-withdelay</span>? <span Class="emphasis">fileName</span> <br><span Class="bold">recorder stop</span> 
+<p class="level0">
+<p class="level0"><a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
+<p class="level0">
+<p class="level0">This command provides a simple recorder/player for certain kinds of events. The <span Class="bold">recorder start</span> form arranges for recording events to the event log file <span Class="emphasis">fileName</span>. If the <span Class="emphasis">-withdelay</span> switch is specified, the delays between events are also recorded. The event log file may be replayed using the <span Class="bold">recorder replay</span> command form. With <span Class="bold">recorder stop</span> all recording/playing activity is stopped and all event log files are closed. 
+<p class="level0">Each event takes up one line in an event log file. Event types are the first word in angle brackets in the line. They are followed by parameters for the event: 
+<p class="level0"><span class="bold">&lt;ButtonPress&gt; <span Class="emphasis">window button x y rootX rooty</span> Mouse button <span Class="bold">button</span> (1, 2, or 3) pressed in window <span Class="emphasis">window</span> at window coordinate <span Class="emphasis">x</span>, <span Class="emphasis">y</span>. Root coordinates are in <span Class="emphasis">rootX</span>, <span Class="emphasis">rootY</span>. 
+<p class="level0"><span class="bold">&lt;ButtonRelease&gt; <span Class="emphasis">window button x y rootX rooty</span> Mouse button released, analogous to <span Class="bold">&lt;ButtonPress&gt;</span>. 
+<p class="level0"><span class="bold">&lt;Delay&gt; <span Class="emphasis">milliseconds</span> Delay replay for <span Class="emphasis">milliseconds</span>. 
+<p class="level0"><span class="bold">&lt;Key&gt; <span Class="emphasis">window keysym</span> Key pressed in <span Class="emphasis">window</span>. <span Class="emphasis">Keysym</span> is the symbolic name of the key, e.g. ``Linefeed&#39;&#39;, ``Return&#39;&#39;, ``Control-A&#39;&#39;, or a hexadecimal key code like 0xc3. Note that hexadecimal key codes greater than 0x7f are not portable accross different systems. 
+<p class="level0">Lines starting with a hash are treated as comments. All other lines whose first word does not start with an open angle bracket are evaluated as normal Tcl commands. As in Tcl source files, newline-backslash sequences are treated as continuation lines. 
+<p class="level0">Errors occuring during replay are reported using the background error mechanism. Upon error, the replay event log file is closed. 
+<p class="level0"><a name="KEYWORDS"></a><h2 class="nroffsh">KEYWORDS</h2>
+<p class="level0">event, recorder <p class="roffit">
+ This HTML page was made with <a href="http://daniel.haxx.se/projects/roffit/">roffit</a>.
+</body></html>

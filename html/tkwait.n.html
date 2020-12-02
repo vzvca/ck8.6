@@ -1,0 +1,66 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<title>n man page</title>
+<meta name="generator" content="roffit">
+<STYLE type="text/css">
+pre {
+  overflow: auto;
+  margin: 0;
+}
+
+P.level0, pre.level0 {
+ padding-left: 2em;
+}
+
+P.level1, pre.level1 {
+ padding-left: 4em;
+}
+
+P.level2, pre.level2 {
+ padding-left: 6em;
+}
+
+span.emphasis {
+ font-style: italic;
+}
+
+span.bold {
+ font-weight: bold;
+}
+
+span.manpage {
+ font-weight: bold;
+}
+
+h2.nroffsh {
+ background-color: #e0e0e0;
+}
+
+span.nroffip {
+ font-weight: bold;
+ font-size: 120%;
+ font-family: monospace;
+}
+
+p.roffit {
+ text-align: center;
+ font-size: 80%;
+}
+</STYLE>
+</head><body>
+See the man.macros man page.
+
+<p class="level0">
+<p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
+<p class="level0">tkwait - Wait for variable to change or window to be destroyed <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
+<p class="level0"><span class="bold">tkwait variable <span Class="emphasis">name</span> <br><span class="bold">tkwait visibility <span Class="emphasis">name</span> <br><span class="bold">tkwait window <span Class="emphasis">name</span> 
+<p class="level0">
+<p class="level0"><a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
+<p class="level0">
+<p class="level0">The <span Class="bold">tkwait</span> command waits for one of several things to happen, then it returns without taking any other actions. The return value is always an empty string. If the first argument is <span Class="bold">variable</span> (or any abbreviation of it) then the second argument is the name of a global variable and the command waits for that variable to be modified. If the first argument is <span Class="bold">visibility</span> (or any abbreviation of it) then the second argument is the name of a window and the <span Class="bold">tkwait</span> command waits for a change in its visibility state. This form is typically used to wait for a newly-created window to appear on the screen before taking some action. At the time of this writing, visibility state changes are unreliable. Thus this form of the <span Class="bold">tkwait</span> command is strongly discouraged. If the first argument is <span Class="bold">window</span> (or any abbreviation of it) then the second argument is the name of a window and the <span Class="bold">tkwait</span> command waits for that window to be destroyed. This form is typically used to wait for a user to finish interacting with a dialog box before using the result of that interaction. 
+<p class="level0">While the <span Class="bold">tkwait</span> command is waiting it processes events in the normal fashion, so the application will continue to respond to user interactions. 
+<p class="level0"><a name="KEYWORDS"></a><h2 class="nroffsh">KEYWORDS</h2>
+<p class="level0">variable, visibility, wait, window <p class="roffit">
+ This HTML page was made with <a href="http://daniel.haxx.se/projects/roffit/">roffit</a>.
+</body></html>

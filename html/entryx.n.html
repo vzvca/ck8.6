@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<title>n man page</title>
+<meta name="generator" content="roffit">
+<STYLE type="text/css">
+pre {
+  overflow: auto;
+  margin: 0;
+}
+
+P.level0, pre.level0 {
+ padding-left: 2em;
+}
+
+P.level1, pre.level1 {
+ padding-left: 4em;
+}
+
+P.level2, pre.level2 {
+ padding-left: 6em;
+}
+
+span.emphasis {
+ font-style: italic;
+}
+
+span.bold {
+ font-weight: bold;
+}
+
+span.manpage {
+ font-weight: bold;
+}
+
+h2.nroffsh {
+ background-color: #e0e0e0;
+}
+
+span.nroffip {
+ font-weight: bold;
+ font-size: 120%;
+ font-family: monospace;
+}
+
+p.roffit {
+ text-align: center;
+ font-size: 80%;
+}
+</STYLE>
+</head><body>
+See the man.macros man page.
+
+<p class="level0">
+<p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
+<p class="level0">entryx - Create extended entry widgets <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
+<p class="level0"><span class="bold">entryx <span Class="emphasis">pathName ?options?</span> 
+<p class="level0">
+<p class="level0"><a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
+<p class="level0">
+<p class="level0">This procedure is part of the Ck script library. It is a slightly extended version of the Tcl <span Class="bold">entry</span> command which provides the following additional command line options: 
+<p class="level0"><span class="bold">-default <span Class="emphasis">value</span> Default value for <span Class="bold">integer</span>, <span Class="bold">unsigned</span>, and <span Class="bold">float</span> modes, which is stored in entry widget on FocusOut, if the value in the widget is not a legal number. Defaults to an empty string. 
+<p class="level0"><span class="bold">-fieldwidth <span Class="emphasis">number</span> Limits the string in the entry widget to at most <span Class="emphasis">number</span> characters. Defaults to some ten thousand characters. 
+<p class="level0"><span class="bold">-initial <span Class="emphasis">value</span> Initial value for the entry&#39;s string. If this option is omitted, no initial value is set. 
+<p class="level0"><span class="bold">-mode <span Class="emphasis">modeName</span> Determines the additional bindings for input checking which will be bound to the entry widget. <span Class="emphasis">ModeName</span> must be one of <span Class="bold">integer</span> (for integer numbers including optional sign), <span Class="bold">unsigned</span> (for integer numbers without sign), <span Class="bold">float</span> (for floating point numbers including optional sign and fractional part, but without exponent part), <span Class="bold">normal</span> (for entries without input checking at all), <span Class="bold">regexp</span> (for checking the entry&#39;s string against a regular expression), and <span Class="bold">boolean</span> (for boolean values, e.g. 0 or 1, Y or N and so on). If the <span Class="bold">-mode</span> option is omitted, <span Class="bold">normal</span> is chosen as default. 
+<p class="level0"><span class="bold">-offvalue <span Class="emphasis">char</span> For mode <span Class="bold">boolean</span> entry widgets only: <span Class="emphasis">char</span> is used for the ``false&#39;&#39; state of the entry. <span Class="emphasis">Char</span> defaults to ``0&#39;&#39;. It is always converted to upper case. 
+<p class="level0"><span class="bold">-onvalue <span Class="emphasis">char</span> For mode <span Class="bold">boolean</span> entry widgets only: <span Class="emphasis">char</span> is used for the ``true&#39;&#39; state of the entry. <span Class="emphasis">Char</span> defaults to ``1&#39;&#39;. It is always converted to upper case. 
+<p class="level0"><span class="bold">-regexp <span Class="emphasis">regExp</span> For all modes this is the regular expression which provides input filtering. This option is ignored for <span Class="bold">boolean</span> mode. 
+<p class="level0"><span class="bold">-touchvariable <span Class="emphasis">varName</span> The global variable <span Class="emphasis">varName</span> is set to 1 whenever the user changes the entry&#39;s string. The user may reset this variable to 0 at any time. 
+<p class="level0">These options must be given at creation time of the entry. They cannot be modified later using the <span Class="bold">configure</span> widget command. 
+<p class="level0">After creating the entry widget, <span Class="bold">entryx</span> binds procedures to do input checking using the <span Class="bold">bindtags</span> mechanism to the entry widget. These procedures provide for overtype rather than insert mode and give the following behaviour: 
+<p class="level0"><a name="1"></a><span class="nroffip">[1]</span> 
+<p class="level1">If mouse button 1 is pressed on the entry and the entry accepts the input focus, the input focus is set on the entry and the entry&#39;s insertion cursor is placed on the very first character. 
+<p class="level0"><a name="2"></a><span class="nroffip">[2]</span> 
+<p class="level1">The Left and Right keys move the insertion cursor one character to the left or right. In <span Class="bold">boolean</span> mode these keys are used for keyboard traversal, i.e. the Left key moves the focus to the previous widget in focus order, the Right key to the next widget. 
+<p class="level0"><a name="3"></a><span class="nroffip">[3]</span> 
+<p class="level1">The return key moves the input focus to the next widget in focus order. 
+<p class="level0"><a name="4"></a><span class="nroffip">[4]</span> 
+<p class="level1">The Home key moves the insertion cursor to the beginning of the entry. In <span Class="bold">boolean</span> mode this key is ignored. 
+<p class="level0"><a name="5"></a><span class="nroffip">[5]</span> 
+<p class="level1">The End key moves the insertion cursor to the end of the entry. In <span Class="bold">boolean</span> mode this key is ignored. 
+<p class="level0"><a name="6"></a><span class="nroffip">[6]</span> 
+<p class="level1">The Delete key deletes the character to the right of the insertion cursor. In <span Class="bold">boolean</span> mode this key is ignored. 
+<p class="level0"><a name="7"></a><span class="nroffip">[7]</span> 
+<p class="level1">The BackSpace key and Control-h delete the character to the left of the insertion cursor. In <span Class="bold">boolean</span> mode this key is ignored. 
+<p class="level0"><a name="8"></a><span class="nroffip">[8]</span> 
+<p class="level1">The space key deletes from the insertion cursor until the end of the entry, if the mode is <span Class="bold">integer</span>, <span Class="bold">unsigned</span>, <span Class="bold">float</span> or <span Class="bold">regexp</span>. For <span Class="bold">regexp</span> mode, the space character must not be part of the regular expression to achieve this behaviour. Otherwise it is treated as all other printable keys. In <span Class="bold">boolean</span> mode this key toggles the entry&#39;s value. 
+<p class="level0"><a name="9"></a><span class="nroffip">[9]</span> 
+<p class="level1">All other printable keys are checked according to the entry&#39;s mode. If allowed they overtype the character under the insertion cursor, otherwise they are ignored and the terminal&#39;s bell is rung. Lower case characters are automatically converted to upper case, if the regular expression filters denies lower case characters but allows upper case characters. 
+<p class="level0"><a name="10"></a><span class="nroffip">[10]</span> 
+<p class="level1">FocusIn is bound to display the entry with the <span Class="emphasis">reverse</span> attribute for monochrome screens or with swapped foreground and background colors on color screens; additionally, the insertion cursor is placed on the very first character in the entry. 
+<p class="level0"><a name="11"></a><span class="nroffip">[11]</span> 
+<p class="level1">FocusOut is bound to restore the visual effects of FocusIn, i.e. on mononochrome screens, the <span Class="emphasis">reverse</span> attribute is removed, on color screens, the foreground and background colors are restored to their original values. For <span Class="bold">integer</span>, <span Class="bold">unsigned</span>, and <span Class="emphasis">float</span> modes, the entry&#39;s value is finally checked using the <span Class="bold">scan</span> Tcl command. If the value is legal it is restored into the entry as the return from the <span Class="bold">scan</span>, thus giving the Tcl canonical form for the value, i.e. no leading zeros for integral values (which otherwise could be interpreted as octal numbers) and a decimal point with at least one fractional digit for floating point values (which otherwise could be interpreted as integral numbers). If the <span Class="bold">scan</span> conversion fails, the value specified in the <span Class="bold">-default</span> option is stored into the entry. 
+<p class="level1"><a name="KEYWORDS"></a><h2 class="nroffsh">KEYWORDS</h2>
+<p class="level0">entry, input <p class="roffit">
+ This HTML page was made with <a href="http://daniel.haxx.se/projects/roffit/">roffit</a>.
+</body></html>

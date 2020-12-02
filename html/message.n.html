@@ -1,0 +1,117 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<title>n man page</title>
+<meta name="generator" content="roffit">
+<STYLE type="text/css">
+pre {
+  overflow: auto;
+  margin: 0;
+}
+
+P.level0, pre.level0 {
+ padding-left: 2em;
+}
+
+P.level1, pre.level1 {
+ padding-left: 4em;
+}
+
+P.level2, pre.level2 {
+ padding-left: 6em;
+}
+
+span.emphasis {
+ font-style: italic;
+}
+
+span.bold {
+ font-weight: bold;
+}
+
+span.manpage {
+ font-weight: bold;
+}
+
+h2.nroffsh {
+ background-color: #e0e0e0;
+}
+
+span.nroffip {
+ font-weight: bold;
+ font-size: 120%;
+ font-family: monospace;
+}
+
+p.roffit {
+ text-align: center;
+ font-size: 80%;
+}
+</STYLE>
+</head><body>
+See the man.macros man page.
+
+<p class="level0">
+<p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
+<p class="level0">message - Create and manipulate message widgets <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
+<p class="level0"><span class="bold">message<span class="emphasis"> <span Class="emphasis">pathName </span>?<span Class="emphasis">options</span>? <a name="STANDARD"></a><h2 class="nroffsh">STANDARD OPTIONS</h2>
+<p class="level0">
+<p class="level0"><pre class="level0">
+<span class="bold">anchor</span>	<span class="bold">background</span>	<span class="bold">takeFocus</span>	<span class="bold">textVariable</span>
+<span class="bold">attributes</span>	<span class="bold">foreground</span>	<span class="bold">text</span>
+</pre>
+
+<p class="level0">
+<p class="level0">See the ``options&#39;&#39; manual entry for details on the standard options. <a name="WIDGET-SPECIFIC"></a><h2 class="nroffsh">WIDGET-SPECIFIC OPTIONS</h2>
+<p class="level0">
+<p class="level0">
+<p class="level0"><pre class="level0">
+Name:	<span class="bold">aspect</span>
+Class:	<span class="bold">Aspect</span>
+Command-Line Switch:	<span class="bold">-aspect</span>
+</pre>
+
+<p class="level0">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies a non-negative integer value indicating desired aspect ratio for the text.  The aspect ratio is specified as 100*width/height.  100 means the text should be as wide as it is tall, 200 means the text should be twice as wide as it is tall, 50 means the text should be twice as tall as it is wide, and so on. Used to choose line length for text if <span Class="bold">width</span> option isn&#39;t specified. Defaults to 320. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">justify</span>
+Class:	<span class="bold">Justify</span>
+Command-Line Switch:	<span class="bold">-justify</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies how to justify lines of text. Must be one of <span Class="bold">left</span>, <span Class="bold">center</span>, or <span Class="bold">right</span>.  Defaults to <span Class="bold">left</span>. This option works together with the <span Class="bold">anchor</span>, <span Class="bold">aspect</span>, and <span Class="bold">width</span> options to provide a variety of arrangements of the text within the window. The <span Class="bold">aspect</span> and <span Class="bold">width</span> options determine the amount of screen space needed to display the text. The <span Class="bold">anchor</span> option determines where this rectangular area is displayed within the widget&#39;s window, and the <span Class="bold">justify</span> option determines how each line is displayed within that rectangular region. For example, suppose <span Class="bold">anchor</span> is <span Class="bold">e</span> and <span Class="bold">justify</span> is <span Class="bold">left</span>, and that the message window is much larger than needed for the text. The the text will displayed so that the left edges of all the lines line up; the entire text block will be centered in the vertical span of the window. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">width</span>
+Class:	<span class="bold">Width</span>
+Command-Line Switch:	<span class="bold">-width</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies the length of lines in the window in screen columns. If this option has a value greater than zero then the <span Class="bold">aspect</span> option is ignored and the <span Class="bold">width</span> option determines the line length. If this option has a value equal to zero, then the <span Class="bold">aspect</span> option determines the line length. 
+<p class="level1">
+<p class="level1"><a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
+<p class="level0">
+<p class="level0">The <span Class="bold">message</span> command creates a new window (given by the <span Class="emphasis">pathName</span> argument) and makes it into a message widget. Additional options, described above, may be specified on the command line or in the option database to configure aspects of the message such as its colors, attributes, and text.  The <span Class="bold">message</span> command returns its <span Class="emphasis">pathName</span> argument.  At the time this command is invoked, there must not exist a window named <span Class="emphasis">pathName</span>, but <span Class="emphasis">pathName</span>&#39;s parent must exist. 
+<p class="level0">A message is a widget that displays a textual string.  A message widget has three special features.  First, it breaks up its string into lines in order to produce a given aspect ratio for the window.  The line breaks are chosen at word boundaries wherever possible (if not even a single word would fit on a line, then the word will be split across lines).  Newline characters in the string will force line breaks;  they can be used, for example, to leave blank lines in the display. 
+<p class="level0">The second feature of a message widget is justification.  The text may be displayed left-justified (each line starts at the left side of the window), centered on a line-by-line basis, or right-justified (each line ends at the right side of the window). 
+<p class="level0">The third feature of a message widget is that it handles control characters and non-printing characters specially.  Tab characters are replaced with enough blank space to line up on the next 8-character boundary.  Newlines cause line breaks.  Other control characters (ASCII code less than 0x20) and characters not defined in the font are displayed as a four-character sequence <span class="bold">ex<span Class="emphasis">hh</span> where <span Class="emphasis">hh</span> is the two-digit hexadecimal number corresponding to the character. 
+<p class="level0"><a name="WIDGET"></a><h2 class="nroffsh">WIDGET COMMAND</h2>
+<p class="level0">
+<p class="level0">The <span Class="bold">message</span> command creates a new Tcl command whose name is <span Class="emphasis">pathName</span>.  This command may be used to invoke various operations on the widget.  It has the following general form: 
+<p class="level0"><span Class="emphasis">pathName option </span>?<span Class="emphasis">arg arg ...</span>? <span Class="emphasis">Option</span> and the <span Class="emphasis">arg</span>s determine the exact behavior of the command.  The following commands are possible for message widgets: 
+<p class="level0"><span class="emphasis">pathName <span Class="bold">cget</span> <span Class="emphasis">option</span> Returns the current value of the configuration option given by <span Class="emphasis">option</span>. <span Class="emphasis">Option</span> may have any of the values accepted by the <span Class="bold">message</span> command. 
+<p class="level0"><span class="emphasis">pathName <span Class="bold">configure</span> ?<span Class="emphasis">option</span>? ?<span Class="emphasis">value option value ...</span>? Query or modify the configuration options of the widget. If no <span Class="emphasis">option</span> is specified, returns a list describing all of the available options for <span Class="emphasis">pathName</span>. If <span Class="emphasis">option</span> is specified with no <span Class="emphasis">value</span>, then the command returns a list describing the one named option (this list will be identical to the corresponding sublist of the value returned if no <span Class="emphasis">option</span> is specified).  If one or more <span Class="emphasis">option-value</span> pairs are specified, then the command modifies the given widget option(s) to have the given value(s);  in this case the command returns an empty string. <span Class="emphasis">Option</span> may have any of the values accepted by the <span Class="bold">message</span> command. 
+<p class="level0"><a name="DEFAULT"></a><h2 class="nroffsh">DEFAULT BINDINGS</h2>
+<p class="level0">
+<p class="level0">When a new message is created, it has no default event bindings: messages are intended for output purposes only. 
+<p class="level0"><a name="BUGS"></a><h2 class="nroffsh">BUGS</h2>
+<p class="level0">
+<p class="level0">Tabs don&#39;t work very well with text that is centered or right-justified. The most common result is that the line is justified wrong. 
+<p class="level0"><a name="KEYWORDS"></a><h2 class="nroffsh">KEYWORDS</h2>
+<p class="level0">message, widget <p class="roffit">
+ This HTML page was made with <a href="http://daniel.haxx.se/projects/roffit/">roffit</a>.
+</body></html>

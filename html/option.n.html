@@ -1,0 +1,77 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<title>n man page</title>
+<meta name="generator" content="roffit">
+<STYLE type="text/css">
+pre {
+  overflow: auto;
+  margin: 0;
+}
+
+P.level0, pre.level0 {
+ padding-left: 2em;
+}
+
+P.level1, pre.level1 {
+ padding-left: 4em;
+}
+
+P.level2, pre.level2 {
+ padding-left: 6em;
+}
+
+span.emphasis {
+ font-style: italic;
+}
+
+span.bold {
+ font-weight: bold;
+}
+
+span.manpage {
+ font-weight: bold;
+}
+
+h2.nroffsh {
+ background-color: #e0e0e0;
+}
+
+span.nroffip {
+ font-weight: bold;
+ font-size: 120%;
+ font-family: monospace;
+}
+
+p.roffit {
+ text-align: center;
+ font-size: 80%;
+}
+</STYLE>
+</head><body>
+See the man.macros man page.
+
+<p class="level0">
+<p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
+<p class="level0">option - Add/retrieve window options to/from the option database <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
+<p class="level0"><span class="bold">option add <span Class="emphasis">pattern value </span>?<span Class="emphasis">priority</span>? 
+<p class="level0"><span Class="bold">option clear</span> 
+<p class="level0"><span class="bold">option get <span Class="emphasis">window name class</span> 
+<p class="level0"><span class="bold">option readfile <span Class="emphasis">fileName </span>?<span Class="emphasis">priority</span>? 
+<p class="level0">
+<p class="level0"><a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
+<p class="level0">
+<p class="level0">The <span Class="bold">option</span> command allows you to add entries to the Ck option database or to retrieve options from the database.  The <span Class="bold">add</span> form of the command adds a new option to the database. <span Class="emphasis">Pattern</span> contains the option being specified, and consists of names and/or classes separated by asterisks or dots, in the usual X format.  <span Class="emphasis">Value</span> contains a text string to associate with <span Class="emphasis">pattern</span>;  this is the value that will be returned in invocations of the <span Class="bold">option get</span> command.  If <span Class="emphasis">priority</span> is specified, it indicates the priority level for this option (see below for legal values);  it defaults to <span Class="bold">interactive</span>. This command always returns an empty string. 
+<p class="level0">The <span Class="bold">option clear</span> command clears the option database. This command always returns an empty string. 
+<p class="level0">The <span Class="bold">option get</span> command returns the value of the option specified for <span Class="emphasis">window</span> under <span Class="emphasis">name</span> and <span Class="emphasis">class</span>.  If several entries in the option database match <span Class="emphasis">window</span>, <span Class="emphasis">name</span>, and <span Class="emphasis">class</span>, then the command returns whichever was created with highest <span Class="emphasis">priority</span> level.  If there are several matching entries at the same priority level, then it returns whichever entry was most recently entered into the option database.  If there are no matching entries, then the empty string is returned. 
+<p class="level0">The <span Class="bold">readfile</span> form of the command reads <span Class="emphasis">fileName</span>, which should have the standard format for an X resource database such as <span Class="bold">.Xdefaults</span>, and adds all the options specified in that file to the option database.  If <span Class="emphasis">priority</span> is specified, it indicates the priority level at which to enter the options;  <span Class="emphasis">priority</span> defaults to <span Class="bold">interactive</span>. 
+<p class="level0">The <span Class="emphasis">priority</span> arguments to the <span Class="bold">option</span> command are normally specified symbolically using one of the following values: 
+<p class="level0"><span Class="bold">widgetDefault</span> Level 20.  Used for default values hard-coded into widgets. 
+<p class="level0"><span Class="bold">startupFile</span> Level 40.  Used for options specified in application-specific startup files. 
+<p class="level0"><span Class="bold">userDefault</span> Level 60.  Used for options specified in user-specific defaults files, such as <span Class="bold">.Xdefaults</span>, resource databases loaded into the X server, or user-specific startup files. 
+<p class="level0"><span Class="bold">interactive</span> Level 80.  Used for options specified interactively after the application starts running.  If <span Class="emphasis">priority</span> isn&#39;t specified, it defaults to this level. 
+<p class="level0">Any of the above keywords may be abbreviated.  In addition, priorities may be specified numerically using integers between 0 and 100, inclusive.  The numeric form is probably a bad idea except for new priority levels other than the ones given above. 
+<p class="level0"><a name="KEYWORDS"></a><h2 class="nroffsh">KEYWORDS</h2>
+<p class="level0">database, option, priority, retrieve <p class="roffit">
+ This HTML page was made with <a href="http://daniel.haxx.se/projects/roffit/">roffit</a>.
+</body></html>

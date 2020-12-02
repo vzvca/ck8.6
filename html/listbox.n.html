@@ -1,0 +1,168 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<title>n man page</title>
+<meta name="generator" content="roffit">
+<STYLE type="text/css">
+pre {
+  overflow: auto;
+  margin: 0;
+}
+
+P.level0, pre.level0 {
+ padding-left: 2em;
+}
+
+P.level1, pre.level1 {
+ padding-left: 4em;
+}
+
+P.level2, pre.level2 {
+ padding-left: 6em;
+}
+
+span.emphasis {
+ font-style: italic;
+}
+
+span.bold {
+ font-weight: bold;
+}
+
+span.manpage {
+ font-weight: bold;
+}
+
+h2.nroffsh {
+ background-color: #e0e0e0;
+}
+
+span.nroffip {
+ font-weight: bold;
+ font-size: 120%;
+ font-family: monospace;
+}
+
+p.roffit {
+ text-align: center;
+ font-size: 80%;
+}
+</STYLE>
+</head><body>
+See the man.macros man page.
+
+<p class="level0">
+<p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
+<p class="level0">listbox - Create and manipulate listbox widgets <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
+<p class="level0"><span class="bold">listbox<span class="emphasis"> <span Class="emphasis">pathName </span>?<span Class="emphasis">options</span>? <a name="STANDARD"></a><h2 class="nroffsh">STANDARD OPTIONS</h2>
+<p class="level0">
+<p class="level0"><pre class="level0">
+<span class="bold">activeAttributes</span>	<span class="bold">attributes</span>	<span class="bold">selectAttributes</span>	<span class="bold">takeFocus</span>
+<span class="bold">activeBackground</span>	<span class="bold">background</span>	<span class="bold">selectBackground</span>	<span class="bold">xScrollCommand</span>
+<span class="bold">activeForeground</span>	<span class="bold">foreground</span>	<span class="bold">selectForeground</span>	<span class="bold">yScrollCommand</span>
+</pre>
+
+<p class="level0">
+<p class="level0">See the ``options&#39;&#39; manual entry for details on the standard options. <a name="WIDGET-SPECIFIC"></a><h2 class="nroffsh">WIDGET-SPECIFIC OPTIONS</h2>
+<p class="level0">
+<p class="level0">
+<p class="level0"><pre class="level0">
+Name:	<span class="bold">height</span>
+Class:	<span class="bold">Height</span>
+Command-Line Switch:	<span class="bold">-height</span>
+</pre>
+
+<p class="level0">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies the desired height for the window, in lines. If zero or less, then the desired height for the window is made just large enough to hold all the elements in the listbox. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">selectMode</span>
+Class:	<span class="bold">SelectMode</span>
+Command-Line Switch:	<span class="bold">-selectmode</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies one of several styles for manipulating the selection. The value of the option may be arbitrary, but the default bindings expect it to be either <span Class="bold">single</span>, <span Class="bold">browse</span> or <span Class="bold">multiple</span>; the default value is <span Class="bold">browse</span>. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">width</span>
+Class:	<span class="bold">Width</span>
+Command-Line Switch:	<span class="bold">-width</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies the desired width for the window in characters. If zero or less, then the desired width for the window is made just large enough to hold all the elements in the listbox. 
+<p class="level1">
+<p class="level1"><a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
+<p class="level0">
+<p class="level0">The <span Class="bold">listbox</span> command creates a new window (given by the <span Class="emphasis">pathName</span> argument) and makes it into a listbox widget. Additional options, described above, may be specified on the command line or in the option database to configure aspects of the listbox such as its colors, attributes and text. The <span Class="bold">listbox</span> command returns its <span Class="emphasis">pathName</span> argument.  At the time this command is invoked, there must not exist a window named <span Class="emphasis">pathName</span>, but <span Class="emphasis">pathName</span>&#39;s parent must exist. 
+<p class="level0">A listbox is a widget that displays a list of strings, one per line. When first created, a new listbox has no elements. Elements may be added or deleted using widget commands described below. In addition, one or more elements may be selected as described below. 
+<p class="level0">It is not necessary for all the elements to be displayed in the listbox window at once;  commands described below may be used to change the view in the window.  Listboxes allow scrolling in both directions using the standard <span Class="bold">xScrollCommand</span> and <span Class="bold">yScrollCommand</span> options. 
+<p class="level0"><a name="INDICES"></a><h2 class="nroffsh">INDICES</h2>
+<p class="level0">
+<p class="level0">Many of the widget commands for listboxes take one or more indices as arguments. An index specifies a particular element of the listbox, in any of the following ways: 
+<p class="level0"><span Class="emphasis">number</span> Specifies the element as a numerical index, where 0 corresponds to the first element in the listbox. 
+<p class="level0"><span Class="bold">active</span> Indicates the element that has the location cursor.  This element will be displayed with the <span Class="bold">activeAttributes</span>, <span Class="bold">activeBackground</span>, and <span Class="bold">activeForeground</span> options if the keyboard focus is in the listbox. The element is specified with the <span Class="bold">activate</span> widget command. 
+<p class="level0"><span Class="bold">anchor</span> Indicates the anchor point for the selection, which is set with the <span Class="bold">selection anchor</span> widget command. 
+<p class="level0"><span Class="bold">end</span> Indicates the end of the listbox. For some commands this means just after the last element; for other commands it means the last element. 
+<p class="level0"><span class="bold">@<span class="emphasis">x<span class="bold">,<span Class="emphasis">y</span> Indicates the element that covers the point in the listbox window specified by <span Class="emphasis">x</span> and <span Class="emphasis">y</span> (in screen coordinates). If no element covers that point, then the closest element to that point is used. 
+<p class="level0">In the widget command descriptions below, arguments named <span Class="emphasis">index</span>, <span Class="emphasis">first</span>, and <span Class="emphasis">last</span> always contain text indices in one of the above forms. 
+<p class="level0"><a name="WIDGET"></a><h2 class="nroffsh">WIDGET COMMAND</h2>
+<p class="level0">
+<p class="level0">The <span Class="bold">listbox</span> command creates a new Tcl command whose name is <span Class="emphasis">pathName</span>.  This command may be used to invoke various operations on the widget. It has the following general form: 
+<p class="level0"><span Class="emphasis">pathName option </span>?<span Class="emphasis">arg arg ...</span>? <span Class="emphasis">Option</span> and the <span Class="emphasis">arg</span>s determine the exact behavior of the command.  The following commands are possible for listbox widgets: 
+<p class="level0"><span class="emphasis">pathName <span Class="bold">activate</span> <span Class="emphasis">index</span> Sets the active element to the one indicated by <span Class="emphasis">index</span>. The active element is drawn with the <span Class="bold">activeAttributes</span>, <span Class="bold">activeBackground</span>, and <span Class="bold">activeForeground</span> options when the widget has the input focus, and its index may be retrieved with the index <span Class="bold">active</span>. 
+<p class="level0"><span class="emphasis">pathName <span Class="bold">cget</span> <span Class="emphasis">option</span> Returns the current value of the configuration option given by <span Class="emphasis">option</span>. <span Class="emphasis">Option</span> may have any of the values accepted by the <span Class="bold">listbox</span> command. 
+<p class="level0"><span class="emphasis">pathName <span Class="bold">configure</span> ?<span Class="emphasis">option</span>? ?<span Class="emphasis">value option value ...</span>? Query or modify the configuration options of the widget. If no <span Class="emphasis">option</span> is specified, returns a list describing all of the available options for <span Class="emphasis">pathName</span>. If <span Class="emphasis">option</span> is specified with no <span Class="emphasis">value</span>, then the command returns a list describing the one named option (this list will be identical to the corresponding sublist of the value returned if no <span Class="emphasis">option</span> is specified).  If one or more <span Class="emphasis">option-value</span> pairs are specified, then the command modifies the given widget option(s) to have the given value(s);  in this case the command returns an empty string. <span Class="emphasis">Option</span> may have any of the values accepted by the <span Class="bold">listbox</span> command. 
+<p class="level0"><span class="emphasis">pathName <span Class="bold">curselection</span> Returns a list containing the numerical indices of all of the elements in the listbox that are currently selected. If there are no elements selected in the listbox then an empty string is returned. 
+<p class="level0"><span class="emphasis">pathName <span class="bold">delete <span Class="emphasis">first </span>?<span Class="emphasis">last</span>? Deletes one or more elements of the listbox.  <span Class="emphasis">First</span> and <span Class="emphasis">last</span> are indices specifying the first and last elements in the range to delete.  If <span Class="emphasis">last</span> isn&#39;t specified it defaults to <span Class="emphasis">first</span>, i.e. a single element is deleted. 
+<p class="level0"><span class="emphasis">pathName <span class="bold">get <span Class="emphasis">first</span> ?<span Class="emphasis">last</span>? If <span Class="emphasis">last</span> is omitted, returns the contents of the listbox element indicated by <span Class="emphasis">first</span>. If <span Class="emphasis">last</span> is specified, the command returns a list whose elements are all of the listbox elements between <span Class="emphasis">first</span> and <span Class="emphasis">last</span>, inclusive. Both <span Class="emphasis">first</span> and <span Class="emphasis">last</span> may have any of the standard forms for indices. 
+<p class="level0"><span class="emphasis">pathName <span class="bold">index <span Class="emphasis">index</span> Returns a decimal string giving the integer index value that corresponds to <span Class="emphasis">index</span>. 
+<p class="level0"><span class="emphasis">pathName <span class="bold">insert <span Class="emphasis">index </span>?<span Class="emphasis">element element ...</span>? Inserts zero or more new elements in the list just before the element given by <span Class="emphasis">index</span>.  If <span Class="emphasis">index</span> is specified as <span Class="bold">end</span> then the new elements are added to the end of the list.  Returns an empty string. 
+<p class="level0"><span class="emphasis">pathName <span class="bold">nearest <span Class="emphasis">y</span> Given a y-coordinate within the listbox window, this command returns the index of the (visible) listbox element nearest to that y-coordinate. 
+<p class="level0"><span class="emphasis">pathName <span class="bold">see <span Class="emphasis">index</span> Adjust the view in the listbox so that the element given by <span Class="emphasis">index</span> is visible. If the element is already visible then the command has no effect; if the element is near one edge of the window then the listbox scrolls to bring the element into view at the edge;  otherwise the listbox scrolls to center the element. 
+<p class="level0"><span class="emphasis">pathName <span class="bold">selection <span Class="emphasis">option arg</span> This command is used to adjust the selection within a listbox.  It has several forms, depending on <span Class="emphasis">option</span>: 
+<p class="level1">
+<p class="level1"><span class="emphasis">pathName <span class="bold">selection anchor <span Class="emphasis">index</span> Sets the selection anchor to the element given by <span Class="emphasis">index</span>. The selection anchor is the end of the selection that is fixed while dragging out a selection with the mouse. The index <span Class="bold">anchor</span> may be used to refer to the anchor element. 
+<p class="level1"><span class="emphasis">pathName <span class="bold">selection clear <span Class="emphasis">first </span>?<span Class="emphasis">last</span>? If any of the elements between <span Class="emphasis">first</span> and <span Class="emphasis">last</span> (inclusive) are selected, they are deselected. The selection state is not changed for elements outside this range. 
+<p class="level1"><span class="emphasis">pathName <span class="bold">selection includes <span Class="emphasis">index</span> Returns 1 if the element indicated by <span Class="emphasis">index</span> is currently selected, 0 if it isn&#39;t. 
+<p class="level1"><span class="emphasis">pathName <span class="bold">selection set <span Class="emphasis">first </span>?<span Class="emphasis">last</span>? Selects all of the elements in the range between <span Class="emphasis">first</span> and <span Class="emphasis">last</span>, inclusive, without affecting the selection state of elements outside that range. 
+<p class="level0">
+<p class="level0"><span class="emphasis">pathName <span Class="bold">size</span> Returns a decimal string indicating the total number of elements in the listbox. 
+<p class="level0"><span class="emphasis">pathName <span class="bold">xview <span Class="emphasis">args</span> This command is used to query and change the horizontal position of the information in the widget&#39;s window.  It can take any of the following forms: 
+<p class="level1">
+<p class="level1"><span class="emphasis">pathName <span Class="bold">xview</span> Returns a list containing two elements. Each element is a real fraction between 0 and 1;  together they describe the horizontal span that is visible in the window. For example, if the first element is .2 and the second element is .6, 20% of the listbox&#39;s text is off-screen to the left, the middle 40% is visible in the window, and 40% of the text is off-screen to the right. These are the same values passed to scrollbars via the <span Class="bold">-xscrollcommand</span> option. 
+<p class="level1"><span class="emphasis">pathName <span Class="bold">xview</span> <span Class="emphasis">index</span> Adjusts the view in the window so that the character position given by <span Class="emphasis">index</span> is displayed at the left edge of the window. Character positions are defined by the width of the character <span Class="bold">0</span>. 
+<p class="level1"><span class="emphasis">pathName <span class="bold">xview moveto<span Class="emphasis"> fraction</span> Adjusts the view in the window so that <span Class="emphasis">fraction</span> of the total width of the listbox text is off-screen to the left. <span Class="emphasis">fraction</span> must be a fraction between 0 and 1. 
+<p class="level1"><span class="emphasis">pathName <span class="bold">xview scroll <span Class="emphasis">number what</span> This command shifts the view in the window left or right according to <span Class="emphasis">number</span> and <span Class="emphasis">what</span>. <span Class="emphasis">Number</span> must be an integer. <span Class="emphasis">What</span> must be either <span Class="bold">units</span> or <span Class="bold">pages</span> or an abbreviation of one of these. If <span Class="emphasis">what</span> is <span Class="bold">units</span>, the view adjusts left or right by <span Class="emphasis">number</span> character units (the width of the <span Class="bold">0</span> character) on the display;  if it is <span Class="bold">pages</span> then the view adjusts by <span Class="emphasis">number</span> screenfuls. If <span Class="emphasis">number</span> is negative then characters farther to the left become visible;  if it is positive then characters farther to the right become visible. 
+<p class="level0">
+<p class="level0"><span class="emphasis">pathName <span class="bold">yview <span Class="emphasis">?args</span>? This command is used to query and change the vertical position of the text in the widget&#39;s window. It can take any of the following forms: 
+<p class="level1">
+<p class="level1"><span class="emphasis">pathName <span Class="bold">yview</span> Returns a list containing two elements, both of which are real fractions between 0 and 1. The first element gives the position of the listbox element at the top of the window, relative to the listbox as a whole (0.5 means it is halfway through the listbox, for example). The second element gives the position of the listbox element just after the last one in the window, relative to the listbox as a whole. These are the same values passed to scrollbars via the <span Class="bold">-yscrollcommand</span> option. 
+<p class="level1"><span class="emphasis">pathName <span Class="bold">yview</span> <span Class="emphasis">index</span> Adjusts the view in the window so that the element given by <span Class="emphasis">index</span> is displayed at the top of the window. 
+<p class="level1"><span class="emphasis">pathName <span class="bold">yview moveto<span Class="emphasis"> fraction</span> Adjusts the view in the window so that the element given by <span Class="emphasis">fraction</span> appears at the top of the window. <span Class="emphasis">Fraction</span> is a fraction between 0 and 1;  0 indicates the first element in the listbox, 0.33 indicates the element one-third the way through the listbox, and so on. 
+<p class="level1"><span class="emphasis">pathName <span class="bold">yview scroll <span Class="emphasis">number what</span> This command adjusts the view in the window up or down according to <span Class="emphasis">number</span> and <span Class="emphasis">what</span>. <span Class="emphasis">Number</span> must be an integer. <span Class="emphasis">What</span> must be either <span Class="bold">units</span> or <span Class="bold">pages</span>. If <span Class="emphasis">what</span> is <span Class="bold">units</span>, the view adjusts up or down by <span Class="emphasis">number</span> lines;  if it is <span Class="bold">pages</span> then the view adjusts by <span Class="emphasis">number</span> screenfuls. If <span Class="emphasis">number</span> is negative then earlier elements become visible;  if it is positive then later elements become visible. 
+<p class="level0">
+<p class="level0"><a name="DEFAULT"></a><h2 class="nroffsh">DEFAULT BINDINGS</h2>
+<p class="level0">
+<p class="level0">Ck automatically creates class bindings for listboxes. Much of the behavior of a listbox is determined by its <span Class="bold">selectMode</span> option, which selects one of three ways of dealing with the selection. 
+<p class="level0">If the selection mode is <span Class="bold">single</span> or <span Class="bold">browse</span>, at most one element can be selected in the listbox at once. In both modes, clicking button 1 on an element selects it and deselects any other selected item. 
+<p class="level0">If the selection mode is <span Class="bold">multiple</span>, any number of elements may be selected at once, including discontiguous ranges. Clicking button 1 on an element toggles its selection state without affecting any other elements. 
+<p class="level0">Most people will probably want to use <span Class="bold">browse</span> mode for single selections and <span Class="bold">multiple</span> mode for multiple selections. 
+<p class="level0">In addition to the above behavior, the following additional behavior is defined by the default bindings: 
+<p class="level0"><a name="1"></a><span class="nroffip">[1]</span> 
+<p class="level1">If the Up or Down key is pressed, the location cursor (active element) moves up or down one element. If the selection mode is <span Class="bold">browse</span> then the new active element is also selected and all other elements are deselected. 
+<p class="level0"><a name="2"></a><span class="nroffip">[2]</span> 
+<p class="level1">The Left and Right keys scroll the listbox view left and right by the one column. 
+<p class="level0"><a name="3"></a><span class="nroffip">[3]</span> 
+<p class="level1">The Prior and Next keys scroll the listbox view up and down by one page (the height of the window). 
+<p class="level0"><a name="4"></a><span class="nroffip">[4]</span> 
+<p class="level1">The Home and End keys scroll the listbox horizontally to the left and right edges, respectively. 
+<p class="level0"><a name="5"></a><span class="nroffip">[5]</span> 
+<p class="level1">The space and Select keys make a selection at the location cursor (active element) just as if mouse button 1 had been pressed over this element. 
+<p class="level1">The behavior of listboxes can be changed by defining new bindings for individual widgets or by redefining the class bindings. 
+<p class="level1"><a name="KEYWORDS"></a><h2 class="nroffsh">KEYWORDS</h2>
+<p class="level0">listbox, widget <p class="roffit">
+ This HTML page was made with <a href="http://daniel.haxx.se/projects/roffit/">roffit</a>.
+</body></html>

@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<title>n man page</title>
+<meta name="generator" content="roffit">
+<STYLE type="text/css">
+pre {
+  overflow: auto;
+  margin: 0;
+}
+
+P.level0, pre.level0 {
+ padding-left: 2em;
+}
+
+P.level1, pre.level1 {
+ padding-left: 4em;
+}
+
+P.level2, pre.level2 {
+ padding-left: 6em;
+}
+
+span.emphasis {
+ font-style: italic;
+}
+
+span.bold {
+ font-weight: bold;
+}
+
+span.manpage {
+ font-weight: bold;
+}
+
+h2.nroffsh {
+ background-color: #e0e0e0;
+}
+
+span.nroffip {
+ font-weight: bold;
+ font-size: 120%;
+ font-family: monospace;
+}
+
+p.roffit {
+ text-align: center;
+ font-size: 80%;
+}
+</STYLE>
+</head><body>
+See the man.macros man page.
+
+<p class="level0">
+<p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
+<p class="level0">ck_dialog - Create dialog and wait for response <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
+<p class="level0"><span class="bold">ck_dialog <span Class="emphasis">window title text string string ...</span> 
+<p class="level0">
+<p class="level0"><a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
+<p class="level0">
+<p class="level0">This procedure is part of the Ck script library. Its arguments describe a dialog box: 
+<p class="level0"><span Class="emphasis">window</span> Name of top-level window to use for dialog.  Any existing window by this name is destroyed. 
+<p class="level0"><span Class="emphasis">title</span> Text to appear in the window&#39;s top line as title for the dialog. 
+<p class="level0"><span Class="emphasis">text</span> Message to appear in the top portion of the dialog box. 
+<p class="level0"><span Class="emphasis">string</span> There will be one button for each of these arguments. Each <span Class="emphasis">string</span> specifies text to display in a button, in order from left to right. 
+<p class="level0">After creating a dialog box, <span Class="bold">ck_dialog</span> waits for the user to select one of the buttons either by clicking on the button with the mouse or by typing return or space to invoke the focus button (if any). Then it returns the index of the selected button:  0 for the leftmost button, 1 for the button next to it, and so on. 
+<p class="level0"><a name="KEYWORDS"></a><h2 class="nroffsh">KEYWORDS</h2>
+<p class="level0">bitmap, dialog <p class="roffit">
+ This HTML page was made with <a href="http://daniel.haxx.se/projects/roffit/">roffit</a>.
+</body></html>

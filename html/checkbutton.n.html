@@ -1,0 +1,172 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<title>n man page</title>
+<meta name="generator" content="roffit">
+<STYLE type="text/css">
+pre {
+  overflow: auto;
+  margin: 0;
+}
+
+P.level0, pre.level0 {
+ padding-left: 2em;
+}
+
+P.level1, pre.level1 {
+ padding-left: 4em;
+}
+
+P.level2, pre.level2 {
+ padding-left: 6em;
+}
+
+span.emphasis {
+ font-style: italic;
+}
+
+span.bold {
+ font-weight: bold;
+}
+
+span.manpage {
+ font-weight: bold;
+}
+
+h2.nroffsh {
+ background-color: #e0e0e0;
+}
+
+span.nroffip {
+ font-weight: bold;
+ font-size: 120%;
+ font-family: monospace;
+}
+
+p.roffit {
+ text-align: center;
+ font-size: 80%;
+}
+</STYLE>
+</head><body>
+See the man.macros man page.
+
+<p class="level0">
+<p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
+<p class="level0">checkbutton - Create and manipulate checkbutton widgets <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
+<p class="level0"><span class="bold">checkbutton<span Class="emphasis"> pathName </span>?<span Class="emphasis">options</span>? <a name="STANDARD"></a><h2 class="nroffsh">STANDARD OPTIONS</h2>
+<p class="level0">
+<p class="level0"><pre class="level0">
+<span class="bold">activeAttributes</span>	<span class="bold">attributes</span>	<span class="bold">disabledForeground</span>	<span class="bold">textVariable</span>
+<span class="bold">activeBackground</span>	<span class="bold">background</span>	<span class="bold">foreground</span>	<span class="bold">underline</span>
+<span class="bold">activeForeground</span>	<span class="bold">disabledAttributes</span>	<span class="bold">takeFocus</span>	<span class="bold">underlineAttributes</span>
+<span class="bold">anchor</span>	<span class="bold">disabledBackground</span>	<span class="bold">text</span>	<span class="bold">underlineForeground</span>
+</pre>
+
+<p class="level0">
+<p class="level0">See the ``options&#39;&#39; manual entry for details on the standard options. <a name="WIDGET-SPECIFIC"></a><h2 class="nroffsh">WIDGET-SPECIFIC OPTIONS</h2>
+<p class="level0">
+<p class="level0">
+<p class="level0"><pre class="level0">
+Name:	<span class="bold">command</span>
+Class:	<span class="bold">Command</span>
+Command-Line Switch:	<span class="bold">-command</span>
+</pre>
+
+<p class="level0">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies a Tcl command to associate with the button.  This command is typically invoked when mouse button 1 is pressed on the button window.  The button&#39;s global variable (<span Class="bold">-variable</span> option) will be updated before the command is invoked. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">height</span>
+Class:	<span class="bold">Height</span>
+Command-Line Switch:	<span class="bold">-height</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies a desired height for the button in screen lines. If this option isn&#39;t specified, the button&#39;s desired height is 1 line. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">offValue</span>
+Class:	<span class="bold">Value</span>
+Command-Line Switch:	<span class="bold">-offvalue</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies value to store in the button&#39;s associated variable whenever this button is deselected.  Defaults to ``0&#39;&#39;. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">onValue</span>
+Class:	<span class="bold">Value</span>
+Command-Line Switch:	<span class="bold">-onvalue</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies value to store in the button&#39;s associated variable whenever this button is selected.  Defaults to ``1&#39;&#39;. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">selectColor</span>
+Class:	<span class="bold">Background</span>
+Command-Line Switch:	<span class="bold">-selectcolor</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies a background color to use when the button is selected. If <span Class="bold">indicatorOn</span> is true then the color applicies to the indicator. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">state</span>
+Class:	<span class="bold">State</span>
+Command-Line Switch:	<span class="bold">-state</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies one of three states for the checkbutton:  <span Class="bold">normal</span>, <span Class="bold">active</span>, or <span Class="bold">disabled</span>.  In normal state the checkbutton is displayed using the <span Class="bold">attributes</span>, <span Class="bold">foreground</span> and <span Class="bold">background</span> options.  The active state is used when the input focus is in the checkbutton. In active state the checkbutton is displayed using the <span Class="bold">activeAttributes</span>, <span Class="bold">activeForeground</span>, and <span Class="bold">activeBackground</span> options.  Disabled state means that the checkbutton should be insensitive:  the default bindings will refuse to activate the widget and will ignore mouse button presses. In this state the <span Class="bold">disabledAttributes</span>, <span Class="bold">disabledForeground</span>, and <span Class="bold">disabledBackground</span> options determine how the checkbutton is displayed. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">variable</span>
+Class:	<span class="bold">Variable</span>
+Command-Line Switch:	<span class="bold">-variable</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies name of global variable to set to indicate whether or not this button is selected.  Defaults to the name of the button within its parent (i.e. the last element of the button window&#39;s path name). 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">width</span>
+Class:	<span class="bold">Width</span>
+Command-Line Switch:	<span class="bold">-width</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies a desired width for the button in screen columns. If this option isn&#39;t specified, the button&#39;s desired width is computed from the size of the text being displayed in it. 
+<p class="level1">
+<p class="level1"><a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
+<p class="level0">
+<p class="level0">The <span Class="bold">checkbutton</span> command creates a new window (given by the <span Class="emphasis">pathName</span> argument) and makes it into a checkbutton widget. Additional options, described above, may be specified on the command line or in the option database to configure aspects of the checkbutton such as its colors, font, text, and initial relief.  The <span Class="bold">checkbutton</span> command returns its <span Class="emphasis">pathName</span> argument.  At the time this command is invoked, there must not exist a window named <span Class="emphasis">pathName</span>, but <span Class="emphasis">pathName</span>&#39;s parent must exist. 
+<p class="level0">A checkbutton is a widget that displays a textual string and a square called an <span Class="emphasis">indicator</span>. One of the characters of the string may optionally be underlined using the <span Class="bold">underline</span>, <span Class="bold">underlineAttributes</span>, and <span Class="bold">underlineForeground</span> options. A checkbutton has all of the behavior of a simple button, including the following: it can display itself in either of three different ways, according to the <span Class="bold">state</span> option, and it invokes a Tcl command whenever mouse button 1 is clicked over the checkbutton. 
+<p class="level0">In addition, checkbuttons can be <span Class="emphasis">selected</span>. If a checkbutton is selected then the indicator is drawn with a special color, and a Tcl variable associated with the checkbutton is set to a particular value (normally 1). If the checkbutton is not selected, then the indicator is drawn with no special color, and the associated variable is set to a different value (typically 0). By default, the name of the variable associated with a checkbutton is the same as the <span Class="emphasis">name</span> used to create the checkbutton. The variable name, and the ``on&#39;&#39; and ``off&#39;&#39; values stored in it, may be modified with options on the command line or in the option database. By default a checkbutton is configured to select and deselect itself on alternate button clicks. In addition, each checkbutton monitors its associated variable and automatically selects and deselects itself when the variables value changes to and from the button&#39;s ``on&#39;&#39; value. 
+<p class="level0"><a name="WIDGET"></a><h2 class="nroffsh">WIDGET COMMAND</h2>
+<p class="level0">
+<p class="level0">The <span Class="bold">checkbutton</span> command creates a new Tcl command whose name is <span Class="emphasis">pathName</span>.  This command may be used to invoke various operations on the widget.  It has the following general form: 
+<p class="level0"><span Class="emphasis">pathName option </span>?<span Class="emphasis">arg arg ...</span>? <span Class="emphasis">Option</span> and the <span Class="emphasis">arg</span>s determine the exact behavior of the command.  The following commands are possible for checkbutton widgets: 
+<p class="level0"><span class="emphasis">pathName <span Class="bold">cget</span> <span Class="emphasis">option</span> Returns the current value of the configuration option given by <span Class="emphasis">option</span>. <span Class="emphasis">Option</span> may have any of the values accepted by the <span Class="bold">checkbutton</span> command. 
+<p class="level0"><span class="emphasis">pathName <span Class="bold">configure</span> ?<span Class="emphasis">option</span>? ?<span Class="emphasis">value option value ...</span>? Query or modify the configuration options of the widget. If no <span Class="emphasis">option</span> is specified, returns a list describing all of the available options for <span Class="emphasis">pathName</span>. If <span Class="emphasis">option</span> is specified with no <span Class="emphasis">value</span>, then the command returns a list describing the one named option (this list will be identical to the corresponding sublist of the value returned if no <span Class="emphasis">option</span> is specified).  If one or more <span Class="emphasis">option-value</span> pairs are specified, then the command modifies the given widget option(s) to have the given value(s);  in this case the command returns an empty string. <span Class="emphasis">Option</span> may have any of the values accepted by the <span Class="bold">checkbutton</span> command. 
+<p class="level0"><span class="emphasis">pathName <span Class="bold">deselect</span> Deselects the checkbutton and sets the associated variable to its ``off&#39;&#39; value. 
+<p class="level0"><span class="emphasis">pathName <span Class="bold">invoke</span> Does just what would have happened if the user invoked the checkbutton with the mouse: toggle the selection state of the button and invoke the Tcl command associated with the checkbutton, if there is one. The return value is the return value from the Tcl command, or an empty string if there is no command associated with the checkbutton. This command is ignored if the checkbutton&#39;s state is <span Class="bold">disabled</span>. 
+<p class="level0"><span class="emphasis">pathName <span Class="bold">select</span> Selects the checkbutton and sets the associated variable to its ``on&#39;&#39; value. 
+<p class="level0"><span class="emphasis">pathName <span Class="bold">toggle</span> Toggles the selection state of the button, redisplaying it and modifying its associated variable to reflect the new state. 
+<p class="level0"><a name="BINDINGS"></a><h2 class="nroffsh">BINDINGS</h2>
+<p class="level0">
+<p class="level0">Ck automatically creates class bindings for checkbuttons that give them the following default behavior: 
+<p class="level0"><a name="1"></a><span class="nroffip">[1]</span> 
+<p class="level1">A checkbutton activates whenever it gets the input focus and deactivates whenever it loses the input focus. 
+<p class="level0"><a name="2"></a><span class="nroffip">[2]</span> 
+<p class="level1">When mouse button 1 is pressed over a checkbutton it is invoked (its selection state toggles and the command associated with the button is invoked, if there is one). 
+<p class="level0"><a name="3"></a><span class="nroffip">[3]</span> 
+<p class="level1">When a checkbutton has the input focus, the space or return keys cause the checkbutton to be invoked. 
+<p class="level1">If the checkbutton&#39;s state is <span Class="bold">disabled</span> then none of the above actions occur:  the checkbutton is completely non-responsive. 
+<p class="level1">The behavior of checkbuttons can be changed by defining new bindings for individual widgets or by redefining the class bindings. 
+<p class="level1"><a name="KEYWORDS"></a><h2 class="nroffsh">KEYWORDS</h2>
+<p class="level0">checkbutton, widget <p class="roffit">
+ This HTML page was made with <a href="http://daniel.haxx.se/projects/roffit/">roffit</a>.
+</body></html>

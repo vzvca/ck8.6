@@ -13,13 +13,13 @@
 .SH NAME
 bind \- Arrange for events to invoke Tcl scripts
 .SH SYNOPSIS
-\fBbind\fI tag\fR
+\fBbind\fI tag\fR\fR
 .br
-\fBbind\fI tag sequence\fR
+\fBbind\fI tag sequence\fR\fR
 .br
-\fBbind\fI tag sequence script\fR
+\fBbind\fI tag sequence script\fR\fR
 .br
-\fBbind\fI tag sequence \fB+\fIscript\fR
+\fBbind\fI tag sequence \fB+\fIscript\fR\fR
 .BE
 
 .SH INTRODUCTION

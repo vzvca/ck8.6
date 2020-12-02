@@ -1,0 +1,315 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<title>n man page</title>
+<meta name="generator" content="roffit">
+<STYLE type="text/css">
+pre {
+  overflow: auto;
+  margin: 0;
+}
+
+P.level0, pre.level0 {
+ padding-left: 2em;
+}
+
+P.level1, pre.level1 {
+ padding-left: 4em;
+}
+
+P.level2, pre.level2 {
+ padding-left: 6em;
+}
+
+span.emphasis {
+ font-style: italic;
+}
+
+span.bold {
+ font-weight: bold;
+}
+
+span.manpage {
+ font-weight: bold;
+}
+
+h2.nroffsh {
+ background-color: #e0e0e0;
+}
+
+span.nroffip {
+ font-weight: bold;
+ font-size: 120%;
+ font-family: monospace;
+}
+
+p.roffit {
+ text-align: center;
+ font-size: 80%;
+}
+</STYLE>
+</head><body>
+See the man.macros man page.
+
+<p class="level0">
+<p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
+<p class="level0">options - Standard options supported by widgets 
+<p class="level0">
+<p class="level0"><a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
+<p class="level0">This manual entry describes the common configuration options supported by widgets in the Ck toolkit.  Every widget does not necessarily support every option (see the manual entries for individual widgets for a list of the standard options supported by that widget), but if a widget does support an option with one of the names listed below, then the option has exactly the effect described below. 
+<p class="level0">In the descriptions below, ``Name&#39;&#39; refers to the option&#39;s name in the option database ``Class&#39;&#39; refers to the option&#39;s class value in the option database.  ``Command-Line Switch&#39;&#39; refers to the switch used in widget-creation and <span Class="bold">configure</span> widget commands to set this value.  For example, if an option&#39;s command-line switch is <span Class="bold">-foreground</span> and there exists a widget <span Class="bold">.a.b.c</span>, then the command 
+<p class="level0"><span Class="bold">.a.b.c00configure00-foreground black</span> may be used to specify the value <span Class="bold">black</span> for the option in the the widget <span Class="bold">.a.b.c</span>.  Command-line switches may be abbreviated, as long as the abbreviation is unambiguous. 
+<p class="level0">
+<p class="level0"><pre class="level0">
+Name:	<span class="bold">activeAttributes</span>
+Class:	<span class="bold">Attributes</span>
+Command-Line Switch:	<span class="bold">-activeattributes</span>
+</pre>
+
+<p class="level0">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies video attributes to use when drawing active elements of widgets. This option must be a proper Tcl list which may contain the elements: 
+<p class="level1">
+<p class="level1"><pre class="level1">
+	<span class="bold">blink</span>	<span class="bold">reverse</span>
+	<span class="bold">bold</span>	<span class="bold">standout</span>
+	<span class="bold">dim</span>	<span class="bold">underline</span>
+	<span class="bold">normal</span>
+</pre>
+
+<p class="level1">
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">If the list is empty, the <span Class="bold">normal</span> attribute is automatically present. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">activeBackground</span>
+Class:	<span class="bold">Foreground</span>
+Command-Line Switch:	<span class="bold">-activebackground</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies background color to use when drawing active elements of widgets. Color specifications are always symbolic; valid color names are: 
+<p class="level1">
+<p class="level1"><pre class="level1">
+	<span class="bold">black</span>	<span class="bold">magenta</span>
+	<span class="bold">blue</span>	<span class="bold">red</span>
+	<span class="bold">cyan</span>	<span class="bold">yellow</span>
+	<span class="bold">green</span>	<span class="bold">white</span>
+</pre>
+
+<p class="level1">
+<p class="level1">
+<p class="level1">
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">activeForeground</span>
+Class:	<span class="bold">Background</span>
+Command-Line Switch:	<span class="bold">-activeforeground</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies foreground color to use when drawing active elements. See above for possible colors. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">anchor</span>
+Class:	<span class="bold">Anchor</span>
+Command-Line Switch:	<span class="bold">-anchor</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies how the text in a widget is to be displayed in the widget. Must be one of the values <span Class="bold">n</span>, <span Class="bold">ne</span>, <span Class="bold">e</span>, <span Class="bold">se</span>, <span Class="bold">s</span>, <span Class="bold">sw</span>, <span Class="bold">w</span>, <span Class="bold">nw</span>, or <span Class="bold">center</span>. For example, <span Class="bold">nw</span> means display the text such that its top-left corner is at the top-left corner of the widget. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">attributes</span>
+Class:	<span class="bold">Attributes</span>
+Command-Line Switch:	<span class="bold">-attributes</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies video attributes to use when displaying the widget. See <span Class="bold">activeAttributes</span> for possible values. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">background</span>
+Class:	<span class="bold">Background</span>
+Command-Line Switch:	<span class="bold">-background or -bg</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies the normal background color to use when displaying the widget. See <span Class="bold">activeBackground</span> for possible colors. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">border</span>
+Class:	<span class="bold">Border</span>
+Command-Line Switch:	<span class="bold">-border</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies the characters used for drawing a border around a widget. This options must be a proper Tcl list with exactly zero, one, three, six, or eight elements: 
+<p class="level2">
+<p class="level2">0 elements No extra space for the border is allocated by the widget. 
+<p class="level2">1 element All four sides of the border&#39;s rectangle plus the corners are made from the sole element. 
+<p class="level2">3 elements The first element is used for the rectangle&#39;s corners, the second for the horizontal sides, and the third for the vertical sides. 
+<p class="level2">6 elements The order of elements in the rectangle is: upper left corner, horizontal side, upper right corner, vertical side, lower right corner, lower left corner. 
+<p class="level2">8 elements Each element gives corner and side, alternating, starting at the upper left corner of the square, clockwise. 
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">The list elements must be either a single character or a symbolic name of a graphical character. For valid names of graphical characters refer to the <span Class="bold">curses gchar</span> command. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">disabledAttributes</span>
+Class:	<span class="bold">DisabledAttributes</span>
+Command-Line Switch:	<span class="bold">-disabledattributes</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies video attributes to use when drawing a disabled element. See <span Class="bold">activeAttributes</span> for possible values. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">disabledBackground</span>
+Class:	<span class="bold">DisabledBackground</span>
+Command-Line Switch:	<span class="bold">-disabledbackground</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies background color to use when drawing a disabled element. See <span Class="bold">activeBackground</span> for possible colors. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">disabledForeground</span>
+Class:	<span class="bold">DisabledForeground</span>
+Command-Line Switch:	<span class="bold">-disabledforeground</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies foreground color to use when drawing a disabled element. See <span Class="bold">activeBackground</span> for possible colors. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">foreground</span>
+Class:	<span class="bold">Foreground</span>
+Command-Line Switch:	<span class="bold">-foreground or -fg</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies the normal foreground color to use when displaying the widget. See <span Class="bold">activeBackground</span> for possible colors. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">justify</span>
+Class:	<span class="bold">Justify</span>
+Command-Line Switch:	<span class="bold">-justify</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">When there are multiple lines of text displayed in a widget, this option determines how the lines line up with each other. Must be one of <span Class="bold">left</span>, <span Class="bold">center</span>, or <span Class="bold">right</span>. <span Class="bold">Left</span> means that the lines&#39; left edges all line up, <span Class="bold">center</span> means that the lines&#39; centers are aligned, and <span Class="bold">right</span> means that the lines&#39; right edges line up. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">orient</span>
+Class:	<span class="bold">Orient</span>
+Command-Line Switch:	<span class="bold">-orient</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">For widgets that can lay themselves out with either a horizontal or vertical orientation, such as scrollbars, this option specifies which orientation should be used.  Must be either <span Class="bold">horizontal</span> or <span Class="bold">vertical</span> or an abbreviation of one of these. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">selectAttributes</span>
+Class:	<span class="bold">SelectAttributes</span>
+Command-Line Switch:	<span class="bold">-selectattributes</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies video attributes to use when displaying selected items. See <span Class="bold">activeAttributes</span> for possible values. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">selectBackground</span>
+Class:	<span class="bold">Foreground</span>
+Command-Line Switch:	<span class="bold">-selectbackground</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies the background color to use when displaying selected items. See <span Class="bold">activeBackground</span> for possible colors. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">selectForeground</span>
+Class:	<span class="bold">Background</span>
+Command-Line Switch:	<span class="bold">-selectforeground</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies the foreground color to use when displaying selected items. See <span Class="bold">activeBackground</span> for possible colors. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">takeFocus</span>
+Class:	<span class="bold">TakeFocus</span>
+Command-Line Switch:	<span class="bold">-takefocus</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Provides information used when moving the focus from window to window via keyboard traversal (e.g., Tab and BackTab). Before setting the focus to a window, the traversal scripts first check whether the window is viewable (it and all its ancestors are mapped); if not, the window is skipped. Next, the scripts consult the value of the <span Class="bold">takeFocus</span> option. A value of <span Class="bold">0</span> means that this window should be skipped entirely during keyboard traversal.  <span Class="bold">1</span> means that the this window should always receive the input focus. An empty value means that the traversal scripts make the decision about whether or not to focus on the window:  the current algorithm is to skip the window if it is disabled or if it has no key bindings. If the value has any other form, then the traversal scripts take the value, append the name of the window to it (with a separator space), and evaluate the resulting string as a Tcl script. The script must return 0, 1, or an empty string;  this value is used just as if the option had that value in the first place. Note: this interpretation of the option is defined entirely by the Tcl scripts that implement traversal:  the widget implementations ignore the option entirely, so you can change its meaning if you redefine the keyboard traversal scripts. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">text</span>
+Class:	<span class="bold">Text</span>
+Command-Line Switch:	<span class="bold">-text</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies a string to be displayed inside the widget.  The way in which the string is displayed depends on the particular widget and may be determined by other options, such as <span Class="bold">anchor</span> or <span Class="bold">justify</span>. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">textVariable</span>
+Class:	<span class="bold">Variable</span>
+Command-Line Switch:	<span class="bold">-textvariable</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies the name of a variable.  The value of the variable is a text string to be displayed inside the widget;  if the variable value changes then the widget will automatically update itself to reflect the new value. The way in which the string is displayed in the widget depends on the particular widget and may be determined by other options, such as <span Class="bold">anchor</span> or <span Class="bold">justify</span>. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">underline</span>
+Class:	<span class="bold">Underline</span>
+Command-Line Switch:	<span class="bold">-underline</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies the integer index of a character to underline in the widget. This option is used by the default bindings to implement keyboard traversal for menu buttons and menu entries. 0 corresponds to the first character of the text displayed in the widget, 1 to the next character, and so on. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">underlineAttributes</span>
+Class:	<span class="bold">UnderlineAttributes</span>
+Command-Line Switch:	<span class="bold">-underlineattributes</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">
+<p class="level1">
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">underlineForeground</span>
+Class:	<span class="bold">UnderlineForeground</span>
+Command-Line Switch:	<span class="bold">-underlineforeground</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies the foreground color to use when displaying an underlined character. See <span Class="bold">activeBackground</span> for possible colors. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">xScrollCommand</span>
+Class:	<span class="bold">ScrollCommand</span>
+Command-Line Switch:	<span class="bold">-xscrollcommand</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies the prefix for a command used to communicate with horizontal scrollbars. When the view in the widget&#39;s window changes (or whenever anything else occurs that could change the display in a scrollbar, such as a change in the total size of the widget&#39;s contents), the widget will generate a Tcl command by concatenating the scroll command and two numbers. Each of the numbers is a fraction between 0 and 1, which indicates a position in the document.  0 indicates the beginning of the document, 1 indicates the end, .333 indicates a position one third the way through the document, and so on. The first fraction indicates the first information in the document that is visible in the window, and the second fraction indicates the information just after the last portion that is visible. The command is then passed to the Tcl interpreter for execution.  Typically the <span Class="bold">xScrollCommand</span> option consists of the path name of a scrollbar widget followed by ``set&#39;&#39;, e.g. ``.x.scrollbar set&#39;&#39;:  this will cause the scrollbar to be updated whenever the view in the window changes. If this option is not specified, then no command will be executed. 
+<p class="level1"><pre class="level1">
+Name:	<span class="bold">yScrollCommand</span>
+Class:	<span class="bold">ScrollCommand</span>
+Command-Line Switch:	<span class="bold">-yscrollcommand</span>
+</pre>
+
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Specifies the prefix for a command used to communicate with vertical scrollbars.  This option is treated in the same way as the <span Class="bold">xScrollCommand</span> option, except that it is used for vertical scrollbars and is provided by widgets that support vertical scrolling. See the description of <span Class="bold">xScrollCommand</span> for details on how this option is used. 
+<p class="level1"><a name="KEYWORDS"></a><h2 class="nroffsh">KEYWORDS</h2>
+<p class="level0">class, name, standard option, switch <p class="roffit">
+ This HTML page was made with <a href="http://daniel.haxx.se/projects/roffit/">roffit</a>.
+</body></html>

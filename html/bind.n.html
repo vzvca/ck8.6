@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<title>n man page</title>
+<meta name="generator" content="roffit">
+<STYLE type="text/css">
+pre {
+  overflow: auto;
+  margin: 0;
+}
+
+P.level0, pre.level0 {
+ padding-left: 2em;
+}
+
+P.level1, pre.level1 {
+ padding-left: 4em;
+}
+
+P.level2, pre.level2 {
+ padding-left: 6em;
+}
+
+span.emphasis {
+ font-style: italic;
+}
+
+span.bold {
+ font-weight: bold;
+}
+
+span.manpage {
+ font-weight: bold;
+}
+
+h2.nroffsh {
+ background-color: #e0e0e0;
+}
+
+span.nroffip {
+ font-weight: bold;
+ font-size: 120%;
+ font-family: monospace;
+}
+
+p.roffit {
+ text-align: center;
+ font-size: 80%;
+}
+</STYLE>
+</head><body>
+See the man.macros man page.
+
+<p class="level0">
+<p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
+<p class="level0">bind - Arrange for events to invoke Tcl scripts <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
+<p class="level0"><span class="bold">bind<span Class="emphasis"> tag</span></span> <br><span class="bold">bind<span Class="emphasis"> tag sequence</span></span> <br><span class="bold">bind<span Class="emphasis"> tag sequence script</span></span> <br><span class="bold">bind<span class="emphasis"> tag sequence <span class="bold">+<span Class="emphasis">script</span></span> 
+<p class="level0">
+<p class="level0"><a name="INTRODUCTION"></a><h2 class="nroffsh">INTRODUCTION</h2>
+<p class="level0">
+<p class="level0">The <span Class="bold">bind</span> command associates Tcl scripts with events. If all three arguments are specified, <span Class="bold">bind</span> will arrange for <span Class="emphasis">script</span> (a Tcl script) to be evaluated whenever the event(s) given by <span Class="emphasis">sequence</span> occur in the window(s) identified by <span Class="emphasis">tag</span>. If <span Class="emphasis">script</span> is prefixed with a ``+&#39;&#39;, then it is appended to any existing binding for <span Class="emphasis">sequence</span>;  otherwise <span Class="emphasis">script</span> replaces any existing binding. If <span Class="emphasis">script</span> is an empty string then the current binding for <span Class="emphasis">sequence</span> is destroyed, leaving <span Class="emphasis">sequence</span> unbound. In all of the cases where a <span Class="emphasis">script</span> argument is provided, <span Class="bold">bind</span> returns an empty string. 
+<p class="level0">If <span Class="emphasis">sequence</span> is specified without a <span Class="emphasis">script</span>, then the script currently bound to <span Class="emphasis">sequence</span> is returned, or an empty string is returned if there is no binding for <span Class="emphasis">sequence</span>. If neither <span Class="emphasis">sequence</span> nor <span Class="emphasis">script</span> is specified, then the return value is a list whose elements are all the sequences for which there exist bindings for <span Class="emphasis">tag</span>. 
+<p class="level0">The <span Class="emphasis">tag</span> argument determines which window(s) the binding applies to. If <span Class="emphasis">tag</span> begins with a dot, as in <span Class="bold">.a.b.c</span>, then it must be the path name for a window; otherwise it may be an arbitrary string. Each window has an associated list of tags, and a binding applies to a particular window if its tag is among those specified for the window. Although the <span Class="bold">bindtags</span> command may be used to assign an arbitrary set of binding tags to a window, the default binding tags provide the following behavior: 
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">If a tag is the name of an internal window the binding applies to that window. 
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">If the tag is the name of a toplevel window the binding applies to the toplevel window and all its internal windows. 
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">If the tag is the name of a class of widgets, such as <span Class="bold">Button</span>, the binding applies to all widgets in that class; 
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">If <span Class="emphasis">tag</span> has the value <span Class="bold">all</span>, the binding applies to all windows in the application. 
+<p class="level1"><a name="EVENT"></a><h2 class="nroffsh">EVENT PATTERNS</h2>
+<p class="level0">
+<p class="level0">The <span Class="emphasis">sequence</span> argument specifies a sequence of one or more event patterns, with optional white space between the patterns.  Each event pattern may take either of two forms.  In the simplest case it is a single printing ASCII character, such as <span Class="bold">a</span> or <a class="bold" href="#">[</a>.  The character may not be a space character or the character <span Class="bold">&lt;</span>.  This form of pattern matches a <span Class="bold">KeyPress</span> event for the particular character.  The second form of pattern is longer but more general. It has the following syntax: 
+<p class="level0"><span class="bold">&lt;<span class="emphasis">type-detail<span Class="bold">&gt;</span> The entire event pattern is surrounded by angle brackets. Inside the angle brackets are an event type, and an extra piece of information (<span Class="emphasis">detail</span>) identifying a particular button or keysym. Any of the fields may be omitted, as long as at least one of <span Class="emphasis">type</span> and <span Class="emphasis">detail</span> is present. The fields must be separated by white space or dashes. 
+<p class="level0"><a name="EVENT"></a><h2 class="nroffsh">EVENT TYPES</h2>
+<p class="level0">
+<p class="level0">The <span Class="emphasis">type</span> field may be any of the following list. Where two names appear together, they are synonyms. 
+<p class="level0">
+<p class="level0"><span class="bold"> BarCode	Expose	Map ButtonPress, Button	FocusIn	Unmap ButtonRelease	FocusOut Destroy	KeyPress, Key, Control</span> 
+<p class="level0">The last part of a long event specification is <span Class="emphasis">detail</span>.  In the case of a <span Class="bold">ButtonPress</span> or <span Class="bold">ButtonRelease</span> event, it is the number of a button (1-5).  If a button number is given, then only an event on that particular button will match;  if no button number is given, then an event on any button will match.  Note:  giving a specific button number is different than specifying a button modifier; in the first case, it refers to a button being pressed or released, while in the second it refers to some other button that is already depressed when the matching event occurs.  If a button number is given then <span Class="emphasis">type</span> may be omitted:  if will default to <span Class="bold">ButtonPress</span>.  For example, the specifier <span Class="bold">&lt;1&gt;</span> is equivalent to <span Class="bold">&lt;ButtonPress-1&gt;</span>. 
+<p class="level0">If the event type is <span Class="bold">KeyPress</span>, <span Class="bold">Key</span> or <span Class="bold">Control</span>, then <span Class="emphasis">detail</span> may be specified in the form of a keysym.  Keysyms are textual specifications for particular keys on the keyboard; they include all the alphanumeric ASCII characters (e.g. ``a&#39;&#39; is the keysym for the ASCII character ``a&#39;&#39;), plus descriptions for non-alphanumeric characters (``comma&#39;&#39; is the keysym for the comma character), plus descriptions for some of the non-ASCII keys on the keyboard (e.g. ``F1&#39;&#39; is the keysym for the F1 function key, if it exists). The complete list of keysyms is not presented here;  it is available by invoking the <span Class="bold">curses haskey</span> Tcl command and may vary from system to system. If necessary, you can use the <span Class="bold">%K</span> notation described below to print out the keysym name for a particular key. If a keysym <span Class="emphasis">detail</span> is given, then the <span Class="emphasis">type</span> field may be omitted;  it will default to <span Class="bold">KeyPress</span>. For example, <span Class="bold">&lt;KeyPress-comma&gt;</span> is equivalent to <span Class="bold">&lt;comma&gt;</span>. 
+<p class="level0"><a name="BINDING"></a><h2 class="nroffsh">BINDING SCRIPTS AND SUBSTITUTIONS</h2>
+<p class="level0">
+<p class="level0">The <span Class="emphasis">script</span> argument to <span Class="bold">bind</span> is a Tcl script, which will be executed whenever the given event sequence occurs. <span Class="emphasis">Command</span> will be executed in the same interpreter that the <span Class="bold">bind</span> command was executed in, and it will run at global level (only global variables will be accessible). If <span Class="emphasis">script</span> contains any <a class="bold" href="#">%</a> characters, then the script will not be executed directly.  Instead, a new script will be generated by replacing each <a class="bold" href="#">%</a>, and the character following it, with information from the current event.  The replacement depends on the character following the <a class="bold" href="#">%</a>, as defined in the list below.  Unless otherwise indicated, the replacement string is the decimal value of the given field from the current event. Some of the substitutions are only valid for certain types of events;  if they are used for other types of events the value substituted is undefined. 
+<p class="level0"><a class="bold" href="#">%%</a> Replaced with a single percent. 
+<p class="level0"><span Class="bold">%b</span> The number of the button that was pressed or released.  Valid only for <span Class="bold">ButtonPress</span> and <span Class="bold">ButtonRelease</span> events. 
+<p class="level0"><span Class="bold">%k</span> The <span Class="emphasis">keycode</span> field from the event.  Valid only for <span Class="bold">KeyPress</span> and <span Class="bold">KeyRelease</span> events. 
+<p class="level0"><span Class="bold">%x</span> The <span Class="emphasis">x</span> coordinate (window coordinate system) from <span Class="bold">ButtonPress</span> and <span Class="bold">ButtonRelease</span> events. 
+<p class="level0"><span Class="bold">%y</span> The <span Class="emphasis">y</span> coordinate (window coordinate system) from <span Class="bold">ButtonPress</span> and <span Class="bold">ButtonRelease</span> events. 
+<p class="level0"><span Class="bold">%A</span> For <span Class="bold">KeyPress</span> events, substitutes the ASCII character corresponding to the event, or the empty string if the event doesn&#39;t correspond to an ASCII character (e.g. the shift key was pressed). For <span Class="bold">BarCode</span> events, substitutes the entire barcode data packet. 
+<p class="level0"><span Class="bold">%K</span> The keysym corresponding to the event, substituted as a textual string. Valid only for <span Class="bold">KeyPress</span> events. 
+<p class="level0"><span Class="bold">%N</span> The keysym corresponding to the event, substituted as a decimal number. Valid only for <span Class="bold">KeyPress</span> events. 
+<p class="level0"><span Class="bold">%W</span> The path name of the window to which the event was reported (the <span Class="emphasis">window</span> field from the event).  Valid for all event types. 
+<p class="level0"><span Class="bold">%X</span> The <span Class="emphasis">x</span> coordinate (screen coordinate system) from <span Class="bold">ButtonPress</span> and <span Class="bold">ButtonRelease</span> events. 
+<p class="level0"><span Class="bold">%Y</span> The <span Class="emphasis">y</span> coordinate (screen coordinate system) from <span Class="bold">ButtonPress</span> and <span Class="bold">ButtonRelease</span> events. 
+<p class="level0">The replacement string for a %-replacement is formatted as a proper Tcl list element. This means that it will be surrounded with braces if it contains spaces, or special characters such as <a class="bold" href="#">$</a> and <a class="bold" href="#">{</a> may be preceded by backslashes. This guarantees that the string will be passed through the Tcl parser when the binding script is evaluated. Most replacements are numbers or well-defined strings such as <span Class="bold">comma</span>;  for these replacements no special formatting is ever necessary. The most common case where reformatting occurs is for the <span Class="bold">%A</span> substitution.  For example, if <span Class="emphasis">script</span> is 
+<p class="level0"><span Class="bold">insert0%A</span> and the character typed is an open square bracket, then the script actually executed will be 
+<p class="level0"><span Class="bold">insert0e[</span> This will cause the <span Class="bold">insert</span> to receive the original replacement string (open square bracket) as its first argument. If the extra backslash hadn&#39;t been added, Tcl would not have been able to parse the script correctly. 
+<p class="level0"><a name="MULTIPLE"></a><h2 class="nroffsh">MULTIPLE MATCHES</h2>
+<p class="level0">
+<p class="level0">It is possible for several bindings to match a given event. If the bindings are associated with different <span Class="emphasis">tag</span>&#39;s, then each of the bindings will be executed, in order. By default, a class binding will be executed first, followed by a binding for the widget, a binding for its toplevel, and an <span Class="bold">all</span> binding. The <span Class="bold">bindtags</span> command may be used to change this order for a particular window or to associate additional binding tags with the window. 
+<p class="level0">The <span Class="bold">continue</span> and <span Class="bold">break</span> commands may be used inside a binding script to control the processing of matching scripts. If <span Class="bold">continue</span> is invoked, then the current binding script is terminated but Tk will continue processing binding scripts associated with other <span Class="emphasis">tag</span>&#39;s. If the <span Class="bold">break</span> command is invoked within a binding script, then that script terminates and no other scripts will be invoked for the event. 
+<p class="level0">If more than one binding matches a particular event and they have the same <span Class="emphasis">tag</span>, then the most specific binding is chosen and its script is evaluated. The following tests are applied, in order, to determine which of several matching sequences is more specific: (a) a longer sequence (in terms of number of events matched) is more specific than a shorter sequence; (b) an event pattern that specifies a specific button or key is more specific than one that doesn&#39;t. 
+<p class="level0">If an event does not match any of the existing bindings, then the event is ignored. An unbound event is not considered to be an error. 
+<p class="level0"><a name="ERRORS"></a><h2 class="nroffsh">ERRORS</h2>
+<p class="level0">
+<p class="level0">If an error occurs in executing the script for a binding then the <span Class="bold">tkerror</span> mechanism is used to report the error. The <span Class="bold">tkerror</span> command will be executed at global level (outside the context of any Tcl procedure). 
+<p class="level0"><a name="SEE"></a><h2 class="nroffsh">SEE ALSO</h2>
+<p class="level0">tkerror 
+<p class="level0"><a name="KEYWORDS"></a><h2 class="nroffsh">KEYWORDS</h2>
+<p class="level0">event, binding <p class="roffit">
+ This HTML page was made with <a href="http://daniel.haxx.se/projects/roffit/">roffit</a>.
+</body></html>
