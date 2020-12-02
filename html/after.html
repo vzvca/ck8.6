@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+ "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<title>n man page</title>
+<meta name="generator" content="roffit">
+<STYLE type="text/css">
+pre {
+  overflow: auto;
+  margin: 0;
+}
+
+P.level0, pre.level0 {
+ padding-left: 2em;
+}
+
+P.level1, pre.level1 {
+ padding-left: 4em;
+}
+
+P.level2, pre.level2 {
+ padding-left: 6em;
+}
+
+span.emphasis {
+ font-style: italic;
+}
+
+span.bold {
+ font-weight: bold;
+}
+
+span.manpage {
+ font-weight: bold;
+}
+
+h2.nroffsh {
+ background-color: #e0e0e0;
+}
+
+span.nroffip {
+ font-weight: bold;
+ font-size: 120%;
+ font-family: monospace;
+}
+
+p.roffit {
+ text-align: center;
+ font-size: 80%;
+}
+</STYLE>
+</head><body>
+See the man.macros man page.
+
+<p class="level0">
+<p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
+<p class="level0">after - Execute a command after a time delay <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
+<p class="level0"><span class="bold">after <span Class="emphasis">ms</span> <br><span class="bold">after <span Class="emphasis">ms </span>?<span Class="emphasis">script script script ...</span>? <br><span class="bold">after cancel <span Class="emphasis">id</span> <br><span class="bold">after cancel <span Class="emphasis">script script script ...</span> <br><span Class="bold">after idle </span>?<span Class="emphasis">script script script ...</span>? 
+<p class="level0">
+<p class="level0"><a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
+<p class="level0">
+<p class="level0">This command is used to delay execution of the program or to execute a command in background after a delay.  It has several forms, depending on the first argument to the command: 
+<p class="level0"><span class="bold">after <span Class="emphasis">ms</span> <span Class="emphasis">Ms</span> must be an integer giving a time in milliseconds. The command sleeps for <span Class="emphasis">ms</span> milliseconds and then returns. While the command is sleeping the application does not respond to keypresses or any other events. 
+<p class="level0"><span class="bold">after <span Class="emphasis">ms </span>?<span Class="emphasis">script script script ...</span>? In this form the command returns immediately, but it arranges for a Tcl command to be executed <span Class="emphasis">ms</span> milliseconds later as a background event handler. The delayed command is formed by concatenating all the <span Class="emphasis">script</span> arguments in the same fashion as the <span Class="bold">concat</span> command. The command will be executed at global level (outside the context of any Tcl procedure). If an error occurs while executing the delayed command then the <span Class="bold">tkerror</span> mechanism is used to report the error. The <span Class="bold">after</span> command returns an identifier that can be used to cancel the delayed command using <span Class="bold">after cancel</span>. 
+<p class="level0"><span class="bold">after cancel <span Class="emphasis">id</span> Cancels the execution of a delayed command that was previously scheduled. <span Class="emphasis">Id</span> indicates which command should be canceled;  it must have been the return value from a previous <span Class="bold">after</span> command. If the command given by <span Class="emphasis">id</span> has already been executed then the <span Class="bold">after cancel</span> command has no effect. 
+<p class="level0"><span class="bold">after cancel <span Class="emphasis">script script ...</span> This command also cancels the execution of a delayed command. The <span Class="emphasis">script</span> arguments are concatenated together with space separators (just as in the <span Class="bold">concat</span> command). If there is a pending command that matches the string, it is cancelled and will never be executed;  if no such command is currently pending then the <span Class="bold">after cancel</span> command has no effect. 
+<p class="level0"><span class="bold">after idle <span Class="emphasis">script </span>?<span Class="emphasis">script script ...</span>? Concatenates the <span Class="emphasis">script</span> arguments together with space separators (just as in the <span Class="bold">concat</span> command), and arranges for the resulting script to be evaluated later as an idle handler (the script runs the next time the Tk event loop is entered and there are no events to process). The command returns an identifier that can be used to cancel the delayed command using <span Class="bold">after cancel</span>. If an error occurs while executing the script then the <span Class="bold">tkerror</span> mechanism is used to report the error. 
+<p class="level0"><a name="SEE"></a><h2 class="nroffsh">SEE ALSO</h2>
+<p class="level0">tkerror 
+<p class="level0"><a name="KEYWORDS"></a><h2 class="nroffsh">KEYWORDS</h2>
+<p class="level0">cancel, delay, sleep, time <p class="roffit">
+ This HTML page was made with <a href="http://daniel.haxx.se/projects/roffit/">roffit</a>.
+</body></html>
