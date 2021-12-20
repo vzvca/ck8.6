@@ -291,6 +291,66 @@ proc timer {} {
     after 1000 timer
 }
 
+proc help {} {
+    catch {destroy .help}
+    toplevel .help -bg black -fg white \
+	-border {ulcorner hline urcorner vline lrcorner hline llcorner vline}
+
+    set W [winfo width  .]
+    set H [winfo height .]
+    incr W -1
+    incr H -1
+    
+    place .help -x 1 -width $W -y 1 -height $H
+    raise .help
+ 
+    set t .help.t
+    text $t -wrap word -width 70 -height 30 -yscrollcommand {.help.sb set}
+    scrollbar .help.sb -orient vertical -command [list $t yview]
+    button .help.dismiss -text Close -command {destroy .help}
+    pack .help.dismiss -side bottom -pady 1
+    pack .help.sb -side right -fill y
+    pack $t -side top -expand 1 -fill both
+ 
+    $t tag config title -justify center -foregr red -attr bold
+    $t tag configure title2 -justify center -attr bold
+    $t tag configure header -attr bold
+    $t tag configure n -lmargin1 10 -lmargin2 10
+    $t tag configure bullet -lmargin1 10 -lmargin2 12
+ 
+    $t insert end "Minesweeper\n" title
+    $t insert end "by vzvca\n\n" title2
+ 
+    $t insert end "Minesweeper is a simple solitaire game.\n\n"
+    
+    $t insert end "Each Minesweeper game starts out with a grid of unmarked squares. "
+    $t insert end "After clicking one of these squares, some of the squares will disappear, "
+    $t insert end "some will remain blank, and some will have numbers on them. "
+    $t insert end "It's your job to use the numbers to figure out which of "
+    $t insert end "the blank squares have mines and which are safe to click. "
+    $t insert end "There are 10 mines hidden when the game begins.\n\n"
+
+    $t insert end "A number on a square refers to the number of mines that are currently "
+    $t insert end "touching that square. For example, if there are two squares touching "
+    $t insert end "each other and one of the squares has '1' on it, "
+    $t insert end "you know that the square next to it has a mine beneath it.\n\n"
+    
+    $t insert end "Keys\n" header
+    $t insert end "o Use arrows to move the cursor on the grid.\n" bullet
+    $t insert end "o Use 'f' to flag a place as (maybe) containing a bomb.\n" bullet
+    $t insert end "o Use 'space' on a square without mine. All the surrounding squares will be revealed. If a mine is header in the square you loose.\n" bullet
+    $t insert end "o Use 'r' to replay current game.\n" bullet
+    $t insert end "o Use 'q' to quit.\n" bullet
+    $t insert end "o Use 'enter' to close this help box.\n" bullet
+    $t insert end "\n\n"
+
+    $t insert end "Mouse\n" header
+    $t insert end "o Left button will act like 'space' key.\n" bullet
+    $t insert end "o Right button will act like 'f' key.\n" bullet
+    
+    $t config -state disabled
+}
+
 # --------------------------------------------------------------------------
 #  -- Set up key bindings
 # --------------------------------------------------------------------------
@@ -350,7 +410,27 @@ bind all <Key-q> {
     exit
 }
 
+bind all <Key-Return> {
+    catch {destroy .help}
+}
 
+bind all <Button-1> {
+    if { [string match ".c.*" %W] } {
+	set xcell [expr {(%X - [winfo rootx .c]) / 4}]
+	set ycell [expr {(%Y - [winfo rooty .c]) / 2}]
+	drawcell
+	xpand
+    }
+}
+
+bind all <Button-3> {
+    if { [string match ".c.*" %W] } {
+	set xcell [expr {(%X - [winfo rootx .c]) / 4}]
+	set ycell [expr {(%Y - [winfo rooty .c]) / 2}]
+	drawcell
+	flag
+    }
+}
 
 init-gui
 init-board

@@ -12,3 +12,4 @@ Makefile
 ckConfig.sh
 build-stamp
 install-stamp
+cwsh
