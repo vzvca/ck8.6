@@ -6,7 +6,7 @@ ck (8.6-1) unstable; urgency=low
   * added X11 colors
   * added resize support
 
- -- VCA <vca@somewhere.com>  Mon, 16 Dec 2019 20:00:00 +0100
+ -- vzvca <vca@somewhere.com>  Mon, 16 Dec 2019 20:00:00 +0100
 
 ck (8.4-1) unstable; urgency=low
 
