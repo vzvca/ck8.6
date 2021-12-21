@@ -1067,7 +1067,6 @@ keyEvent:
 	 (w >= 0x20 && w < 0x100))
 	event.key.is_uch = 1;
 #endif
-    
 
 mkEvent:
     qev = (CkQEvt *) ckalloc(sizeof (CkQEvt));
@@ -1075,7 +1074,6 @@ mkEvent:
     qev->event = event;
     qev->mainPtr = mainPtr;
     Tcl_QueueEvent(&qev->header, TCL_QUEUE_TAIL);
-
     goto readagain;
 }
 

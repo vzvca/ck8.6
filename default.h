@@ -71,7 +71,7 @@
 #define DEF_TERMINAL_WIDTH                  "80"
 #define DEF_TERMINAL_SCROLLBACK             "1000"
 #define DEF_TERMINAL_EXEC                   NULL
-#define DEF_TERMINAL_TERM                   NULL
+#define DEF_TERMINAL_TERM                   "xterm"
 #define DEF_TERMINAL_REDISPLAY              "line"
 
 #define DEF_BUTTON_ACTIVE_ATTR_COLOR     "normal"
