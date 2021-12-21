@@ -145,7 +145,7 @@ CkCmd commands[] = {
 static void	UnlinkWindow _ANSI_ARGS_((CkWindow *winPtr));
 static void	UnlinkToplevel _ANSI_ARGS_((CkWindow *winPtr));
 static void     ChangeToplevelFocus _ANSI_ARGS_((CkWindow *winPtr));
-/*static*/ void	DoRefresh _ANSI_ARGS_((ClientData clientData));
+static void	DoRefresh _ANSI_ARGS_((ClientData clientData));
 static void	RefreshToplevels _ANSI_ARGS_((CkWindow *winPtr));
 static void	RefreshThem _ANSI_ARGS_((CkWindow *winPtr));
 static void     UpdateHWCursor _ANSI_ARGS_((CkMainInfo *mainPtr));
@@ -667,6 +667,11 @@ Ck_CreateMainWindow(interp, className)
     Ck_ClearToBot(winPtr, 0, 0);
     Ck_EventuallyRefresh(winPtr);
 
+    //@vca : create resize event handler
+    EXTERN void handleFullResize _ANSI_ARGS_((ClientData clientData,
+					      CkEvent *eventPtr));
+    Ck_CreateEventHandler(winPtr, CK_EV_RESIZE, handleFullResize, mainPtr);
+    
     /*
      * Bind in Ck's commands.
      */
@@ -1973,7 +1978,7 @@ Ck_EventuallyRefresh(winPtr)
  *----------------------------------------------------------------------
  */
 
-/*static*/ void
+static void
 DoRefresh(clientData)
     ClientData clientData;
 {

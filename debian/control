@@ -2,7 +2,7 @@ Source: ck
 Section: libs
 Priority: optional
 Maintainer: C Werner <chw@ch-werner.de>
-Build-Depends: debhelper (>= 4), libncursesw5-dev, tcl8.6-dev
+Build-Depends: debhelper (>= 4), libncursesw5-dev, tcl8.6-dev, libgpm-dev
 Standards-Version: 3.6.1
 
 Package: ck

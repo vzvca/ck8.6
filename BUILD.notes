@@ -3,8 +3,10 @@ On Debian based systems (tested on Debian buster) using tcl8.6:
   tar xzf ck8.6.tar.gz
   cd ck8.6
   autoconf
+  
   dpkg-buildpackage -b -us -uc
-
+  sbuild -d stretch
+  sbuild -d buster
 
 Original build notes by Ck. Werner :
 

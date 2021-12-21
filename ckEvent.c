@@ -485,22 +485,21 @@ CkEventDeadWindow(winPtr)
     }
 }
 
-
-extern void DoRefresh(ClientData clientData);
-
-void fullrefresh(ClientData clientData)
+void handleFullResize(clientData, eventPtr)
+     ClientData clientData;
+     CkEvent *eventPtr;
 {
   CkMainInfo *mainPtr = (CkMainInfo *) clientData;
-  DoRefresh(mainPtr->winPtr);
-}
+  struct winsize winsz;
 
-void doit(ClientData clientData) {
-  CkMainInfo *mainPtr = (CkMainInfo *) clientData;
+  ioctl(0, TIOCGWINSZ, &winsz);
+  resizeterm(winsz.ws_row, winsz.ws_col);
   mainPtr->maxWidth = COLS;
   mainPtr->maxHeight = LINES;
   Ck_ResizeWindow(mainPtr->winPtr, COLS, LINES);
-  Tk_DoWhenIdle(fullrefresh, mainPtr);
+  Ck_EventuallyRefresh(mainPtr->winPtr);
 }
+
 /*
  *--------------------------------------------------------------
  *
@@ -763,31 +762,32 @@ CkHandleInput(clientData, mask)
     wint_t w;
     int rc;
 #endif
-
+    
     if (!(mask & TCL_READABLE))
 	return;
 
  readagain:
 
-    /* to the original way */
+    /* note that getch() will not block 
+     * it will return ERR if no data is available. */
     code = getch();
     if ( code == ERR ) return;
     if ( code != KEY_RESIZE ) {
-    ungetch(code);
-    rc = get_wch(&w);
-    if (rc == ERR ) {
-      //    if (code == ERR) {
+      ungetch(code);
+      rc = get_wch(&w);
+      if (rc == ERR ) {
+	//    if (code == ERR) {
 	if (++errCount > 100) {
-	    Tcl_Eval(mainPtr->interp, "exit 99");
+	  Tcl_Eval(mainPtr->interp, "exit 99");
 #if (TCL_MAJOR_VERSION >= 8)
-	    Tcl_Exit(99);			/* just in case */
+	  Tcl_Exit(99);			/* just in case */
 #else
-	    exit(99);				/* just in case */
+	  exit(99);				/* just in case */
 #endif
 	}
 	return;
-    }
-    errCount = 0;
+      }
+      errCount = 0;
     }
 
 #if CK_USE_UTF
@@ -1034,8 +1034,9 @@ mouseEvent:
 
     /* full resize */
     if ( code == KEY_RESIZE ) {
-      Tk_DoWhenIdle(doit, mainPtr);
-      goto readagain;
+      event.any.type   = CK_EV_RESIZE;
+      event.any.winPtr = mainPtr->winPtr;
+      goto mkEvent;
     }
     
 keyEvent:

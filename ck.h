@@ -140,6 +140,7 @@ typedef union {
 #define CK_EV_DESTROY    0x00000080
 #define CK_EV_FOCUSIN    0x00000100
 #define CK_EV_FOCUSOUT   0x00000200
+#define CK_EV_RESIZE     0x00000400
 #define CK_EV_BARCODE    0x10000000
 #define CK_EV_ALL        0xffffffff
 

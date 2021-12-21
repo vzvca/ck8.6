@@ -13,6 +13,38 @@ Ck is a Tk port to curses. A subset of Tk widgets have been ported to curses all
  * More colors and a way to define custom colors
  * Support for `<alt-key>` form of bindings
 
+## Building
+
+The following dependencies are required:
+
+ * libtcl8.6-dev
+ * libncursesw5-dev
+ * [libgpm-dev] : required for mouse support in text console.
+
+Debian packaging is provided (tested on debian stretch and debian buster).
+
+~~~~
+$ ./configure
+$ make && sudo make install
+~~~~
+
+## Mouse support
+
+Mouse is supported out of the box in X11 terminals windows. In true text console, mouse is supported through `gpm` which needs to be installed on the system. On debian based system, as `root` :
+
+~~~~
+$ apt-get install gpm
+$ systemctl enable gpm.service
+$ systemctl start gpm.service
+~~~~
+
+## Resizing
+
+True text consoles are not resized but X11 terminals are often resized.
+
+It might be necessary to run `cwsh` with environment variable `CK_USE_GPM=1` set. Sometimes ncurses does not support gpm and `cwsh` has to support it by itself.
+
+
 ## Documentation
 
 The original documentation is included (in the doc subdirectory) in man page format. The man pages were converted to HTML and can be found in the html subdirectory.
@@ -20,8 +52,8 @@ The original documentation is included (in the doc subdirectory) in man page for
 ## Demos
 
 A few games have been coded / ported form Tk to Ck. Most of the games come from the Tcl/Tk wiki. I would like to thanks here the original authors of these games :
- * Keith Wetter : I stole its montana solitaire
- * XXX : I copied TinyTetris and changed it
+ * Keith Wetter : I stole its montana solitaire.
+ * BHE : I copied TinyTetris and changed it.
 
 ### Puzzle
 
