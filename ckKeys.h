@@ -2,7 +2,7 @@
  * Keys defined by Ck
  * Mostly ALT keys sequence
  */
-CK_NEW_KEY(CK_KEY_ALT_a, "\033a", KEY_MAX+1)
+  CK_NEW_KEY(CK_KEY_ALT_a, "\033a", KEY_MAX+1)
   CK_NEW_KEY(CK_KEY_ALT_b, "\033b", KEY_MAX+2)
   CK_NEW_KEY(CK_KEY_ALT_c, "\033c", KEY_MAX+3)
   CK_NEW_KEY(CK_KEY_ALT_d, "\033d", KEY_MAX+4)

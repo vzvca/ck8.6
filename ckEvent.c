@@ -1226,6 +1226,27 @@ CkHandleGPMInput(clientData, mask)
 /*
  *--------------------------------------------------------------
  *
+ * Ck_QueueVirtualEvent --
+ *
+ *	Builds a virtual event and queue it.
+ *
+ * Results:
+ *	None.
+ *
+ * Side effects:
+ *	Arbitrary;  depends on handlers for events.
+ *
+ *--------------------------------------------------------------
+ */
+
+void
+Ck_QueueVirtualEvent()
+{
+}
+
+/*
+ *--------------------------------------------------------------
+ *
  * Ck_MainLoop --
  *
  *	Call Ck_DoOneEvent over and over again in an infinite

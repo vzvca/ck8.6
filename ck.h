@@ -92,39 +92,47 @@ typedef long KeySym;
  */
 
 typedef struct {
-    long type;
-    struct CkWindow *winPtr;
+  long type;
+  struct CkWindow *winPtr;
 } CkAnyEvent;
 
 typedef struct {
-    long type;
-    struct CkWindow *winPtr;
-    int keycode;
+  long type;
+  struct CkWindow *winPtr;
+  int keycode;
 #if CK_USE_UTF
-    int is_uch;
-    Tcl_UniChar uch;
+  int is_uch;
+  Tcl_UniChar uch;
 #endif
   int curses_rc;    /* return code of get_wch */
   wint_t curses_w;  /* wide character returned by get_wch */
 } CkKeyEvent;
 
 typedef struct {
-    long type;
-    struct CkWindow *winPtr;
-    int button, x, y, rootx, rooty;
+  long type;
+  struct CkWindow *winPtr;
+  int button, x, y, rootx, rooty;
 } CkMouseEvent;
 
 typedef struct {
-    long type;
-    struct CkWindow *winPtr;    
+  long type;
+  struct CkWindow *winPtr;    
 } CkWindowEvent;
 
+typedef struct {
+  long type;
+  struct CkWindow *winPtr;
+  long subtype;
+  char *text;
+} CkVirtualEvent;
+
 typedef union {
-    long type;
-    CkAnyEvent any;
-    CkKeyEvent key;
-    CkMouseEvent mouse;
-    CkWindowEvent win;
+  long type;
+  CkAnyEvent any;
+  CkKeyEvent key;
+  CkMouseEvent mouse;
+  CkWindowEvent win;
+  CkVirtualEvent virt;
 } CkEvent;
 
 /*
@@ -141,8 +149,10 @@ typedef union {
 #define CK_EV_FOCUSIN    0x00000100
 #define CK_EV_FOCUSOUT   0x00000200
 #define CK_EV_RESIZE     0x00000400
+#define CK_EV_VIRTUAL    0x00000800
 #define CK_EV_BARCODE    0x10000000
 #define CK_EV_ALL        0xffffffff
+
 
 /*
  * Additional key codes
@@ -176,9 +186,9 @@ typedef char *Tk_TimerToken;
  */
       
 typedef void (Ck_EventProc) _ANSI_ARGS_((ClientData clientData,
-				CkEvent *eventPtr));
+										 CkEvent *eventPtr));
 typedef int  (Ck_GenericProc) _ANSI_ARGS_((ClientData clientData,
-				CkEvent *eventPtr));
+										   CkEvent *eventPtr));
 #if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
 typedef void (Ck_FreeProc) _ANSI_ARGS_((ClientData clientData));
 #else
@@ -187,7 +197,7 @@ typedef void (Ck_FreeProc) _ANSI_ARGS_((ClientData clientData));
 
 typedef void (Tk_FileProc) _ANSI_ARGS_((ClientData clientData, int mask));
 typedef int (Tk_FileProc2) _ANSI_ARGS_((ClientData clientData, int mask,
-				int flags));
+										int flags));
 typedef void (Tk_IdleProc) _ANSI_ARGS_((ClientData clientData));
 typedef void (Tk_TimerProc) _ANSI_ARGS_((ClientData clientData));
 
@@ -198,22 +208,22 @@ typedef void (Tk_TimerProc) _ANSI_ARGS_((ClientData clientData));
  */
 
 typedef void (Ck_GeomRequestProc) _ANSI_ARGS_((ClientData clientData,
-	struct CkWindow *winPtr));
+											   struct CkWindow *winPtr));
 typedef void (Ck_GeomLostSlaveProc) _ANSI_ARGS_((ClientData clientData,
-	struct CkWindow *winPtr));
+												 struct CkWindow *winPtr));
 
 typedef struct Ck_GeomMgr {
-    char *name;			/* Name of the geometry manager (command
-				 * used to invoke it, or name of widget
-				 * class that allows embedded widgets). */
-    Ck_GeomRequestProc *requestProc;
-				/* Procedure to invoke when a slave's
-				 * requested geometry changes. */
-    Ck_GeomLostSlaveProc *lostSlaveProc;
-				/* Procedure to invoke when a slave is
-				 * taken away from one geometry manager
-				 * by another.  NULL means geometry manager
-				 * doesn't care when slaves are lost. */
+  char *name;			/* Name of the geometry manager (command
+						 * used to invoke it, or name of widget
+						 * class that allows embedded widgets). */
+  Ck_GeomRequestProc *requestProc;
+  /* Procedure to invoke when a slave's
+   * requested geometry changes. */
+  Ck_GeomLostSlaveProc *lostSlaveProc;
+  /* Procedure to invoke when a slave is
+   * taken away from one geometry manager
+   * by another.  NULL means geometry manager
+   * doesn't care when slaves are lost. */
 } Ck_GeomMgr;
 
 
@@ -270,13 +280,13 @@ typedef struct Ck_GeomMgr {
  */
     
 typedef struct CkEventHandler {
-    long mask;				/* Events for which to invoke proc. */
-    Ck_EventProc *proc;			/* Procedure to invoke when an event
-    					 * in mask occurs. */
-    ClientData clientData;		/* Argument to pass to proc. */
-    struct CkEventHandler *nextPtr;	/* Next in list of handlers
-					 * associated with window (NULL means
-					 * end of list). */
+  long mask;				/* Events for which to invoke proc. */
+  Ck_EventProc *proc;			/* Procedure to invoke when an event
+								 * in mask occurs. */
+  ClientData clientData;		/* Argument to pass to proc. */
+  struct CkEventHandler *nextPtr;	/* Next in list of handlers
+									 * associated with window (NULL means
+									 * end of list). */
 } CkEventHandler;
  
 /*
@@ -287,35 +297,35 @@ typedef struct CkEventHandler {
  */
 
 typedef struct CkMainInfo {
-    struct CkWindow *winPtr;	/* Pointer to main window. */
-    Tcl_Interp *interp;		/* Interpreter associated with application. */
-    Tcl_HashTable nameTable;	/* Hash table mapping path names to CkWindow
-				 * structs for all windows related to this
-				 * main window.  Managed by ckWindow.c. */
-    Tcl_HashTable winTable;	/* Ditto, for event handling. */
-    struct CkWindow *topLevPtr; /* Anchor for toplevel window list. */
-    struct CkWindow *focusPtr;	/* Identifies window that currently has the
-				 * focus. NULL means nobody has the focus.
-				 * Managed by ckFocus.c. */
-    Ck_BindingTable bindingTable;
-				/* Used in conjunction with "bind" command
-				 * to bind events to Tcl commands. */
-    struct ElArray *optionRootPtr;
-                                /* Top level of option hierarchy for this
-                                 * main window.  NULL means uninitialized.
-                                 * Managed by ckOption.c. */
-    int maxWidth, maxHeight;    /* Max dimensions of curses screen. */
-    int refreshCount;		/* Counts number of calls
-    				 * to Ck_EventuallyRefresh. */
-    int refreshDelay;		/* Delay in milliseconds between updates;
-				 * see comment in ckWindow.c. */
-    double lastRefresh;		/* Delay computation for updates. */
-    Tk_TimerToken refreshTimer;	/* Timer for delayed updates. */
-    ClientData mouseData;       /* Value used by mouse handling code. */
-    ClientData barcodeData;	/* Value used by bar code handling code. */
-    int flags;			/* See definitions below. */
+  struct CkWindow *winPtr;	/* Pointer to main window. */
+  Tcl_Interp *interp;		/* Interpreter associated with application. */
+  Tcl_HashTable nameTable;	/* Hash table mapping path names to CkWindow
+							 * structs for all windows related to this
+							 * main window.  Managed by ckWindow.c. */
+  Tcl_HashTable winTable;	/* Ditto, for event handling. */
+  struct CkWindow *topLevPtr; /* Anchor for toplevel window list. */
+  struct CkWindow *focusPtr;	/* Identifies window that currently has the
+								 * focus. NULL means nobody has the focus.
+								 * Managed by ckFocus.c. */
+  Ck_BindingTable bindingTable;
+  /* Used in conjunction with "bind" command
+   * to bind events to Tcl commands. */
+  struct ElArray *optionRootPtr;
+  /* Top level of option hierarchy for this
+   * main window.  NULL means uninitialized.
+   * Managed by ckOption.c. */
+  int maxWidth, maxHeight;    /* Max dimensions of curses screen. */
+  int refreshCount;		/* Counts number of calls
+						 * to Ck_EventuallyRefresh. */
+  int refreshDelay;		/* Delay in milliseconds between updates;
+						 * see comment in ckWindow.c. */
+  double lastRefresh;		/* Delay computation for updates. */
+  Tk_TimerToken refreshTimer;	/* Timer for delayed updates. */
+  ClientData mouseData;       /* Value used by mouse handling code. */
+  ClientData barcodeData;	/* Value used by bar code handling code. */
+  int flags;			/* See definitions below. */
 #if CK_USE_UTF
-    Tcl_Encoding isoEncoding;
+  Tcl_Encoding isoEncoding;
 #endif
 } CkMainInfo;
 
@@ -334,93 +344,93 @@ typedef struct CkMainInfo {
 
 typedef struct CkWindow {
 
-    /*
-     * Structural information:
-     */
+  /*
+   * Structural information:
+   */
 
-    WINDOW *window;		/* Curses window. NULL means window
-				 * hasn't actually been created yet, or it's
-				 * been deleted, or it's managed by the widget itself */
-    struct CkWindow *childList;	/* First in list of child windows,
-				 * or NULL if no children. */
-    struct CkWindow *lastChildPtr;
-				/* Last in list of child windows, or NULL
-				 * if no children. */
-    struct CkWindow *parentPtr;	/* Pointer to parent window. */
-    struct CkWindow *nextPtr;	/* Next in list of children with
-				 * same parent (NULL if end of list). */
-    struct CkWindow *topLevPtr; /* Next toplevel if this is toplevel. */
-    CkMainInfo *mainPtr;	/* Information shared by all windows
-				 * associated with the main window. */
+  WINDOW *window;		/* Curses window. NULL means window
+						 * hasn't actually been created yet, or it's
+						 * been deleted, or it's managed by the widget itself */
+  struct CkWindow *childList;	/* First in list of child windows,
+								 * or NULL if no children. */
+  struct CkWindow *lastChildPtr;
+  /* Last in list of child windows, or NULL
+   * if no children. */
+  struct CkWindow *parentPtr;	/* Pointer to parent window. */
+  struct CkWindow *nextPtr;	/* Next in list of children with
+							 * same parent (NULL if end of list). */
+  struct CkWindow *topLevPtr; /* Next toplevel if this is toplevel. */
+  CkMainInfo *mainPtr;	/* Information shared by all windows
+						 * associated with the main window. */
 
-    /*
-     * Name and type information for the window:
-     */
+  /*
+   * Name and type information for the window:
+   */
 
-    char *pathName;		/* Path name of window (concatenation
-				 * of all names between this window and
-				 * its top-level ancestor).  This is a
-				 * pointer into an entry in mainPtr->nameTable.
-				 */
-    Ck_Uid nameUid;		/* Name of the window within its parent
-				 * (unique within the parent). */
-    Ck_Uid classUid;		/* Class of the window.  NULL means window
-				 * hasn't been given a class yet. */
+  char *pathName;		/* Path name of window (concatenation
+						 * of all names between this window and
+						 * its top-level ancestor).  This is a
+						 * pointer into an entry in mainPtr->nameTable.
+						 */
+  Ck_Uid nameUid;		/* Name of the window within its parent
+						 * (unique within the parent). */
+  Ck_Uid classUid;		/* Class of the window.  NULL means window
+						 * hasn't been given a class yet. */
 
-    /*
-     * Information kept by the event manager (ckEvent.c):
-     */
+  /*
+   * Information kept by the event manager (ckEvent.c):
+   */
               
-    CkEventHandler *handlerList;/* First in list of event handlers
-				 * declared for this window, or
-				 * NULL if none. */
+  CkEventHandler *handlerList;/* First in list of event handlers
+							   * declared for this window, or
+							   * NULL if none. */
 
-    /*
-     * Information kept by the bind/bindtags mechanism (ckCmds.c):
-     */
+  /*
+   * Information kept by the bind/bindtags mechanism (ckCmds.c):
+   */
 
-    ClientData *tagPtr;		/* Points to array of tags used for bindings
-				 * on this window.  Each tag is a Ck_Uid.
-				 * Malloc'ed.  NULL means no tags. */
-    int numTags;		/* Number of tags at *tagPtr. */
+  ClientData *tagPtr;		/* Points to array of tags used for bindings
+							 * on this window.  Each tag is a Ck_Uid.
+							 * Malloc'ed.  NULL means no tags. */
+  int numTags;		/* Number of tags at *tagPtr. */
 
-    /*
-     * Information used by ckFocus.c for toplevel windows.
-     */
+  /*
+   * Information used by ckFocus.c for toplevel windows.
+   */
 
-    struct CkWindow *focusPtr;  /* If toplevel, this was the last child
-				 * which had the focus. */
+  struct CkWindow *focusPtr;  /* If toplevel, this was the last child
+							   * which had the focus. */
 
-    /*
-     * Information used by ckGeometry.c for geometry managers.
-     */
+  /*
+   * Information used by ckGeometry.c for geometry managers.
+   */
 
-    Ck_GeomMgr *geomMgrPtr;	/* Procedure to manage geometry, NULL
-    				 * means unmanaged. */
-    ClientData geomData;	/* Argument for geomProc. */
-    int reqWidth, reqHeight;	/* Requested width/height of window. */
+  Ck_GeomMgr *geomMgrPtr;	/* Procedure to manage geometry, NULL
+							 * means unmanaged. */
+  ClientData geomData;	/* Argument for geomProc. */
+  int reqWidth, reqHeight;	/* Requested width/height of window. */
 
-    /*
-     * Information used by ckOption.c to manage options for the
-     * window.
-     */
+  /*
+   * Information used by ckOption.c to manage options for the
+   * window.
+   */
 
-    int optionLevel;            /* -1 means no option information is
-                                 * currently cached for this window.
-                                 * Otherwise this gives the level in
-                                 * the option stack at which info is
-                                 * cached. */
+  int optionLevel;            /* -1 means no option information is
+							   * currently cached for this window.
+							   * Otherwise this gives the level in
+							   * the option stack at which info is
+							   * cached. */
 
-    /*
-     * Geometry and other attributes of window.
-     */
+  /*
+   * Geometry and other attributes of window.
+   */
 
-    int x, y;			/* Top-left corner with respect to
+  int x, y;			/* Top-left corner with respect to
     				 * parent window. */
-    int width, height;		/* Width and height of window. */
-    int fg, bg;			/* Foreground/background colors. */
-    int attr;			/* Video attributes. */
-    int flags;			/* Various flag values, see below. */
+  int width, height;		/* Width and height of window. */
+  int fg, bg;			/* Foreground/background colors. */
+  int attr;			/* Video attributes. */
+  int flags;			/* Various flag values, see below. */
 
 
 } CkWindow;
@@ -465,8 +475,8 @@ typedef struct CkWindow {
  */
 
 typedef struct {
-    char *name;			/* Name of border, malloc'ed. */
-    int gchar[9];		/* ACS chars making up border. */
+  char *name;			/* Name of border, malloc'ed. */
+  int gchar[9];		/* ACS chars making up border. */
 } CkBorder;
 
 /*
@@ -474,9 +484,9 @@ typedef struct {
  */
   
 typedef enum {
-    CK_ANCHOR_N, CK_ANCHOR_NE, CK_ANCHOR_E, CK_ANCHOR_SE,
-    CK_ANCHOR_S, CK_ANCHOR_SW, CK_ANCHOR_W, CK_ANCHOR_NW,
-    CK_ANCHOR_CENTER
+			  CK_ANCHOR_N, CK_ANCHOR_NE, CK_ANCHOR_E, CK_ANCHOR_SE,
+			  CK_ANCHOR_S, CK_ANCHOR_SW, CK_ANCHOR_W, CK_ANCHOR_NW,
+			  CK_ANCHOR_CENTER
 } Ck_Anchor;
   
 /*
@@ -484,8 +494,8 @@ typedef enum {
  */
   
 typedef enum {
-    CK_JUSTIFY_LEFT, CK_JUSTIFY_RIGHT,
-    CK_JUSTIFY_CENTER, CK_JUSTIFY_FILL
+			  CK_JUSTIFY_LEFT, CK_JUSTIFY_RIGHT,
+			  CK_JUSTIFY_CENTER, CK_JUSTIFY_FILL
 } Ck_Justify;
 
 /*
@@ -525,22 +535,22 @@ typedef enum {
  */
 
 typedef int (Ck_OptionParseProc) _ANSI_ARGS_((ClientData clientData,
-	Tcl_Interp *interp, CkWindow *winPtr, char *value, char *widgRec,
-	int offset));
+											  Tcl_Interp *interp, CkWindow *winPtr, char *value, char *widgRec,
+											  int offset));
 typedef char *(Ck_OptionPrintProc) _ANSI_ARGS_((ClientData clientData,
-	CkWindow *winPtr, char *widgRec, int offset,
-	Tcl_FreeProc **freeProcPtr));
+												CkWindow *winPtr, char *widgRec, int offset,
+												Tcl_FreeProc **freeProcPtr));
 
 typedef struct Ck_CustomOption {
-    Ck_OptionParseProc *parseProc;	/* Procedure to call to parse an
-					 * option and store it in converted
-					 * form. */
-    Ck_OptionPrintProc *printProc;	/* Procedure to return a printable
-					 * string describing an existing
-					 * option. */
-    ClientData clientData;		/* Arbitrary one-word value used by
-					 * option parser:  passed to
-					 * parseProc and printProc. */
+  Ck_OptionParseProc *parseProc;	/* Procedure to call to parse an
+									 * option and store it in converted
+									 * form. */
+  Ck_OptionPrintProc *printProc;	/* Procedure to return a printable
+									 * string describing an existing
+									 * option. */
+  ClientData clientData;		/* Arbitrary one-word value used by
+								 * option parser:  passed to
+								 * parseProc and printProc. */
 } Ck_CustomOption;
 
 /*
@@ -551,25 +561,25 @@ typedef struct Ck_CustomOption {
  */
 
 typedef struct Ck_ConfigSpec {
-    int type;			/* Type of option, such as CK_CONFIG_COLOR;
-				 * see definitions below.  Last option in
-				 * table must have type CK_CONFIG_END. */
-    char *argvName;		/* Switch used to specify option in argv.
-				 * NULL means this spec is part of a group. */
-    char *dbName;		/* Name for option in option database. */
-    char *dbClass;		/* Class for option in database. */
-    char *defValue;		/* Default value for option if not
-				 * specified in command line or database. */
-    int offset;			/* Where in widget record to store value;
-				 * use Ck_Offset macro to generate values
-				 * for this. */
-    int specFlags;		/* Any combination of the values defined
-				 * below;  other bits are used internally
-				 * by ckConfig.c. */
-    Ck_CustomOption *customPtr;	/* If type is CK_CONFIG_CUSTOM then this is
-				 * a pointer to info about how to parse and
-				 * print the option.  Otherwise it is
-				 * irrelevant. */
+  int type;			/* Type of option, such as CK_CONFIG_COLOR;
+					 * see definitions below.  Last option in
+					 * table must have type CK_CONFIG_END. */
+  char *argvName;		/* Switch used to specify option in argv.
+						 * NULL means this spec is part of a group. */
+  char *dbName;		/* Name for option in option database. */
+  char *dbClass;		/* Class for option in database. */
+  char *defValue;		/* Default value for option if not
+						 * specified in command line or database. */
+  int offset;			/* Where in widget record to store value;
+						 * use Ck_Offset macro to generate values
+						 * for this. */
+  int specFlags;		/* Any combination of the values defined
+						 * below;  other bits are used internally
+						 * by ckConfig.c. */
+  Ck_CustomOption *customPtr;	/* If type is CK_CONFIG_CUSTOM then this is
+								 * a pointer to info about how to parse and
+								 * print the option.  Otherwise it is
+								 * irrelevant. */
 } Ck_ConfigSpec;
 
 /*
@@ -643,40 +653,40 @@ extern Ck_Uid ckDisabledUid;
 
 EXTERN int	CkAllKeyNames _ANSI_ARGS_((Tcl_Interp *interp));
 EXTERN int	CkBarcodeCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									  Tcl_Interp *interp, int argc, char **argv));
 EXTERN void	CkBindEventProc _ANSI_ARGS_((CkWindow *winPtr,
-		    CkEvent *eventPtr));
+										 CkEvent *eventPtr));
 EXTERN int	CkCopyAndGlobalEval _ANSI_ARGS_((Tcl_Interp *interp,
-		    char *string));
+											 char *string));
 EXTERN void	CkDisplayChars _ANSI_ARGS_((CkMainInfo *mainPtr,
-		    WINDOW *window, char *string,
-		    int numChars, int x, int y, int tabOrigin, int flags));
+										WINDOW *window, char *string,
+										int numChars, int x, int y, int tabOrigin, int flags));
 EXTERN void	CkEventDeadWindow _ANSI_ARGS_((CkWindow *winPtr));
 EXTERN void	CkFreeBindingTags _ANSI_ARGS_((CkWindow *winPtr));
 EXTERN char *	CkGetBarcodeData _ANSI_ARGS_((CkMainInfo *mainPtr));
 
 #if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
 EXTERN int	CkHandleInput _ANSI_ARGS_((ClientData clientData, int mask,
-		    int flags));	
+									   int flags));	
 #else
 EXTERN void	CkHandleInput _ANSI_ARGS_((ClientData clientData, int mask));
 #endif
 
 EXTERN int	CkInitFrame _ANSI_ARGS_((Tcl_Interp *interp, CkWindow *winPtr,
-		    int argc, char **argv));
+									 int argc, char **argv));
 EXTERN char *	CkKeysymToString _ANSI_ARGS_((KeySym keySym, int printControl));
 EXTERN int	CkMeasureChars _ANSI_ARGS_((CkMainInfo *mainPtr,
-		    char *source, int maxChars,
-		    int startX, int maxX, int tabOrigin, int flags,
-		    int *nextPtr, int *nextCPtr));
+										char *source, int maxChars,
+										int startX, int maxX, int tabOrigin, int flags,
+										int *nextPtr, int *nextCPtr));
 EXTERN void     CkOptionClassChanged _ANSI_ARGS_((CkWindow *winPtr));
 EXTERN void     CkOptionDeadWindow _ANSI_ARGS_((CkWindow *winPtr));
 EXTERN KeySym	CkStringToKeysym _ANSI_ARGS_((char *name));
 EXTERN int	CkTermHasKey _ANSI_ARGS_((Tcl_Interp *interp, char *name));
 EXTERN void	CkUnderlineChars _ANSI_ARGS_((CkMainInfo *mainPtr,
-		    WINDOW *window, char *string,
-		    int numChars, int x, int y, int tabOrigin, int flags,
-		    int first, int last));
+										  WINDOW *window, char *string,
+										  int numChars, int x, int y, int tabOrigin, int flags,
+										  int first, int last));
 
 #if !((TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4))
 
@@ -695,104 +705,104 @@ EXTERN void	CkUnderlineChars _ANSI_ARGS_((CkMainInfo *mainPtr,
  */
 
 EXTERN void     Ck_AddOption _ANSI_ARGS_((CkWindow *winPtr, char *name,
-		    char *value, int priority));
+										  char *value, int priority));
 EXTERN void	Ck_BindEvent _ANSI_ARGS_((Ck_BindingTable bindingTable,
-		    CkEvent *eventPtr, CkWindow *winPtr, int numObjects,
-		    ClientData *objectPtr));
+									  CkEvent *eventPtr, CkWindow *winPtr, int numObjects,
+									  ClientData *objectPtr));
 EXTERN void     Ck_ClearToBot _ANSI_ARGS_((CkWindow *winPtr, int x, int y));
 EXTERN void	Ck_ClearToEol _ANSI_ARGS_((CkWindow *winPtr, int x, int y));
 EXTERN int      Ck_ConfigureInfo _ANSI_ARGS_((Tcl_Interp *interp,
-		    CkWindow *winPtr, Ck_ConfigSpec *specs, char *widgRec,
-		    char *argvName, int flags));
+											  CkWindow *winPtr, Ck_ConfigSpec *specs, char *widgRec,
+											  char *argvName, int flags));
 EXTERN int      Ck_ConfigureValue _ANSI_ARGS_((Tcl_Interp *interp,
-		    CkWindow *winPtr, Ck_ConfigSpec *specs, char *widgRec,
-		    char *argvName, int flags));
+											   CkWindow *winPtr, Ck_ConfigSpec *specs, char *widgRec,
+											   char *argvName, int flags));
 EXTERN int      Ck_ConfigureWidget _ANSI_ARGS_((Tcl_Interp *interp,
-		    CkWindow *winPtr, Ck_ConfigSpec *specs,
-		    int argc, char **argv, char *widgRec, int flags));
+												CkWindow *winPtr, Ck_ConfigSpec *specs,
+												int argc, char **argv, char *widgRec, int flags));
 EXTERN int	Ck_CreateBinding _ANSI_ARGS_((Tcl_Interp *interp,
-		    Ck_BindingTable bindingTable, ClientData object,
-		    char *eventString, char *command, int append));
+										  Ck_BindingTable bindingTable, ClientData object,
+										  char *eventString, char *command, int append));
 EXTERN Ck_BindingTable Ck_CreateBindingTable _ANSI_ARGS_((Tcl_Interp *interp));
 EXTERN void	Ck_CreateEventHandler _ANSI_ARGS_((CkWindow *winPtr, long mask,
-		    Ck_EventProc *proc, ClientData clientData));
+											   Ck_EventProc *proc, ClientData clientData));
 EXTERN void	Ck_CreateGenericHandler _ANSI_ARGS_((Ck_GenericProc *proc,
-		    ClientData clientData));
+												 ClientData clientData));
 EXTERN CkWindow *Ck_CreateMainWindow _ANSI_ARGS_((Tcl_Interp *interp,
-		    char *className));
+												  char *className));
 EXTERN CkWindow	*Ck_CreateWindow _ANSI_ARGS_((Tcl_Interp *interp,
-		    CkWindow *parentPtr, char *name, int toplevel));
+											  CkWindow *parentPtr, char *name, int toplevel));
 EXTERN CkWindow	*Ck_CreateWindowFromPath _ANSI_ARGS_((Tcl_Interp *interp,
-		    CkWindow *anywin, char *pathName, int toplevel));
+													  CkWindow *anywin, char *pathName, int toplevel));
 EXTERN void	Ck_DeleteAllBindings _ANSI_ARGS_((Ck_BindingTable bindingTable,
-		    ClientData object));
+											  ClientData object));
 EXTERN int	Ck_DeleteBinding _ANSI_ARGS_((Tcl_Interp *interp,
-		    Ck_BindingTable bindingTable, ClientData object,
-		    char *eventString));
+										  Ck_BindingTable bindingTable, ClientData object,
+										  char *eventString));
 EXTERN void	Ck_DeleteBindingTable
-		    _ANSI_ARGS_((Ck_BindingTable bindingTable));
+_ANSI_ARGS_((Ck_BindingTable bindingTable));
 EXTERN void	Ck_DeleteEventHandler _ANSI_ARGS_((CkWindow *winPtr, long mask,
-		    Ck_EventProc *proc, ClientData clientData));
+											   Ck_EventProc *proc, ClientData clientData));
 EXTERN void	Ck_DeleteGenericHandler _ANSI_ARGS_((Ck_GenericProc *proc,
-		    ClientData clientData));
+												 ClientData clientData));
 EXTERN void	Ck_DestroyWindow _ANSI_ARGS_((CkWindow *winPtr));
 EXTERN void	Ck_DrawBorder _ANSI_ARGS_((CkWindow *winPtr,
-		    CkBorder *borderPtr, int x, int y, int width, int height));
+									   CkBorder *borderPtr, int x, int y, int width, int height));
 #if ((TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4))
 EXTERN void	Ck_EventuallyFree _ANSI_ARGS_((ClientData clientData,
-		    Ck_FreeProc *freeProc));
+										   Ck_FreeProc *freeProc));
 #endif
 EXTERN void	Ck_EventuallyRefresh _ANSI_ARGS_((CkWindow *winPtr));
 EXTERN void	Ck_FreeBorder _ANSI_ARGS_((CkBorder *borderPtr));
 EXTERN void     Ck_FreeOptions _ANSI_ARGS_((Ck_ConfigSpec *specs,
-		    char *widgrec, int needFlags));
+											char *widgrec, int needFlags));
 EXTERN void	Ck_GeometryRequest _ANSI_ARGS_((CkWindow *winPtr,
-		    int reqWidth, int reqHeight));
+											int reqWidth, int reqHeight));
 EXTERN void	Ck_GetAllBindings _ANSI_ARGS_((Tcl_Interp *interp,
-		    Ck_BindingTable bindingTable, ClientData object));
+										   Ck_BindingTable bindingTable, ClientData object));
 EXTERN int	Ck_GetAnchor _ANSI_ARGS_((Tcl_Interp *interp, char *string,
-		    Ck_Anchor *anchorPtr));
+									  Ck_Anchor *anchorPtr));
 EXTERN int	Ck_GetAttr _ANSI_ARGS_((Tcl_Interp *interp, char *name,
-		    int *attrPtr));
+									int *attrPtr));
 EXTERN char *	Ck_GetBinding _ANSI_ARGS_((Tcl_Interp *inter,
-		    Ck_BindingTable bindingTable, ClientData object,
-		    char *eventString));
+										   Ck_BindingTable bindingTable, ClientData object,
+										   char *eventString));
 EXTERN CkBorder *Ck_GetBorder _ANSI_ARGS_((Tcl_Interp *interp,
-		    char *string));
+										   char *string));
 EXTERN void     Ck_InitColor _ANSI_ARGS_(());
 EXTERN void     Ck_InitKeys _ANSI_ARGS_(());
 EXTERN int	Ck_GetColor _ANSI_ARGS_((Tcl_Interp *interp, char *name,
-		    int *colorPtr));
+									 int *colorPtr));
 EXTERN int	Ck_GetCoord _ANSI_ARGS_((Tcl_Interp *interp, CkWindow *winPtr,
-		    char *string, int *intPtr));
+									 char *string, int *intPtr));
 EXTERN int	Ck_GetEncoding _ANSI_ARGS_((Tcl_Interp *interp));
 EXTERN int	Ck_GetGChar _ANSI_ARGS_((Tcl_Interp *interp, char *name,
-		    long *gchar));
+									 long *gchar));
 EXTERN int	Ck_GetJustify _ANSI_ARGS_((Tcl_Interp *interp, char *string,
-		    Ck_Justify *justifyPtr));
+									   Ck_Justify *justifyPtr));
 EXTERN Ck_Uid   Ck_GetOption _ANSI_ARGS_((CkWindow *winPtr, char *name,
-                    char *class));
+										  char *class));
 EXTERN int	Ck_GetPair _ANSI_ARGS_((CkWindow *winPtr, int fg, int bg));
 EXTERN void	Ck_GetRootGeometry _ANSI_ARGS_((CkWindow *winPtr, int *xPtr,
-		    int *yPtr, int *widthPtr, int *heightPtr));
+											int *yPtr, int *widthPtr, int *heightPtr));
 EXTERN int      Ck_GetScrollInfo _ANSI_ARGS_((Tcl_Interp *interp,
-		    int argc, char **argv, double *dblPtr, int *intPtr));
+											  int argc, char **argv, double *dblPtr, int *intPtr));
 EXTERN Ck_Uid	Ck_GetUid _ANSI_ARGS_((char *string));
 EXTERN CkWindow *Ck_GetWindowXY _ANSI_ARGS_((CkMainInfo *mainPtr, int *xPtr,
-		    int *yPtr, int mode));
+											 int *yPtr, int mode));
 EXTERN void	Ck_HandleEvent _ANSI_ARGS_((CkMainInfo *mainPtr,
-		    CkEvent *eventPtr));
+										CkEvent *eventPtr));
 EXTERN int	Ck_Init _ANSI_ARGS_((Tcl_Interp *interp));
 EXTERN void	Ck_Main _ANSI_ARGS_((int argc, char **argv,
-		    int (*appInitProc)()));
+								 int (*appInitProc)()));
 EXTERN void	Ck_MainLoop _ANSI_ARGS_((void));
 EXTERN CkWindow	*Ck_MainWindow _ANSI_ARGS_((Tcl_Interp *interp));
 EXTERN void	Ck_MaintainGeometry _ANSI_ARGS_((CkWindow *slave,
-		    CkWindow *master, int x, int y, int width,
-		    int height));
+											 CkWindow *master, int x, int y, int width,
+											 int height));
 EXTERN void	Ck_MakeWindowExist _ANSI_ARGS_((CkWindow *winPtr));
 EXTERN void	Ck_ManageGeometry _ANSI_ARGS_((CkWindow *winPtr,
-			    Ck_GeomMgr *mgrPtr, ClientData clientData));
+										   Ck_GeomMgr *mgrPtr, ClientData clientData));
 EXTERN void	Ck_MapWindow _ANSI_ARGS_((CkWindow *winPtr));
 EXTERN void	Ck_MoveWindow _ANSI_ARGS_((CkWindow *winPtr, int x, int y));
 EXTERN char *	Ck_NameOfAnchor _ANSI_ARGS_((Ck_Anchor anchor));
@@ -801,27 +811,27 @@ EXTERN char *	Ck_NameOfBorder _ANSI_ARGS_((CkBorder *borderPtr));
 EXTERN char *	Ck_NameOfColor _ANSI_ARGS_((int color));
 EXTERN char *	Ck_NameOfJustify _ANSI_ARGS_((Ck_Justify justify));
 EXTERN CkWindow *Ck_NameToWindow _ANSI_ARGS_((Tcl_Interp *interp,
-		    char *pathName, CkWindow *winPtr));
+											  char *pathName, CkWindow *winPtr));
 #if ((TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4))
 EXTERN void	Ck_Preserve _ANSI_ARGS_((ClientData clientData));
 EXTERN void	Ck_Release _ANSI_ARGS_((ClientData clientData));
 #endif
 EXTERN void	Ck_ResizeWindow _ANSI_ARGS_((CkWindow *winPtr, int width,
-		    int height));
+										 int height));
 EXTERN int	Ck_RestackWindow _ANSI_ARGS_((CkWindow *winPtr, int aboveBelow,
-		    CkWindow *otherPtr));
+										  CkWindow *otherPtr));
 EXTERN void	Ck_SetClass _ANSI_ARGS_((CkWindow *winPtr, char *className));
 EXTERN int	Ck_SetEncoding _ANSI_ARGS_((Tcl_Interp *interp, char *name));
 EXTERN void	Ck_SetFocus _ANSI_ARGS_((CkWindow *winPtr));
 EXTERN int	Ck_SetGChar _ANSI_ARGS_((Tcl_Interp *interp, char *name,
-		    long gchar));
+									 long gchar));
 EXTERN void	Ck_SetHWCursor _ANSI_ARGS_((CkWindow *winPtr, int newState));
 EXTERN void	Ck_SetInternalBorder _ANSI_ARGS_((CkWindow *winPtr,
-		    int onoff));
+											  int onoff));
 EXTERN void	Ck_SetWindowAttr _ANSI_ARGS_((CkWindow *winPtr, int fg,
-		    int bg, int attr));
+										  int bg, int attr));
 EXTERN void	Ck_UnmaintainGeometry _ANSI_ARGS_((CkWindow *slave,
-		    CkWindow *master));
+											   CkWindow *master));
 EXTERN void	Ck_UnmapWindow _ANSI_ARGS_((CkWindow *winPtr));
 
 #if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
@@ -831,20 +841,20 @@ EXTERN void	Ck_UnmapWindow _ANSI_ARGS_((CkWindow *winPtr));
 
 EXTERN void	Tk_BackgroundError _ANSI_ARGS_((Tcl_Interp *interp));
 EXTERN void	Tk_CancelIdleCall _ANSI_ARGS_((Tk_IdleProc *proc,
-		    ClientData clientData));
+										   ClientData clientData));
 EXTERN void	Tk_CreateFileHandler _ANSI_ARGS_((int fd, int mask,
-		    Tk_FileProc *proc, ClientData clientData));
+											  Tk_FileProc *proc, ClientData clientData));
 EXTERN void	Tk_CreateFileHandler2 _ANSI_ARGS_((int fd,
-		    Tk_FileProc2 *proc, ClientData clientData));
+											   Tk_FileProc2 *proc, ClientData clientData));
 EXTERN Tk_TimerToken Tk_CreateTimerHandler _ANSI_ARGS_((int milliseconds,
-		    Tk_TimerProc *proc, ClientData clientData));
+														Tk_TimerProc *proc, ClientData clientData));
 EXTERN void	Tk_DeleteFileHandler _ANSI_ARGS_((int fd));
 EXTERN void	Tk_DeleteTimerHandler _ANSI_ARGS_((Tk_TimerToken token));
 EXTERN int	Tk_DoOneEvent _ANSI_ARGS_((int flags));
 EXTERN void	Tk_DoWhenIdle _ANSI_ARGS_((Tk_IdleProc *proc,
-		    ClientData clientData));
+									   ClientData clientData));
 EXTERN void	Tk_DoWhenIdle2 _ANSI_ARGS_((Tk_IdleProc *proc,
-		    ClientData clientData));
+										ClientData clientData));
 EXTERN void	Tk_Sleep _ANSI_ARGS_((int ms));
 
 #endif
@@ -854,79 +864,79 @@ EXTERN void	Tk_Sleep _ANSI_ARGS_((int ms));
  */
 
 EXTERN int	Ck_BellCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_BindCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_BindtagsCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+										Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_CursesCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									  Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_DestroyCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									   Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_ExitCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_FocusCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									 Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_GridCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_LowerCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									 Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_OptionCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									  Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_PackCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_PlaceCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									 Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_RaiseCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									 Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_RecorderCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+										Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_TkwaitCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									  Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_UpdateCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									  Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_WinfoCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									 Tcl_Interp *interp, int argc, char **argv));
 
 EXTERN int	Tk_AfterCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									 Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Tk_FileeventCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+										 Tcl_Interp *interp, int argc, char **argv));
 
 /*
  * Widget creation procedures.
  */
 
 EXTERN int	Ck_ButtonCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									  Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_EntryCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									 Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_FrameCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									 Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_ListboxCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									   Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_MenuCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_MenubuttonCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+										  Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_MessageCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									   Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_ScrollbarCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+										 Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_TextCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_TreeCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_TerminalCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+										Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_ProgressCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+										Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_PlaycardCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+										Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_ColorCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									 Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Ck_SpinboxCmd _ANSI_ARGS_((ClientData clientData,
-		    Tcl_Interp *interp, int argc, char **argv));
+									   Tcl_Interp *interp, int argc, char **argv));
 EXTERN void     Ck_RecomputeLayout _ANSI_ARGS_((CkWindow *mainWinPtr));
 
 #endif  /* RESOURCE_INCLUDED */

@@ -3,11 +3,13 @@
 #  Terminal colors are redefined.
 # --------------------------------------------------------------------------
 
+set MXCOL 48
+set counter 0
 
 # --------------------------------------------------------------------------
 #  -- Save colors
 # --------------------------------------------------------------------------
-for { set i 16 } { $i < 24 } { incr i } {
+for { set i 16 } { $i < $MXCOL } { incr i } {
     set colors($i) [color cell $i]
 }
 
@@ -15,7 +17,7 @@ for { set i 16 } { $i < 24 } { incr i } {
 #  -- Restore colors
 # --------------------------------------------------------------------------
 proc bye {} {
-    for { set i 16 } { $i < 24 } { incr i } {
+    for { set i 16 } { $i < $::MXCOL } { incr i } {
 	color cell $i $::colors($i)
     }
     after idle exit
@@ -25,9 +27,11 @@ proc bye {} {
 #  -- Timer
 # --------------------------------------------------------------------------
 proc timer {} {
-    for { set i 16 } { $i < 24 } { incr i } {
-	color cell $i [list "red" [expr int(rand()*255)] "green" 10 "blue" 20]
-	.f${i} configure -bg @${i}
+    incr ::counter
+    for { set i 16 } { $i < $::MXCOL } { incr i } {
+	set j [expr {$i + $::counter - 16}]
+	color cell $i $::colors([expr {16 + ($j % ($::MXCOL - 16))}])
+	.f.f${i} configure -bg @${i}
     }
     after 1000 timer
 }
@@ -36,14 +40,16 @@ after 3000 timer
 # --------------------------------------------------------------------------
 #  -- Draw GUI
 # --------------------------------------------------------------------------
-message .m -text "This script demonstrates palette rotation effects."
-for { set i 16 } { $i < 24 } { incr i } {
-    frame .f${i} -bg @${i}
-    pack .f${i} -side left -fill both -expand y
+label .m -h 3 -text "This script demonstrates palette rotation effects. After a few seconds animation will start. Type <q> to quit."
+frame .f
+pack .m -side top -fill x
+for { set i 16 } { $i < $::MXCOL } { incr i } {
+    frame .f.f${i} -bg @${i}
+    pack .f.f${i} -side left -fill both -expand y
 }
-.m configure -text [array get ::colors]
-pack .m -side bottom -fill x
-
+pack .f -side bottom -fill both -expand yes
+##.m configure -text [array get ::colors]
+. configure -bg green
 bind all <Key-q> bye
 
 

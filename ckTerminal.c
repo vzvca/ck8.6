@@ -376,6 +376,8 @@ typedef struct Terminal_s {
   int height;                 /* Height to request for window.  <= 0 means
 			       * don't request any size. */
   char *takeFocus;            /* Value of -takefocus option. */
+  char *commandkey;           /* Value of -commandkey option. */
+  char *banner    ;           /* Welcome banner to display */
   int flags;                  /* Various flags;  see below for
 			       * definitions. */
 
@@ -417,7 +419,7 @@ typedef struct Terminal_s {
  *                              using mouse and keyboard. Keys and mouse events
  *                              are sent to the subprocess (through opened pty)
  * 
- * MODE_MOVE:                   The user interacts with the terminal
+ * MODE_COMMAND:                   The user interacts with the terminal
  *                              using mouse and keyboard. BUT Keys and mouse events
  *                              are not sent to the forked subprocess.
  *                              They are interpreted to move around in the buffer.
@@ -431,8 +433,9 @@ typedef struct Terminal_s {
 #define REDRAW_PENDING          1
 #define DISCONNECTED            2
 #define MODE_INTERACT           4
-#define MODE_MOVE               8
+#define MODE_COMMAND            8
 #define MODE_EXPECT             16
+#define DISPLAY_BANNER          32
 
 static int ExecParseProc(ClientData clientData,
 			 Tcl_Interp *interp, CkWindow *winPtr,
@@ -520,6 +523,12 @@ static Ck_ConfigSpec configSpecs[] = {
     {CK_CONFIG_STRING, "-yscrollcommand", "yscrollcommand", "YScrollCommand",
      (char*) NULL, Ck_Offset(Terminal, yscrollcommand), CK_CONFIG_NULL_OK},
     
+    {CK_CONFIG_STRING, "-commandkey", "commandkey", "CommandKey",
+     DEF_TERMINAL_COMMANDKEY, Ck_Offset(Terminal, commandkey), 0},
+    
+    {CK_CONFIG_STRING, "-banner", "banner", "Banner",
+     DEF_TERMINAL_COMMANDKEY, Ck_Offset(Terminal, banner), 0},
+    
     {CK_CONFIG_END, (char *) NULL, (char *) NULL, (char *) NULL,
         (char *) NULL, 0, 0}
 };
@@ -552,26 +561,26 @@ static int      TerminalTee _ANSI_ARGS_((Terminal *terminalPtr,
 // --------------------------------------------------------------------------
 
 /*** GLOBALS AND PROTOTYPES */
-static int commandkey = CTL(COMMAND_KEY);
-
 static void setupevents(NODE *n);
 static void reshape(NODE *n, int h, int w);
 static void draw(NODE *n);
 static void freenode(NODE *n);
 static void fixcursor(NODE *n);
 
-static void
+static int
 safewrite(int fd, const char *b, size_t n) /* Write, checking for errors. */
 {
   size_t w = 0;
+  if ( fd<0 ) return 0;
   while (w < n){
     ssize_t s = write(fd, b + w, n - w);
     if (s < 0 && errno != EINTR)
-      return;
+      return w;
     else if (s < 0)
       s = 0;
     w += (size_t)s;
   }
+  return w;
 }
 
 
@@ -1101,7 +1110,7 @@ HANDLER(sgr0) { /* Reset SGR to default */
   wbkgdset(win, COLOR_PAIR(0) | ' ');
 #endif
   
-  //@vca : essai de regler le fond
+  //@vca : try to tune background
   int p;
   wattrset(win, A_NORMAL);
   p = Ck_GetPair(term->winPtr, s->wfg, s->wbg); p = PAIR_NUMBER(p);
@@ -1541,6 +1550,12 @@ newview(Terminal *term, int scrollback, int h, int w, int fg, int bg) /* Open a 
   setupevents(n);
   ris(&n->vp, n, L'c', 0, 0, NULL, NULL);
 
+  /* insert banner text in window */
+  if ( term->flags & DISPLAY_BANNER && term->banner != NULL ) {
+    term->flags &= ~DISPLAY_BANNER;
+    vtwrite(&n->vp, term->banner, strlen(term->banner));
+  }
+  
   pid_t pid = forkpty(&n->pt, NULL, NULL, &ws);
   if (pid < 0) {
     // @todo: erreur handling a la Tk a mettre en place
@@ -1600,7 +1615,7 @@ reshapeview(NODE *n, int d, int ow) /* Reshape a view. */
   n->alt.tos = n->alt.off = 0;
   wsetscrreg(n->pri.win, 0, MAX(term->scrollback, n->h) - 1);
   wsetscrreg(n->alt.win, 0, n->h - 1);
-  if (d > 0){ /* make sure the new top line syncs up after reshape */
+  if (d > 0) { /* make sure the new top line syncs up after reshape */
     wmove(n->s->win, oy + d, ox);
     wscrl(n->s->win, -d);
   }
@@ -1612,6 +1627,7 @@ reshapeview(NODE *n, int d, int ow) /* Reshape a view. */
 static void
 reshape(NODE *n, int h, int w) /* Reshape a node. */
 {
+  Terminal *terminalPtr = (Terminal*) n->clientData;
   if (n->h == h && n->w == w)
     return;
 
@@ -1621,7 +1637,8 @@ reshape(NODE *n, int h, int w) /* Reshape a node. */
   n->w = MAX(w, 1);
 
   reshapeview(n, d, ow);
-  draw(n);
+  TerminalPostRedisplay(terminalPtr);
+  //draw(n);
 }
 
 static void
@@ -1633,26 +1650,28 @@ draw(NODE *n) /* Draw a node. */
     CkWindow *winPtr = terminalPtr->winPtr;
     int height = (n->h < winPtr->height) ? n->h : winPtr->height;
     int width  = (n->w < winPtr->width)  ? n->w : winPtr->width;
-    int offset = (terminalPtr->borderPtr != NULL) ? 1 : 0;
+    int offsetx = (terminalPtr->borderPtr != NULL) ? 1 : 0;
+    int offsety = offsetx;
     int y, x;
 
     /* save cursor position */
     getyx(winPtr->window, y, x);
 
     copywin( n->s->win, winPtr->window,
-	     n->s->off, 0, offset, offset, height+offset-1, width+offset-1, 0);
+	     n->s->off, 0, offsety, offsetx, height-1-offsety, width-1-offsetx, 0);
 
     Ck_SetWindowAttr(winPtr, COLOR_RED, COLOR_BLACK, A_NORMAL);
-    if ( terminalPtr->flags & MODE_MOVE ) {
-      mvwprintw( winPtr->window, 0, width - 6, "MOVING" );
+    if ( terminalPtr->flags & MODE_COMMAND ) {
+      mvwprintw( winPtr->window, 0, width - 7, "COMMAND" );
     }
     else if ( terminalPtr->flags & MODE_EXPECT ) {
       mvwprintw( winPtr->window, 0, width - 6, "EXPECT" );
     }
     else {
-      mvwprintw( winPtr->window, 0, width - 6, "EXPECT" );
+      mvwprintw( winPtr->window, 0, width - 6, "NORMAL" );
     }
 
+    
     /* restore cursor position */
     wmove(winPtr->window, y, x);
   }
@@ -1673,6 +1692,20 @@ scrollforward(NODE *n)
 }
 
 static void
+scrollbackx(NODE *n, int nl)
+{
+  n->s->off = MAX(0, n->s->off - nl);
+  Tk_DoWhenIdle(TerminalYScrollCommand, n->clientData);
+}
+
+static void
+scrollforwardx(NODE *n, int nl)
+{
+  n->s->off = MIN(n->s->tos, n->s->off + nl);
+  Tk_DoWhenIdle(TerminalYScrollCommand, n->clientData);
+}
+
+static void
 scrollbottom(NODE *n)
 {
   n->s->off = n->s->tos;
@@ -1688,10 +1721,29 @@ sendarrow(const NODE *n, const char *k)
 }
 
 static bool
+setCommandMode( Terminal *terminalPtr, bool mode )
+{
+  if (terminalPtr->node->cmd != mode) {
+    terminalPtr->node->cmd = mode;
+    if ( mode ) {
+      terminalPtr->flags |= MODE_COMMAND;
+      terminalPtr->flags &= ~(MODE_INTERACT);
+    }
+    else {
+      terminalPtr->flags &= ~MODE_COMMAND;
+      terminalPtr->flags |= MODE_INTERACT;
+    }      
+    TerminalPostRedisplay (terminalPtr);
+  }
+  return mode;
+}
+
+static bool
 handlechar(NODE *n, int r, int k) /* Handle a single input character. */
 {
-  const char cmdstr[] = {commandkey, 0};
   Terminal *terminalPtr = (Terminal*) n->clientData;
+  const int commandkey = CTL(terminalPtr->commandkey[0]);
+  const char cmdstr[] = {commandkey, 0};
   
 #define KERR(i) (r == ERR && (i) == k)
 #define KEY(i)  (r == OK  && (i) == k)
@@ -1699,15 +1751,17 @@ handlechar(NODE *n, int r, int k) /* Handle a single input character. */
 #define INSCR (n->s->tos != n->s->off)
 #define SB scrollbottom(n)
 #define DO(s, t, a)						\
-  if (s == n->cmd && (t)) { a ; n->cmd = false; return true; }
+  if (s == n->cmd && (t)) { a ; setCommandMode(terminalPtr, false); return true; }
 
   DO(n->cmd,KERR(k),             return false);
-  DO(false, KEY(commandkey),     return n->cmd = true);
+  DO(false, KEY(commandkey),     return setCommandMode(terminalPtr,true));
   DO(false, KEY(0),              SENDN(n, "\000", 1); SB);
   DO(false, KEY(L'\n'),          SEND(n, "\n"); SB);
   DO(false, KEY(L'\r'),          SEND(n, n->lnm? "\r\n" : "\r"); SB);
   DO(false, SCROLLUP && INSCR,   scrollback(n));
   DO(false, SCROLLDOWN && INSCR, scrollforward(n));
+  DO(false, CODE(KEY_UP) && INSCR, scrollbackx(n,1));
+  DO(false, CODE(KEY_DOWN)&& INSCR,scrollforwardx(n,1));
   DO(false, RECENTER && INSCR,   scrollbottom(n));
   DO(false, CODE(KEY_ENTER),     SEND(n, n->lnm? "\r\n" : "\r"); SB);
   DO(false, CODE(KEY_UP),        sendarrow(n, "A"); SB);
@@ -1749,12 +1803,15 @@ handlechar(NODE *n, int r, int k) /* Handle a single input character. */
   DO(true,  HSPLIT,              split(n, HORIZONTAL));
   DO(true,  VSPLIT,              split(n, VERTICAL));
 #endif
-  DO(true,  CODE(KEY(CTL('i'))), TerminalGiveFocus(terminalPtr));
   DO(true,  MOVE_OTHER,          TerminalGiveFocus(terminalPtr));
+  DO(true,  MOVE_LEFT,           TerminalGiveFocus(terminalPtr));
+  DO(true,  MOVE_RIGHT,          TerminalGiveFocus(terminalPtr));
   DO(true,  REDRAW,              TerminalPostRedisplay(terminalPtr));
   DO(true,  SCROLLUP,            scrollback(n));
   DO(true,  SCROLLDOWN,          scrollforward(n));
   DO(true,  RECENTER,            scrollbottom(n));
+  DO(true,  MOVE_UP,             scrollbackx(n,1));
+  DO(true,  MOVE_DOWN,           scrollforwardx(n,1));
   DO(true,  KEY(commandkey),     SENDN(n, cmdstr, 1));
   
   char c[MB_LEN_MAX + 1] = {0};
@@ -1762,7 +1819,7 @@ handlechar(NODE *n, int r, int k) /* Handle a single input character. */
     scrollbottom(n);
     SEND(n, c);
   }
-  return n->cmd = false, true;
+  return setCommandMode(terminalPtr,false), true;
 }
 
 
@@ -2040,7 +2097,7 @@ CkInitTerminal(interp, winPtr, argc, argv)
     terminalPtr->width = 1;
     terminalPtr->height = 1;
     terminalPtr->takeFocus = NULL;
-    terminalPtr->flags = 0; 
+    terminalPtr->flags = DISPLAY_BANNER; 
     terminalPtr->node = NULL;
     terminalPtr->scrollback = 0;
     terminalPtr->yscrollcommand = NULL;
@@ -2049,6 +2106,8 @@ CkInitTerminal(interp, winPtr, argc, argv)
     terminalPtr->exec = NULL;
     terminalPtr->aexec = NULL;
     terminalPtr->tee = NULL;
+    terminalPtr->commandkey = NULL;
+    terminalPtr->banner = NULL;
     
     Ck_CreateEventHandler(terminalPtr->winPtr,
             CK_EV_MAP | CK_EV_EXPOSE | CK_EV_DESTROY,
@@ -2265,8 +2324,10 @@ DestroyTerminal(clientData)
 
     terminalPtr->flags &= ~REDRAW_PENDING;
     if ( (terminalPtr->flags & DISCONNECTED) == 0 ) {
-      Tcl_DeleteFileHandler( terminalPtr->node->pt );
-      close ( terminalPtr->node->pt );
+      if ( terminalPtr->node != NULL ) {
+	Tcl_DeleteFileHandler( terminalPtr->node->pt );
+	close ( terminalPtr->node->pt );
+      }
       terminalPtr->flags |= DISCONNECTED;
     }
 
@@ -2632,7 +2693,7 @@ DisplayTerminal(clientData)
     }
 
     Ck_ClearToBot(winPtr, 0, 0);
-
+    
     if (terminalPtr->borderPtr != NULL) {
       int y, x;
       getyx(winPtr->window, y, x);
@@ -2672,7 +2733,7 @@ TerminalEventProc(clientData, eventPtr)
 {
     Terminal *terminalPtr = (Terminal *) clientData;
 
-    if (eventPtr->type == CK_EV_EXPOSE && terminalPtr->winPtr != NULL &&
+    if ((eventPtr->type == CK_EV_EXPOSE || eventPtr->type == CK_EV_MAP) && terminalPtr->winPtr != NULL &&
         !(terminalPtr->flags & REDRAW_PENDING)) {
       int width  = terminalPtr->winPtr->width;
       int height = terminalPtr->winPtr->height;
@@ -2683,7 +2744,6 @@ TerminalEventProc(clientData, eventPtr)
       }
 
       if ( terminalPtr->node == NULL ) {
-	
 	terminalPtr->node =
 	  newview( terminalPtr, terminalPtr->scrollback,
 		   height, width,

@@ -7,6 +7,7 @@
  * Copyright (c) 1989-1994 The Regents of the University of California.
  * Copyright (c) 1994-1995 Sun Microsystems, Inc.
  * Copyright (c) 1995 Christian Werner
+ * Copyright (c) 2019 vzvca
  *
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
@@ -159,7 +160,9 @@ typedef struct {
     int eventMask;		/* Mask bits for this event type. */
 } EventInfo;
 
-static EventInfo eventArray[] = {
+#define CK_MAX_EV 64
+
+static EventInfo eventArray[CK_MAX_EV] = {
     {"Expose",		CK_EV_EXPOSE,		CK_EV_EXPOSE},
     {"FocusIn",		CK_EV_FOCUSIN,		CK_EV_FOCUSIN},
     {"FocusOut",	CK_EV_FOCUSOUT,		CK_EV_FOCUSOUT},
@@ -174,6 +177,12 @@ static EventInfo eventArray[] = {
     {"ButtonPress",	CK_EV_MOUSE_DOWN,	CK_EV_MOUSE_DOWN},
     {"ButtonRelease",	CK_EV_MOUSE_UP,		CK_EV_MOUSE_UP},
     {"BarCode",		CK_EV_BARCODE,		CK_EV_BARCODE},
+    {"<Copy>",          CK_EV_VIRTUAL,          CK_EV_VIRTUAL},
+    {"<Paste>",         CK_EV_VIRTUAL,          CK_EV_VIRTUAL},
+    {"<Command>",       CK_EV_VIRTUAL,          CK_EV_VIRTUAL},
+    {"<User1>",         CK_EV_VIRTUAL,          CK_EV_VIRTUAL},
+    {"<User2>",         CK_EV_VIRTUAL,          CK_EV_VIRTUAL},
+    {"<User3>",         CK_EV_VIRTUAL,          CK_EV_VIRTUAL},
     {(char *) NULL,	0,			0}
 };
 static Tcl_HashTable eventTable;
@@ -1025,6 +1034,46 @@ FindSequence(interp, bindPtr, object, eventString, create)
     }
 
     /*
+     * Virtual event case <<XXX>>
+     */
+    if ( *p == '<' ) {
+      register EventInfo *eiPtr;
+      int i, s;
+      
+      p = GetField(p, field, FIELD_SIZE);
+      if ( *p != '>' ) {
+	Tcl_AppendResult(interp, "bad virtual event \"",
+			 field, "\" '>' expected." , (char *) NULL);
+	return NULL;
+      }
+      
+      hPtr = Tcl_FindHashEntry(&eventTable, field);
+
+      if ( hPtr == NULL ) {
+	Tcl_AppendResult(interp, "bad virtual event \"",
+			 field, "\"", (char *) NULL);
+	return NULL;
+      }
+      
+      eiPtr = (EventInfo *) Tcl_GetHashValue(hPtr);
+      patPtr->eventType = eiPtr->type;
+      eventMask |= eiPtr->eventMask;
+
+      for (i = s = 0; eventArray[i].name != NULL; ++i) {
+	if ( eventArray[i].name[0] != '<' ) {
+	  ++s;
+	  continue;
+	}
+	if (!strcmp (eventArray[i].name, field)) {
+	  break;
+	}
+      }
+      patPtr->detail = i-s;  /* remember index of virtual event */
+      p++;
+      continue;
+    }
+    
+    /*
      * A fancier event description.  Must consist of
      * 1. open angle bracket.
      * 2. optional event name.
@@ -1103,6 +1152,7 @@ FindSequence(interp, bindPtr, object, eventString, create)
       Tcl_SetObjResult(interp, Tcl_NewStringObj("no event type or keysym",-1));
       return NULL;
     }
+    
     while ((*p == '-') || isspace((unsigned char) *p)) {
       p++;
     }
@@ -1207,15 +1257,26 @@ GetField(p, copy, size)
     int size;			/* Maximum number of characters to
 				 * copy. */
 {
-    while ((*p != '\0') && !isspace((unsigned char) *p) && (*p != '>')
-	    && (*p != '-') && (size > 1)) {
-	*copy = *p;
-	p++;
-	copy++;
-	size--;
-    }
-    *copy = '\0';
-    return p;
+  int isVirt = 0;
+  if (*p == '<') {
+    *copy++ = *p++;
+    --size;
+    isVirt = 1;
+  }
+  while ((*p != '\0') && !isspace((unsigned char) *p) && (*p != '>')
+	 && (*p != '-') && (size > 1)) {
+      *copy = *p;
+      p++;
+      copy++;
+      size--;
+  }
+  if (isVirt && (*p == '>')) {
+    *copy = '>';
+    copy++;
+    p++;
+  }
+  *copy = '\0';
+  return p;
 }
 
 /*
@@ -1472,6 +1533,9 @@ ExpandPercents(winPtr, before, eventPtr, keySym, dsPtr)
 		    string = "??";
 		}
 		goto doString;
+	    case '@':
+	        string = eventPtr->virt.text;
+	        goto doString;
 	    case 'x':
 		if (eventPtr->type == CK_EV_MOUSE_UP ||
 		    eventPtr->type == CK_EV_MOUSE_DOWN) {
