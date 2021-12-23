@@ -2875,7 +2875,7 @@ TerminalEventProc(clientData, eventPtr)
 	  return;
 	}
 	Tcl_CreateFileHandler( terminalPtr->node->pt, TCL_READABLE, TerminalPtyProc,
-			       (ClientData) terminalPtr);
+			      (ClientData) terminalPtr);
 
 	terminalPtr->winPtr->flags |= CK_MAPPED;
 	
@@ -2925,7 +2925,7 @@ TerminalKeyEventProc(clientData, eventPtr)
 
     /* do not handle more keypress
      * if the terminal is disconnected */
-    if ( terminalPtr->flags & DISCONNECTED != 0 ) {
+    if ( (terminalPtr->flags & DISCONNECTED) != 0 ) {
       return;
     }
     

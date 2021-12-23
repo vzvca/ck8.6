@@ -100,7 +100,7 @@ LIBS = @TCL_BUILD_LIB_SPEC@ @LIBS@ $(CURSES_LIB_SWITCHES) @DL_LIBS@ @MATH_LIBS@ 
 
 # To change the compiler switches, for example to change from -O
 # to -g, change the following line:
-CFLAGS = -O
+CFLAGS =  -g3
 
 # To disable ANSI-C procedure prototypes reverse the comment characters
 # on the following lines:
@@ -204,17 +204,21 @@ TEXTOBJS = ckText.o ckTextBTree.o ckTextDisp.o ckTextIndex.o \
 
 OBJS = ckBind.o ckBorder.o ckCmds.o ckConfig.o ckEvent.o ckFocus.o \
 	ckGeometry.o ckGet.o ckGrid.o ckMain.o ckOption.o ckPack.o ckPlace.o \
-	ckPreserve.o ckRecorder.o ckUtil.o ckWindow.o tkEvent.o \
+	ckPreserve.o ckRecorder.o ckUtil.o ckWindow.o \
 	$(WIDGOBJS) $(TEXTOBJS)
+
+#	ckPreserve.o ckRecorder.o ckUtil.o ckWindow.o tkEvent.o \
 
 SRCS = ckBind.c ckBorder.c ckCmds.c ckConfig.c ckEvent.c ckFocus.c \
 	ckGeometry.c ckGet.c ckGrid.c ckMain.c ckOption.c ckPack.c ckPlace.c \
-	ckPreserve.c ckRecorder.c ckUtil.c ckWindow.c tkEvent.c \
+	ckPreserve.c ckRecorder.c ckUtil.c ckWindow.c \
 	ckButton.c ckEntry.c ckFrame.c ckListbox.c \
 	ckMenu.c ckMenubutton.c ckMessage.c ckScrollbar.c \
 	ckText.c ckTextBTree.c ckTextDisp.c ckTextIndex.c \
 	ckTextMark.c ckTextTag.c ckTree.c ckTerminal.c ckProgress.c ckPlaycard.c \
 	ckSpinbox.c ckAppInit.c
+
+#	ckPreserve.c ckRecorder.c ckUtil.c ckWindow.c tkEvent.c \
 
 HDRS = default.h ks_names.h ck.h ckPort.h ckText.h
 

@@ -61,8 +61,6 @@ There are some caveats / bugs with the current resize handling. I'll try to fix 
 
 When the X11 window is resized, `SIGWINCH` signal is handled immediatly but the signal handler has `SA_RESTART` flag. It means that the currently waiting system call (eg `select()`) will restart just after the signal handler has finished. It means that `curses` will not report immediately the new size (as a `KEY_RESIZE` return value for `getch()`). `KEY_RESIZE` will be reported only after the user has typed a key or clicked in the window with the mouse.
 
-There is deadlock when a terminal widget is resized. This bug is investigated.
-
 ## Documentation
 
 The original documentation is included (in the doc subdirectory) in man page format. The man pages were converted to HTML and can be found in the html subdirectory.
@@ -78,7 +76,6 @@ There is a 'tee' command which can be used to redirect what is read from the TTY
 
 There are currently some bugs and missing features in the terminal widget :
   * Missing : Select / Copy text with mouse.
-  * Bug : resizing (see above)
   * Bug : display of framing characters when the terminal advertises itself as `xterm`
   * Bug : terminal type `linux` is not working.
   * Others to discover ...
