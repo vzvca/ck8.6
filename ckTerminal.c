@@ -1865,7 +1865,7 @@ handlechar(NODE *n, int r, int k) /* Handle a single input character. */
 #endif
 
   if ( n->cmd == TRUE ) {
-    if ( terminalPtr->bindings[k] && (KEY(k) || CODE(k))) {
+    if ( (k < 0x7f) && terminalPtr->bindings[k] && (KEY(k) || CODE(k))) {
       Ck_QueueVirtualEvent(terminalPtr->winPtr, terminalPtr->bindings[k], NULL);
     }
     else {
