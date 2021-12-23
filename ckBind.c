@@ -160,7 +160,7 @@ typedef struct {
     int eventMask;		/* Mask bits for this event type. */
 } EventInfo;
 
-#define CK_MAX_EV 64
+#define CK_MAX_EV 128
 
 static EventInfo eventArray[CK_MAX_EV] = {
     {"Expose",		CK_EV_EXPOSE,		CK_EV_EXPOSE},
@@ -177,12 +177,24 @@ static EventInfo eventArray[CK_MAX_EV] = {
     {"ButtonPress",	CK_EV_MOUSE_DOWN,	CK_EV_MOUSE_DOWN},
     {"ButtonRelease",	CK_EV_MOUSE_UP,		CK_EV_MOUSE_UP},
     {"BarCode",		CK_EV_BARCODE,		CK_EV_BARCODE},
-    {"<Copy>",          CK_EV_VIRTUAL,          CK_EV_VIRTUAL},
-    {"<Paste>",         CK_EV_VIRTUAL,          CK_EV_VIRTUAL},
-    {"<Command>",       CK_EV_VIRTUAL,          CK_EV_VIRTUAL},
-    {"<User1>",         CK_EV_VIRTUAL,          CK_EV_VIRTUAL},
-    {"<User2>",         CK_EV_VIRTUAL,          CK_EV_VIRTUAL},
-    {"<User3>",         CK_EV_VIRTUAL,          CK_EV_VIRTUAL},
+
+    /* The following are virtual events.
+     * At present they are only used by the terminal widget
+     * which use them to report commands that have been detected. 
+     *
+     * Will be improved to allow adding of new virtual events types.
+     */
+    {"<New>",           CK_EV_VIRTUAL,          CK_EV_VIRTUAL},  /* Open a new terminal */
+    {"<Close>",         CK_EV_VIRTUAL,          CK_EV_VIRTUAL},  /* Close terminal */
+    {"<Next>",          CK_EV_VIRTUAL,          CK_EV_VIRTUAL},  /* Move to next terminal */
+    {"<Prev>",          CK_EV_VIRTUAL,          CK_EV_VIRTUAL},  /* Move to previous terminal */
+    {"<Fullscreen>",    CK_EV_VIRTUAL,          CK_EV_VIRTUAL},  /* Go fullscreen */
+    {"<ChszH>",         CK_EV_VIRTUAL,          CK_EV_VIRTUAL},  /* inc/dec horizontal size */
+    {"<ChszV>",         CK_EV_VIRTUAL,          CK_EV_VIRTUAL},  /* inc/dec vertical size */
+    {"<SplitH>",        CK_EV_VIRTUAL,          CK_EV_VIRTUAL},  /* horizontal split */
+    {"<SplitV>",        CK_EV_VIRTUAL,          CK_EV_VIRTUAL},  /* vertical split */
+    {"<Copy>",          CK_EV_VIRTUAL,          CK_EV_VIRTUAL},  /* copy text */
+    {"<Paste>",         CK_EV_VIRTUAL,          CK_EV_VIRTUAL},  /* paste text */
     {(char *) NULL,	0,			0}
 };
 static Tcl_HashTable eventTable;
@@ -618,6 +630,15 @@ Ck_GetAllBindings(interp, bindingTable, object)
 	    }
 
 	    /*
+	     * Virtual events
+	     */
+	    if (patPtr->eventType == CK_EV_VIRTUAL) {
+	      Tcl_DStringAppend(&ds, "<", 1);
+	      Tcl_DStringAppend(&ds, eventArray[patPtr->detail].name, -1);
+	      Tcl_DStringAppend(&ds, ">", 1);
+	    }
+	    
+	    /*
 	     * It's a more general event specification.  First check
 	     * event type, then keysym or button detail.
 	     */
@@ -795,11 +816,26 @@ Ck_BindEvent(bindingTable, eventPtr, winPtr, numObjects, objectPtr)
     memcpy((VOID *) ringPtr, (VOID *) eventPtr, sizeof (CkEvent));
     detail = 0;
     bindPtr->detailRing[bindPtr->curEvent] = 0;
-    if (ringPtr->type == CK_EV_KEYPRESS)
+    if (ringPtr->type == CK_EV_KEYPRESS) {
 	detail = ringPtr->key.keycode;
+    }
     else if (ringPtr->type == CK_EV_MOUSE_DOWN ||
-        ringPtr->type == CK_EV_MOUSE_UP)
-	detail = ringPtr->mouse.button;
+	     ringPtr->type == CK_EV_MOUSE_UP) {
+      detail = ringPtr->mouse.button;
+    }
+    else if (ringPtr->type == CK_EV_VIRTUAL) {
+      //@todo : get rid of this, it is inefficient
+      int i;
+      for (i = 0; eventArray[i].name != NULL; ++i) {
+	if ( eventArray[i].name[0] != '<' ) {
+	  continue;
+	}
+	if (!strcmp (eventArray[i].name, ringPtr->virt.evtype)) {
+	  break;
+	}
+      }
+      detail = i;
+    }
     bindPtr->detailRing[bindPtr->curEvent] = detail;
 
     /*
@@ -1038,7 +1074,7 @@ FindSequence(interp, bindPtr, object, eventString, create)
      */
     if ( *p == '<' ) {
       register EventInfo *eiPtr;
-      int i, s;
+      int i;
       
       p = GetField(p, field, FIELD_SIZE);
       if ( *p != '>' ) {
@@ -1059,16 +1095,15 @@ FindSequence(interp, bindPtr, object, eventString, create)
       patPtr->eventType = eiPtr->type;
       eventMask |= eiPtr->eventMask;
 
-      for (i = s = 0; eventArray[i].name != NULL; ++i) {
+      for (i = 0; eventArray[i].name != NULL; ++i) {
 	if ( eventArray[i].name[0] != '<' ) {
-	  ++s;
 	  continue;
 	}
 	if (!strcmp (eventArray[i].name, field)) {
 	  break;
 	}
       }
-      patPtr->detail = i-s;  /* remember index of virtual event */
+      patPtr->detail = i;   /* remember index of virtual event */
       p++;
       continue;
     }
@@ -1534,7 +1569,7 @@ ExpandPercents(winPtr, before, eventPtr, keySym, dsPtr)
 		}
 		goto doString;
 	    case '@':
-	        string = eventPtr->virt.text;
+	        string = eventPtr->virt.detail;
 	        goto doString;
 	    case 'x':
 		if (eventPtr->type == CK_EV_MOUSE_UP ||

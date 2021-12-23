@@ -895,13 +895,7 @@ Tk_DoOneEvent(flags)
 	    timeoutVal.tv_sec -= 1;
 	    timeoutVal.tv_usec += 1000000;
 	}
-    }
-
-    //@vca
-	timeoutPtr = &timeoutVal;
-	timeoutVal.tv_sec = 0;
-	timeoutVal.tv_usec = 1000*20;
-    
+    }    
     
     if ((timeoutPtr == NULL) && !anyFilesToWaitFor) {
 	return 0;

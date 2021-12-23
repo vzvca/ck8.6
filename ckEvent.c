@@ -1088,6 +1088,14 @@ Ck_HandleQEvent(evPtr, flags)
 	return 0;
     }
     Ck_HandleEvent(qev->mainPtr, &qev->event);
+
+    //@todo : is it the right place ?
+    if ( qev->event.any.type == CK_EV_VIRTUAL ) {
+      free( qev->event.virt.evtype );
+      free( qev->event.virt.detail );
+      qev->event.virt.evtype = NULL;
+      qev->event.virt.detail = NULL;
+    }
     return 1;
 }
 #endif /* TCL_MAJOR_VERSION == 7 && TCL_MINOR_VERSION <= 4 */
@@ -1240,8 +1248,24 @@ CkHandleGPMInput(clientData, mask)
  */
 
 void
-Ck_QueueVirtualEvent()
+Ck_QueueVirtualEvent( windowPtr, evtype, detail )
+     struct CkWindow *windowPtr;
+     char *evtype;
+     char *detail;
 {
+  CkEvent event;
+  CkQEvt *qev;
+  
+  event.virt.type = CK_EV_VIRTUAL;
+  event.virt.winPtr = windowPtr;
+  event.virt.evtype = evtype ? strdup(evtype) : NULL;
+  event.virt.detail = detail ? strdup(detail) : NULL;  
+  
+  qev = (CkQEvt *) ckalloc(sizeof (CkQEvt));
+  qev->header.proc = Ck_HandleQEvent;
+  qev->event = event;
+  qev->mainPtr = windowPtr->mainPtr;
+  Tcl_QueueEvent(&qev->header, TCL_QUEUE_TAIL);
 }
 
 /*

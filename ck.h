@@ -122,8 +122,8 @@ typedef struct {
 typedef struct {
   long type;
   struct CkWindow *winPtr;
-  long subtype;
-  char *text;
+  char *evtype;
+  char *detail;
 } CkVirtualEvent;
 
 typedef union {
@@ -784,14 +784,17 @@ EXTERN Ck_Uid   Ck_GetOption _ANSI_ARGS_((CkWindow *winPtr, char *name,
 										  char *class));
 EXTERN int	Ck_GetPair _ANSI_ARGS_((CkWindow *winPtr, int fg, int bg));
 EXTERN void	Ck_GetRootGeometry _ANSI_ARGS_((CkWindow *winPtr, int *xPtr,
-											int *yPtr, int *widthPtr, int *heightPtr));
+						int *yPtr, int *widthPtr, int *heightPtr));
 EXTERN int      Ck_GetScrollInfo _ANSI_ARGS_((Tcl_Interp *interp,
-											  int argc, char **argv, double *dblPtr, int *intPtr));
+					      int argc, char **argv, double *dblPtr, int *intPtr));
 EXTERN Ck_Uid	Ck_GetUid _ANSI_ARGS_((char *string));
 EXTERN CkWindow *Ck_GetWindowXY _ANSI_ARGS_((CkMainInfo *mainPtr, int *xPtr,
-											 int *yPtr, int mode));
+					     int *yPtr, int mode));
 EXTERN void	Ck_HandleEvent _ANSI_ARGS_((CkMainInfo *mainPtr,
-										CkEvent *eventPtr));
+					    CkEvent *eventPtr));
+EXTERN void     Ck_QueueVirtualEvent _ANSI_ARGS_((struct CkWindow *windowPtr,
+						  char *evtype,
+						  char *detail));
 EXTERN int	Ck_Init _ANSI_ARGS_((Tcl_Interp *interp));
 EXTERN void	Ck_Main _ANSI_ARGS_((int argc, char **argv,
 								 int (*appInitProc)()));

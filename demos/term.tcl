@@ -52,11 +52,16 @@ proc new-term { {ckey "b"} } {
     incr TX
     terminal .t${TX} -exec /bin/bash -term screen-256color-bce \
 	-commandkey ${ckey} -banner [format ${BANNER} ${ckey}]
-    bind .t${TX}  <Button-1> {focus %W}
+
+    bind .t${TX} <Button-1> {focus %W}
+
+    # -- binding to virtual events
+    bind .t${TX} <<Close>> {close-term %W}
+    bind .t${TX} <<New>>   new-term
 
     mk-button t${TX} "Term #${TX}" "set-term .t${TX}"
     bind .l.t${TX} <Control-q> "close-term .t${TX}"
-    bind .l.t${TX} <Control-n> "new-term"
+    bind .l.t${TX} <Control-o> "new-term"
 }
 
 proc close-term { t } {
@@ -129,4 +134,3 @@ set-term .t1
 mk-button q "Quit" exit right
 mk-button h "Help" help right
 
-bind .t1 <Button-3> {.t1 send "# hello"}
