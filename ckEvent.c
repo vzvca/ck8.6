@@ -499,6 +499,7 @@ void handleFullResize(clientData, eventPtr)
   if ( LINES > mainPtr->maxHeight ) {
     mainPtr->maxHeight = LINES;
   }
+  Ck_GeometryRequest(mainPtr->winPtr, COLS, LINES);
   Ck_ResizeWindow(mainPtr->winPtr, COLS, LINES);
 }
 
