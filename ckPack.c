@@ -640,18 +640,18 @@ ArrangePacking(clientData)
 	if (width <= 0 || height <= 0) {
 	    Ck_UnmapWindow(slavePtr->winPtr);
 	} else {
-	  //	    if (width != slavePtr->winPtr->width ||
-	  //		height != slavePtr->winPtr->height)
-		    Ck_ResizeWindow(slavePtr->winPtr, width, height);
-	    //	    if (x != slavePtr->winPtr->x || 
-	    //	        y != slavePtr->winPtr->y)
-		Ck_MoveWindow(slavePtr->winPtr, x, y);
-	    /*
-	     * Temporary kludge til Ck_MoveResizeWindow available !!!
-	     */
-		//	    if (width != slavePtr->winPtr->width ||
-		//		height != slavePtr->winPtr->height)
-		    Ck_ResizeWindow(slavePtr->winPtr, width, height);
+	  if (width != slavePtr->winPtr->width ||
+	      height != slavePtr->winPtr->height)
+	    Ck_ResizeWindow(slavePtr->winPtr, width, height);
+	  if (x != slavePtr->winPtr->x || 
+	      y != slavePtr->winPtr->y)
+	    Ck_MoveWindow(slavePtr->winPtr, x, y);
+	  /*
+	   * Temporary kludge til Ck_MoveResizeWindow available !!!
+	   */
+	  if (width != slavePtr->winPtr->width ||
+	      height != slavePtr->winPtr->height)
+	    Ck_ResizeWindow(slavePtr->winPtr, width, height);
 	    if (abort)
 		goto done;
 	    Ck_MapWindow(slavePtr->winPtr);

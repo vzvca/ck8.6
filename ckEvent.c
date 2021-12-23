@@ -493,11 +493,13 @@ void handleFullResize(clientData, eventPtr)
   struct winsize winsz;
 
   ioctl(0, TIOCGWINSZ, &winsz);
-  resizeterm(winsz.ws_row, winsz.ws_col);
-  mainPtr->maxWidth = COLS;
-  mainPtr->maxHeight = LINES;
+  if ( COLS > mainPtr->maxWidth ) {
+    mainPtr->maxWidth = COLS;
+  }
+  if ( LINES > mainPtr->maxHeight ) {
+    mainPtr->maxHeight = LINES;
+  }
   Ck_ResizeWindow(mainPtr->winPtr, COLS, LINES);
-  Ck_EventuallyRefresh(mainPtr->winPtr);
 }
 
 /*
