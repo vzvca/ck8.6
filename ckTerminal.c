@@ -1276,10 +1276,10 @@ HANDLER(sgr) {
 
 /* 
  *--------------------------------------------------------------------------
- * 
+ * CR - Carriage Return
  *--------------------------------------------------------------------------
  */
-HANDLER(cr) { /* CR - Carriage Return */
+HANDLER(cr) { 
   s->xenl = false;
   wmove(win, py, 0);
   fixcursor(n);
@@ -1288,10 +1288,10 @@ HANDLER(cr) { /* CR - Carriage Return */
 
 /* 
  *--------------------------------------------------------------------------
- * 
+ * IND - Index
  *--------------------------------------------------------------------------
  */
-HANDLER(ind) { /* IND - Index */
+HANDLER(ind) { 
   y == (bot - 1)? scroll(win) : wmove(win, py + 1, x);
   fixcursor(n);
   ENDHANDLER;
@@ -1299,30 +1299,30 @@ HANDLER(ind) { /* IND - Index */
 
 /* 
  *--------------------------------------------------------------------------
- * 
+ * NEL - Next Line
  *--------------------------------------------------------------------------
  */
-HANDLER(nel) { /* NEL - Next Line */
+HANDLER(nel) { 
   CALL(cr); CALL(ind);
   ENDHANDLER;
 }
 
 /* 
  *--------------------------------------------------------------------------
- * 
+ * NL - Newline
  *--------------------------------------------------------------------------
  */
-HANDLER(pnl) { /* NL - Newline */
+HANDLER(pnl) { 
   CALL((n->lnm? nel : ind));
   ENDHANDLER;
 }
 
 /* 
  *--------------------------------------------------------------------------
- * 
+ * CPL - Cursor Previous Line
  *--------------------------------------------------------------------------
  */
-HANDLER(cpl) { /* CPL - Cursor Previous Line */
+HANDLER(cpl) { 
   wmove(win, MAX(tos + top, py - P1(0)), 0);
   fixcursor(n);
   ENDHANDLER;
@@ -1330,10 +1330,10 @@ HANDLER(cpl) { /* CPL - Cursor Previous Line */
 
 /* 
  *--------------------------------------------------------------------------
- * 
+ * CNL - Cursor Next Line
  *--------------------------------------------------------------------------
  */
-HANDLER(cnl) { /* CNL - Cursor Next Line */
+HANDLER(cnl) { 
   wmove(win, MIN(tos + bot - 1, py + P1(0)), 0);
   fixcursor(n);
   ENDHANDLER;
@@ -1341,10 +1341,10 @@ HANDLER(cnl) { /* CNL - Cursor Next Line */
 
 /* 
  *--------------------------------------------------------------------------
- * 
+ * Print a character to the terminal
  *--------------------------------------------------------------------------
  */
-HANDLER(print) { /* Print a character to the terminal */
+HANDLER(print) { 
   if (wcwidth(w) < 0)
     return;
 
@@ -1375,10 +1375,10 @@ HANDLER(print) { /* Print a character to the terminal */
 
 /* 
  *--------------------------------------------------------------------------
- * 
+ * REP - Repeat Character
  *--------------------------------------------------------------------------
  */
-HANDLER(rep) { /* REP - Repeat Character */
+HANDLER(rep) { 
   for (int i = 0; i < P1(0) && n->repc; i++)
     print(v, p, n->repc, 0, 0, NULL, NULL);
   fixcursor(n);
@@ -1387,10 +1387,10 @@ HANDLER(rep) { /* REP - Repeat Character */
 
 /* 
  *--------------------------------------------------------------------------
- * 
+ * Select Character Set
  *--------------------------------------------------------------------------
  */
-HANDLER(scs) { /* Select Character Set */
+HANDLER(scs) { 
   wchar_t **t = NULL;
   switch (iw){
   case L'(': t = &n->g0;  break;
@@ -1406,15 +1406,30 @@ HANDLER(scs) { /* Select Character Set */
   case L'1': *t = CSET_US;    break;
   case L'2': *t = CSET_GRAPH; break;
   }
+
+  //@vca: When TERM=xterm or similar terminal
+  //      ncurses doesn't sent ShiftIn control sequence
+  //      to switch to alternate charset but only sends
+  //      iw='(' w='0' to ask for rendering acs.
+  //      These characters are needed for example by ckBorder.c
+  //      to draw nice looking borders.
+  //      The code below tries to cope with xterm
+  if ( (iw == L'(') && (w == L'0') ) {
+    n->gs = n->gc = n->g1; /* locking shift */;
+  }
+  if ( (iw == L'(') && (w == L'B') ) {
+    n->gs = n->gc = n->g0; /* locking shift */;
+  }
+  
   ENDHANDLER;
 }
 
 /* 
  *--------------------------------------------------------------------------
- * 
+ * Switch Out/In Character Set
  *--------------------------------------------------------------------------
  */
-HANDLER(so) { /* Switch Out/In Character Set */
+HANDLER(so) { 
   if (w == 0x0e)
     n->gs = n->gc = n->g1; /* locking shift */
   else if (w == 0xf)

@@ -50,8 +50,8 @@ proc set-term { t } {
 proc new-term { {ckey "b"} } {
     global TX BANNER
     incr TX
-    terminal .t${TX} -exec /bin/bash -term screen-256color-bce \
-	-redisplay none -commandkey ${ckey} -banner [format ${BANNER} ${ckey}]
+    terminal .t${TX} -exec /bin/bash -term xterm-256color \
+	-commandkey ${ckey} -banner [format ${BANNER} ${ckey}]
 
     bind .t${TX} <Button-1> {focus %W}
 

@@ -499,6 +499,8 @@ Ck_CreateMainWindow(interp, className)
 #endif
 #endif
 
+    
+
 #ifndef __WIN32__
     /*
      * Fix for problem when X server left linux console
@@ -671,6 +673,7 @@ Ck_CreateMainWindow(interp, className)
     EXTERN void handleFullResize _ANSI_ARGS_((ClientData clientData,
 					      CkEvent *eventPtr));
     Ck_CreateEventHandler(winPtr, CK_EV_RESIZE, handleFullResize, mainPtr);
+
     
     /*
      * Bind in Ck's commands.
