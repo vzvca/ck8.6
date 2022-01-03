@@ -195,6 +195,31 @@ typedef struct {
 /*
  *--------------------------------------------------------------
  *
+ * onSigwinch --
+ *
+ *	Called when SIGWINCH is received
+ *
+ * Results:
+ *	Nothing
+ *
+ * Side effects:
+ *	Sets a flags telling that the main window was resized.
+ *
+ *--------------------------------------------------------------
+ */
+
+static
+void onSigwinch( int dummy )
+{
+  if ( ckMainInfo != NULL ) {
+    ckMainInfo->flags |= CK_RESIZING;
+  }
+}
+
+
+/*
+ *--------------------------------------------------------------
+ *
  * NewWindow --
  *
  *	This procedure creates and initializes a CkWindow structure.
@@ -396,6 +421,15 @@ Ck_CreateMainWindow(interp, className)
     Ck_SignalProc sigproc;
 #endif
 #endif
+
+#ifdef SIGWINCH
+#ifdef HAVE_SIGACTION
+    struct sigaction oldsigwinch, newsigwinch;
+#else
+    Ck_SignalProc sigwinchproc;
+#endif
+#endif
+    
 #ifdef NCURSES_MOUSE_VERSION
     MEVENT mEvent;
 #endif
@@ -498,8 +532,6 @@ Ck_CreateMainWindow(interp, className)
     sigproc = (Ck_SignalProc) signal(SIGTSTP, SIG_IGN);
 #endif
 #endif
-
-    
 
 #ifndef __WIN32__
     /*
@@ -610,7 +642,7 @@ Ck_CreateMainWindow(interp, className)
 	if (fd >= 0) {
 	    mainPtr->flags |= CK_HAS_MOUSE;
 #if (TCL_MAJOR_VERSION >= 8)
-	    mainPtr->mouseData = (ClientData) fd;
+	    mainPtr->mouseData = fd;
 	    Tcl_CreateFileHandler(fd, TCL_READABLE,
 				  CkHandleGPMInput, (ClientData) mainPtr);
 #else	    
@@ -674,6 +706,16 @@ Ck_CreateMainWindow(interp, className)
 					      CkEvent *eventPtr));
     Ck_CreateEventHandler(winPtr, CK_EV_RESIZE, handleFullResize, mainPtr);
 
+#ifdef SIGWINCH
+#ifdef HAVE_SIGACTION
+    newsigwinch.sa_handler = onSigwinch;
+    sigfillset(&newsigwinch.sa_mask);
+    newsigwinch.sa_flags = 0;
+    sigaction(SIGWINCH, &newsigwinch, &oldsigwinch);
+#else
+    sigwinchproc = (Ck_SignalProc) signal(SIGWINCH, onSigwinch);
+#endif
+#endif
     
     /*
      * Bind in Ck's commands.
@@ -2747,14 +2789,22 @@ CkEvtExit(clientData)
     Tcl_DeleteEventSource(CkEvtSetup, CkEvtCheck, clientData);
 }
 
+// @vca : following event source will allow to react
+//        quickly to resize events
 static void
 CkEvtSetup(clientData, flags)
     ClientData clientData;
     int flags;
 {
-    if (!(flags & TCL_WINDOW_EVENTS)) {
-	return;
-    }
+  Tcl_Time time = {0, 100*1000}; /* wait 1/10th of second max */
+  if (!(flags & TCL_WINDOW_EVENTS)) {
+    return;
+  }
+  if ((ckMainInfo != NULL) && (ckMainInfo->winPtr != NULL)
+      && (ckMainInfo->flags & CK_RESIZING)) {
+    time.usec = 0; 
+  }
+  Tcl_SetMaxBlockTime (&time);
 }
 
 static void
@@ -2762,8 +2812,13 @@ CkEvtCheck(clientData, flags)
     ClientData clientData;
     int flags;
 {
-    if (!(flags & TCL_WINDOW_EVENTS)) {
-	return;
-    }
+  if (!(flags & TCL_WINDOW_EVENTS)) {
+    return;
+  }
+  if ((ckMainInfo != NULL) && (ckMainInfo->winPtr != NULL)
+      && (ckMainInfo->flags & CK_RESIZING)) {
+    /* queue event */
+    Ck_QueueFullResizeEvent(ckMainInfo->winPtr);
+  }
 }
 #endif

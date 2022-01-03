@@ -321,7 +321,7 @@ typedef struct CkMainInfo {
 						 * see comment in ckWindow.c. */
   double lastRefresh;		/* Delay computation for updates. */
   Tk_TimerToken refreshTimer;	/* Timer for delayed updates. */
-  ClientData mouseData;       /* Value used by mouse handling code. */
+  int mouseData;                /* Value used by mouse handling code. */
   ClientData barcodeData;	/* Value used by bar code handling code. */
   int flags;			/* See definitions below. */
 #if CK_USE_UTF
@@ -336,7 +336,7 @@ typedef struct CkMainInfo {
 #define CK_REFRESH_TIMER   16
 #define CK_HAS_BARCODE     32
 #define CK_NOCLR_ON_EXIT   64
-
+#define CK_RESIZING       128  /* set by signal handler for SIGWINCH */
 /*
  * Ck keeps one of the following structures for each window.
  * This information is (mostly) managed by ckWindow.c.
@@ -795,6 +795,7 @@ EXTERN void	Ck_HandleEvent _ANSI_ARGS_((CkMainInfo *mainPtr,
 EXTERN void     Ck_QueueVirtualEvent _ANSI_ARGS_((struct CkWindow *windowPtr,
 						  char *evtype,
 						  char *detail));
+EXTERN void     Ck_QueueFullResizeEvent _ANSI_ARGS_((struct CkWindow *windowPtr));
 EXTERN int	Ck_Init _ANSI_ARGS_((Tcl_Interp *interp));
 EXTERN void	Ck_Main _ANSI_ARGS_((int argc, char **argv,
 								 int (*appInitProc)()));

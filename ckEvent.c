@@ -485,6 +485,22 @@ CkEventDeadWindow(winPtr)
     }
 }
 
+/*
+ *--------------------------------------------------------------
+ *
+ * handleFullResize --
+ *
+ *	Invoked to process resize event
+ *
+ * Results:
+ *	None.
+ *
+ * Side effects:
+ *	Various things get cleaned up and recycled.
+ *
+ *--------------------------------------------------------------
+ */
+
 void handleFullResize(clientData, eventPtr)
      ClientData clientData;
      CkEvent *eventPtr;
@@ -492,7 +508,9 @@ void handleFullResize(clientData, eventPtr)
   CkMainInfo *mainPtr = (CkMainInfo *) clientData;
   struct winsize winsz;
 
+  mainPtr->flags &= ~CK_RESIZING;
   ioctl(0, TIOCGWINSZ, &winsz);
+  resizeterm (winsz.ws_row, winsz.ws_col);
   if ( COLS > mainPtr->maxWidth ) {
     mainPtr->maxWidth = COLS;
   }
@@ -501,6 +519,7 @@ void handleFullResize(clientData, eventPtr)
   }
   Ck_GeometryRequest(mainPtr->winPtr, COLS, LINES);
   Ck_ResizeWindow(mainPtr->winPtr, COLS, LINES);
+  /* refresh (required for mintty) */
 }
 
 /*
@@ -1204,7 +1223,7 @@ CkHandleGPMInput(clientData, mask)
 #else
 	Tcl_DeleteFileHandler((int) mainPtr->mouseData);
 #endif
-	mainPtr->mouseData = (ClientData) 0;
+	mainPtr->mouseData = 0;
 	return;
     } else if (ret == -1)
 	return;
@@ -1233,6 +1252,39 @@ CkHandleGPMInput(clientData, mask)
 }
 #endif /* TCL_MAJOR_VERSION == 7 && TCL_MINOR_VERSION <= 4 */
 #endif /* HAVE_GPM */
+
+/*
+ *--------------------------------------------------------------
+ *
+ * Ck_QueueResizeEvent --
+ *
+ *	Builds a resize event and queue it.
+ *
+ * Results:
+ *	None.
+ *
+ * Side effects:
+ *	Widget repacking and main window redrawing
+ *
+ *--------------------------------------------------------------
+ */
+
+void
+Ck_QueueFullResizeEvent(windowPtr)
+     struct CkWindow *windowPtr;
+{
+  CkEvent event;
+  CkQEvt *qev;
+
+  event.any.type   = CK_EV_RESIZE;
+  event.any.winPtr = windowPtr;
+  
+  qev = (CkQEvt *) ckalloc(sizeof (CkQEvt));
+  qev->header.proc = Ck_HandleQEvent;
+  qev->event = event;
+  qev->mainPtr = windowPtr->mainPtr;
+  Tcl_QueueEvent(&qev->header, TCL_QUEUE_TAIL);
+}
 
 /*
  *--------------------------------------------------------------
