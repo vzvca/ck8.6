@@ -2796,7 +2796,7 @@ CkEvtSetup(clientData, flags)
     ClientData clientData;
     int flags;
 {
-  Tcl_Time time = {0, 100*1000}; /* wait 1/10th of second max */
+  Tcl_Time time = {0, 50*1000}; /* wait 1/10th of second max */
   if (!(flags & TCL_WINDOW_EVENTS)) {
     return;
   }

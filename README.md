@@ -53,13 +53,14 @@ $ systemctl start gpm.service
 
 It might be necessary to run `cwsh` with environment variable `CK_USE_GPM=1` set. Sometimes ncurses does not support gpm and `cwsh` has to support it by itself.
 
+Mouse event reporting is currently limited to button press. It is planned to add support for motion detection and distinguish button press, button release, double and triple click.
+
 ## Resizing
 
 True text consoles are not resized but X11 terminals are often resized.
 
-There are some caveats / bugs with the current resize handling. I'll try to fix them in the future.
+There are some caveats / bugs with the current resize handling. I'll try to fix them in the future. It doesn't work well with WSL terminal and cygwin mintty under Windows.
 
-When the X11 window is resized, `SIGWINCH` signal is handled immediatly but the signal handler has `SA_RESTART` flag. It means that the currently waiting system call (eg `select()`) will restart just after the signal handler has finished. It means that `curses` will not report immediately the new size (as a `KEY_RESIZE` return value for `getch()`). `KEY_RESIZE` will be reported only after the user has typed a key or clicked in the window with the mouse.
 
 ## Documentation
 
@@ -76,6 +77,7 @@ There is a 'tee' command which can be used to redirect what is read from the TTY
 
 There are currently some bugs and missing features in the terminal widget :
   * Missing : Select / Copy text with mouse.
+  * Missing : Mouse reporting is not implemented. It should be possible to *forward* mouse events to the terminal widget. It will be added but requires a better support of mouse in the application (see section about mouse).
   * Bug : display of framing characters when the terminal advertises itself as `xterm`
   * Bug : terminal type `linux` is not working.
   * Others to discover ...
