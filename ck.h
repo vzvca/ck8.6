@@ -150,13 +150,26 @@ typedef union {
 #define CK_EV_FOCUSOUT   0x00000200
 #define CK_EV_RESIZE     0x00000400
 #define CK_EV_VIRTUAL    0x00000800
+#define CK_EV_MOUSE_MOVE 0x00001000
 #define CK_EV_BARCODE    0x10000000
 #define CK_EV_ALL        0xffffffff
 
 
 /*
+ * Event modifiers
+ */
+
+#define CK_MOD_ALT      0x00000100
+#define CK_MOD_CONTROL  0x00000200
+#define CK_MOD_SHIFT    0x00000400
+#define CK_MOD_DOUBLE   0x00000800
+#define CK_MOD_TRIPLE   0x00001000
+#define CK_MOD_ALL      0x00001F00  /* all above flags ORed */
+
+/*
  * Additional key codes
  */
+
 enum extra_key_e {
 #define CK_NEW_KEY(name,seq,keycode) name = keycode,
 #include "ckKeys.h"
