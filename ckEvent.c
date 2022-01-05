@@ -20,7 +20,6 @@
 #include "gpm.h"
 #endif
 
-#if (TCL_MAJOR_VERSION >= 8)
 typedef struct {
     Tcl_Event header;		/* Standard event header. */
     CkEvent event;		/* Ck event data. */
@@ -28,7 +27,6 @@ typedef struct {
 } CkQEvt;
 
 static int	Ck_HandleQEvent _ANSI_ARGS_((Tcl_Event *evPtr, int flags));
-#endif
 
 /*
  * There's a potential problem if a handler is deleted while it's
@@ -541,229 +539,6 @@ void handleFullResize(clientData, eventPtr)
  *--------------------------------------------------------------
  */
 
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-int
-CkHandleInput(clientData, mask, flags)
-    ClientData clientData;      /* Pointer to main info. */
-    int mask;                   /* OR-ed combination of the bits TK_READABLE,
-                                 * TK_WRITABLE, and TK_EXCEPTION, indicating
-                                 * current state of file. */
-    int flags;                  /* Flag bits passed to Tk_DoOneEvent;
-                                 * contains bits such as TK_DONT_WAIT,
-                                 * TK_X_EVENTS, Tk_FILE_EVENTS, etc. */
-{
-    CkEvent event;
-    CkMainInfo *mainPtr = (CkMainInfo *) clientData;
-    int code;
-    static int buttonpressed = 0;
-    static int errCount = 0;
-
-    if (!(flags & TK_FILE_EVENTS))
-	return 0;
-
-    if (!(mask & TK_READABLE))
-	return TK_READABLE;
-
-    code = getch();
-    if (code == ERR) {
-	if (++errCount > 100) {
-	    Tcl_Eval(mainPtr->interp, "exit 99");
-	    exit(99);			/* just in case */
-	}
-	return TK_READABLE;
-    }
-    errCount = 0;
-
-    /*
-     * Barcode reader handling.
-     */
-
-    if (mainPtr->flags & CK_HAS_BARCODE) {
-	BarcodeData *bd = (BarcodeData *) mainPtr->barcodeData;
-
-	/*
-	 * Here, special handling for nested event loops:
-	 * If BarCode event has been delivered already, we must
-	 * reset the buffer index in order to get normal Key events.
-	 */
-	if (bd->delivered && bd->index >= 0) {
-	    bd->delivered = 0;
-	    bd->index = -1;
-	}
-
-	if (bd->index >= 0 || code == bd->startChar) {
-	    if (code == bd->startChar) {
-		Tk_DeleteTimerHandler(bd->timer);
-		bd->timer = Tk_CreateTimerHandler(bd->pkttime, BarcodeTimeout,
-		    (ClientData) mainPtr);
-		bd->index = 0;
-	    } else if (code == bd->endChar) {
-		Tk_DeleteTimerHandler(bd->timer);
-		bd->timer = (Tk_TimerToken) NULL;
-		bd->delivered = 1;
-		event.key.type = CK_EV_BARCODE;
-		event.key.winPtr = mainPtr->focusPtr;
-		event.key.keycode = 0;
-		Ck_HandleEvent(mainPtr, &event);
-		/*
-		 * Careful, event handler could turn barcode off.
-		 * Only reset buffer index if BarCode event delivered
-		 * flag is set.
-		 */
-		bd = (BarcodeData *) mainPtr->barcodeData;
-		if (bd != NULL && bd->delivered) {
-		    bd->delivered = 0;
-		    bd->index = -1;
-		}
-		return TK_FILE_HANDLED;
-	    } else {
-		/* Leave space for one NUL byte. */
-		if (bd->index < sizeof (bd->buffer) - 1)
-		    bd->buffer[bd->index] = code;
-		bd->index++;
-	    }
-	    return TK_READABLE;
-	}
-    }
-
-#ifdef NCURSES_MOUSE_VERSION
-    /*
-     * ncurses-1.9.8a has builtin mouse support for at least xterm.
-     */
-
-    if (code == KEY_MOUSE) {
-        MEVENT mEvent;
-	int i;
-
-	if (mainPtr->flags & CK_MOUSE_XTERM) {
-	    goto getMouse;
-	}
-
-	if (getmouse(&mEvent) == ERR)
-	    return TK_FILE_HANDLED;
-
-	for (i = 1; i <= 3; i++) {
-	    if (BUTTON_PRESS(mEvent.bstate, i)) {
-		event.mouse.type = CK_EV_MOUSE_DOWN;
-		goto mouseEventNC;
-	    } else if (BUTTON_RELEASE(mEvent.bstate, i)) {
-		event.mouse.type = CK_EV_MOUSE_UP;
-mouseEventNC:
-	        event.mouse.button = i;
-		event.mouse.x = mEvent.x;
-		event.mouse.y = mEvent.y;
-		event.mouse.winPtr = Ck_GetWindowXY(mainPtr, &event.mouse.x,
-		    &event.mouse.y, 1);
-		Ck_HandleEvent(mainPtr, &event);
-		return TK_FILE_HANDLED;
-	    }
-	}
-    }
-#endif
-
-#ifdef __WIN32__
-    if ((mainPtr->flags & CK_HAS_MOUSE) && code == KEY_MOUSE) {
-	int i;
-
-	request_mouse_pos();
-	for (i = 0; i < 3; i++) {
-	    if (Mouse_status.button[i] == BUTTON_PRESSED) {
-		event.mouse.type = CK_EV_MOUSE_DOWN;
-		goto mouseEvt;
-	    } else if (Mouse_status.button[i] == BUTTON_RELEASED) {
-		event.mouse.type = CK_EV_MOUSE_UP;
-mouseEvt:
-	        event.mouse.button = i + 1;
-		event.mouse.x = Mouse_status.x;
-		event.mouse.y = Mouse_status.y;
-		event.mouse.winPtr = Ck_GetWindowXY(mainPtr, &event.mouse.x,
-		    &event.mouse.y, 1);
-		Ck_HandleEvent(mainPtr, &event);
-		return TK_FILE_HANDLED;
-	    }
-	}
-    }
-#endif 
-
-    /*
-     * Xterm mouse report handling: Although GPM has an xterm module
-     * this is separately done here, since I want to be as independent
-     * as possible from GPM.
-     * It is assumed that the entire mouse report comes in one piece
-     * ie without any delay between the 6 relevant characters.
-     * Only a single button down/up event is generated.
-     */
-
-#ifndef __WIN32__
-    if ((mainPtr->flags & CK_MOUSE_XTERM) && (code == 0x1b || code == 0x9b)) {
-	int code2;
-
-	if (code == 0x9b)
-	    goto getM;
-	code2 = getch();
-	if (code2 != ERR) {
-	    if (code2 == '[')
-		goto getM;
-	    ungetch(code2);
-	} else
-	    errCount++;
-	goto keyEvent;
-getM:
-	code2 = getch();
-	if (code2 != ERR) {
-	    if (code2 == 'M')
-		goto getMouse;
-	    ungetch(code2);
-	} else
-	    errCount++;
-	goto keyEvent;
-getMouse:
-	code2 = getch();
-	if (code2 == ERR) {
-	    errCount++;
-	    return TK_READABLE;
-	}
-	event.mouse.button = ((code2 - 0x20) & 0x03) + 1;
-	code2 = getch();
-	if (code2 == ERR) {
-	    errCount++;
-	    return TK_READABLE;
-	}
-	event.mouse.x = event.mouse.rootx = code2 - 0x20 - 1;
-	code2 = getch();
-	if (code2 == ERR) {
-	    errCount++;
-	    return TK_READABLE;
-	}
-	event.mouse.y = event.mouse.rooty = code2 - 0x20 - 1;
-	if (event.mouse.button > 3) {
-	    event.mouse.button = buttonpressed;
-	    buttonpressed = 0;
-	    event.mouse.type = CK_EV_MOUSE_UP;
-	    goto mouseEvent;
-	} else if (buttonpressed == 0) {
-	    buttonpressed = event.mouse.button;
-	    event.mouse.type = CK_EV_MOUSE_DOWN;
-mouseEvent:
-	    event.mouse.winPtr = Ck_GetWindowXY(mainPtr, &event.mouse.x,
-	        &event.mouse.y, 1);
-	    Ck_HandleEvent(mainPtr, &event);
-	    return TK_FILE_HANDLED;
-	}
-	return TK_READABLE;
-    }
-#endif
-
-keyEvent:
-    event.key.type = CK_EV_KEYPRESS;
-    event.key.winPtr = mainPtr->focusPtr;
-    event.key.keycode = code;
-    if (event.key.keycode < 0)
-	event.key.keycode &= 0xff;
-    Ck_HandleEvent(mainPtr, &event);
-    return TK_FILE_HANDLED;
-}
-#else
 void
 CkHandleInput(clientData, mask)
     ClientData clientData;      /* Pointer to main info. */
@@ -801,11 +576,7 @@ CkHandleInput(clientData, mask)
 	//    if (code == ERR) {
 	if (++errCount > 100) {
 	  Tcl_Eval(mainPtr->interp, "exit 99");
-#if (TCL_MAJOR_VERSION >= 8)
 	  Tcl_Exit(99);			/* just in case */
-#else
-	  exit(99);				/* just in case */
-#endif
 	}
 	return;
       }
@@ -943,6 +714,7 @@ CkHandleInput(clientData, mask)
 	    return;
 	}
 
+	// @vca: fixme - handle more than 3 buttons - curses supports up to 5
 	for (i = 1; i <= 3; i++) {
 	    if (BUTTON_PRESS(mEvent.bstate, i)) {
 		event.mouse.type = CK_EV_MOUSE_DOWN;
@@ -959,7 +731,11 @@ mouseEventNC:
 		    &event.mouse.y, 1);
 		goto mkEvent;
 	    }
+
+	    // @vca: handle click, double click, motion
 	}
+
+	// reached for mouse motion events
     }
 #endif
 
@@ -1120,7 +896,7 @@ Ck_HandleQEvent(evPtr, flags)
     }
     return 1;
 }
-#endif /* TCL_MAJOR_VERSION == 7 && TCL_MINOR_VERSION <= 4 */
+
 
 #ifdef HAVE_GPM
 /*
@@ -1143,59 +919,6 @@ Ck_HandleQEvent(evPtr, flags)
  */
 
 #if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-int
-CkHandleGPMInput(clientData, mask, flags)
-    ClientData clientData;      /* Pointer to main info. */
-    int mask;                   /* OR-ed combination of the bits TK_READABLE,
-                                 * TK_WRITABLE, and TK_EXCEPTION, indicating
-                                 * current state of file. */
-    int flags;                  /* Flag bits passed to Tk_DoOneEvent;
-                                 * contains bits such as TK_DONT_WAIT,
-                                 * TK_X_EVENTS, Tk_FILE_EVENTS, etc. */
-{
-    Gpm_Event gpmEvent;
-    CkEvent event;
-    CkMainInfo *mainPtr = (CkMainInfo *) clientData;
-    int ret, type;
-
-    if (!(flags & TK_FILE_EVENTS))
-	return 0;
-
-    if (!(mask & TK_READABLE))
-	return TK_READABLE;
-
-    ret = Gpm_GetEvent(&gpmEvent);
-    if (ret == 0) {
-	/*
-	 * GPM connection is closed; delete this file handler.
-	 */
-
-	Tk_DeleteFileHandler((int) mainPtr->mouseData);
-	mainPtr->mouseData = (ClientData) -1;
-	return 0;
-    } else if (ret == -1)
-	return TK_READABLE;
-
-    GPM_DRAWPOINTER(&gpmEvent);
-    type = gpmEvent.type & (GPM_DOWN | GPM_UP);
-    if (type == GPM_DOWN || type == GPM_UP) {
-	event.mouse.type = type == GPM_DOWN ? CK_EV_MOUSE_DOWN :
-	    CK_EV_MOUSE_UP;
-	if (gpmEvent.buttons & GPM_B_LEFT)
-	    event.mouse.button = 1;
-	else if (gpmEvent.buttons & GPM_B_MIDDLE)
-	    event.mouse.button = 2;
-	else if (gpmEvent.buttons & GPM_B_RIGHT)
-	    event.mouse.button = 3;
-	event.mouse.x = event.mouse.rootx = gpmEvent.x - 1;
-	event.mouse.y = event.mouse.rooty = gpmEvent.y - 1;
-	event.mouse.winPtr = Ck_GetWindowXY(mainPtr, &event.mouse.x,
-	    &event.mouse.y, 1);
-	Ck_HandleEvent(mainPtr, &event);
-	return TK_FILE_HANDLED;
-    }
-    return TK_READABLE;
-}
 #else
 void
 CkHandleGPMInput(clientData, mask)
@@ -1218,11 +941,7 @@ CkHandleGPMInput(clientData, mask)
 	/*
 	 * GPM connection is closed; delete this file handler.
 	 */
-#if (TCL_MAJOR_VERSION == 7) 
-	Tcl_DeleteFileHandler((Tcl_File) mainPtr->mouseData);
-#else
-	Tcl_DeleteFileHandler((int) mainPtr->mouseData);
-#endif
+        Tcl_DeleteFileHandler((int) mainPtr->mouseData);
 	mainPtr->mouseData = 0;
 	return;
     } else if (ret == -1)
@@ -1256,7 +975,7 @@ CkHandleGPMInput(clientData, mask)
 /*
  *--------------------------------------------------------------
  *
- * Ck_QueueResizeEvent --
+ * Ck_QueueFullResizeEvent --
  *
  *	Builds a resize event and queue it.
  *
@@ -1264,7 +983,8 @@ CkHandleGPMInput(clientData, mask)
  *	None.
  *
  * Side effects:
- *	Widget repacking and main window redrawing
+ *	Widget repacking and main window redrawing once
+ *      queued event will be processed.
  *
  *--------------------------------------------------------------
  */

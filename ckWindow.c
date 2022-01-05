@@ -51,13 +51,11 @@ static LRESULT CALLBACK InputHandler _ANSI_ARGS_((HWND hwnd, UINT message,
 static void		InputHandler2 _ANSI_ARGS_((ClientData clientData));
 #endif
 
-#if (TCL_MAJOR_VERSION >= 8)
 static void		CkEvtExit _ANSI_ARGS_((ClientData clientData));
 static void		CkEvtSetup _ANSI_ARGS_((ClientData clientData,
 						int flags));
 static void		CkEvtCheck _ANSI_ARGS_((ClientData clientData,
 						int flags));
-#endif
 
 /*
  * The variables below hold several uid's that are used in many places
@@ -87,18 +85,12 @@ CkCmd commands[] = {
      * Commands that are part of the intrinsics:
      */
 
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-    {"after",		Tk_AfterCmd},
-#endif
     {"bell",		Ck_BellCmd},
     {"bind",		Ck_BindCmd},
     {"bindtags",	Ck_BindtagsCmd},
     {"curses",          Ck_CursesCmd},
     {"destroy",		Ck_DestroyCmd},
     {"exit",		Ck_ExitCmd},
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-    {"fileevent",	Tk_FileeventCmd},
-#endif
     {"focus",		Ck_FocusCmd},
     {"grid",		Ck_GridCmd},
     {"lower",		Ck_LowerCmd},
@@ -578,9 +570,8 @@ Ck_CreateMainWindow(interp, className)
     
 #ifdef NCURSES_MOUSE_VERSION
     mouseinterval(1);
-    mousemask(BUTTON1_PRESSED | BUTTON1_RELEASED |
-	      BUTTON2_PRESSED | BUTTON2_RELEASED |
-	      BUTTON3_PRESSED | BUTTON3_RELEASED, NULL);
+    // @vca: capture all mouse events
+    mousemask(ALL_MOUSE_EVENTS,NULL);
     mainPtr->flags |= (getmouse(&mEvent) != ERR) ? CK_HAS_MOUSE : 0;
     // @vca: according to ncurses manual, getmouse will return an error if there is no event in the key
     // @vca: as a consequence, CK_HAS_MOUSE will not be set and mouse reporting will fail in the application
@@ -598,13 +589,15 @@ Ck_CreateMainWindow(interp, className)
 #else
     term = getenv("TERM");
     isxterm = strncmp(term, "xterm", 5) == 0 ||
-	strncmp(term, "rxvt", 4) == 0 ||
+        strncmp(term, "mintty", 6) == 0 ||
+        strncmp(term, "rxvt", 4) == 0 ||
 	strncmp(term, "kterm", 5) == 0 ||
 	strncmp(term, "color_xterm", 11) == 0 ||
 	(term[0] != '\0' && strncmp(term + 1, "xterm", 5) == 0);
     if (!(mainPtr->flags & CK_HAS_MOUSE) && isxterm) {
 	mainPtr->flags |= CK_HAS_MOUSE | CK_MOUSE_XTERM;
 	fflush(stdout);
+	// @vca: fixme - this sequence only triggers mouse button reporting
 	fputs("\033[?1000h", stdout);
 	fflush(stdout);
     }
@@ -626,13 +619,8 @@ Ck_CreateMainWindow(interp, className)
     if (!isxterm && !(mainPtr->flags & CK_HAS_MOUSE)) {
 	int fd;
 	Gpm_Connect conn;
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-	EXTERN int CkHandleGPMInput _ANSI_ARGS_((ClientData clientData,
-	    int mask, int flags));
-#else
 	EXTERN void CkHandleGPMInput _ANSI_ARGS_((ClientData clientData,
 	    int mask));
-#endif
 
 	conn.eventMask = GPM_DOWN | GPM_UP | GPM_MOVE;
 	conn.defaultMask = 0;
@@ -641,21 +629,9 @@ Ck_CreateMainWindow(interp, className)
 	fd = Gpm_Open(&conn, 0);
 	if (fd >= 0) {
 	    mainPtr->flags |= CK_HAS_MOUSE;
-#if (TCL_MAJOR_VERSION >= 8)
 	    mainPtr->mouseData = fd;
 	    Tcl_CreateFileHandler(fd, TCL_READABLE,
 				  CkHandleGPMInput, (ClientData) mainPtr);
-#else	    
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-	    mainPtr->mouseData = (ClientData) fd;
-	    Tk_CreateFileHandler2(fd, CkHandleGPMInput, (ClientData) mainPtr);
-#else
-	    mainPtr->mouseData = (ClientData)
-	        Tcl_GetFile((ClientData) fd, TCL_UNIX_FD);
-	    Tcl_CreateFileHandler((Tcl_File) mainPtr->mouseData, TCL_READABLE,
-				  CkHandleGPMInput, (ClientData) mainPtr);
-#endif
-#endif
 	}
     }
 #endif	/* HAVE_GPM */
@@ -669,23 +645,12 @@ Ck_CreateMainWindow(interp, className)
 		   ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT);
     InputSetup(&inputInfo);
 #else
-#if (TCL_MAJOR_VERSION >= 8)
     Tcl_CreateFileHandler(0, 
 	TCL_READABLE, CkHandleInput, (ClientData) mainPtr);
-#else
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-    Tk_CreateFileHandler2(0, CkHandleInput, (ClientData) mainPtr);
-#else
-    Tcl_CreateFileHandler(Tcl_GetFile((ClientData) 0, TCL_UNIX_FD),
-			  TCL_READABLE, CkHandleInput, (ClientData) mainPtr);
-#endif
-#endif
 #endif
 
-#if (TCL_MAJOR_VERSION >= 8)
     Tcl_CreateEventSource(CkEvtSetup, CkEvtCheck, (ClientData) mainPtr);
     Tcl_CreateExitHandler(CkEvtExit, (ClientData) mainPtr);
-#endif
 
     idlok(winPtr->window, TRUE);
     scrollok(winPtr->window, FALSE);
@@ -731,21 +696,17 @@ Ck_CreateMainWindow(interp, className)
      */
     for (cmdPtr = redirCommands; cmdPtr->name != NULL; cmdPtr++) {
         RedirInfo *redirInfo;
-#if (TCL_MAJOR_VERSION >= 8)
 	Tcl_DString cmdName;
 	extern int TclRenameCommand _ANSI_ARGS_((Tcl_Interp *interp,
 						 char *oldName, char *newName));
-#endif
         redirInfo = (RedirInfo *) ckalloc(sizeof (RedirInfo));
         redirInfo->mainPtr = mainPtr;
         Tcl_GetCommandInfo(interp, cmdPtr->name, &redirInfo->cmdInfo);
-#if (TCL_MAJOR_VERSION >= 8)
 	Tcl_DStringInit(&cmdName);
 	Tcl_DStringAppend(&cmdName, "____", -1);
 	Tcl_DStringAppend(&cmdName, cmdPtr->name, -1);
 	TclRenameCommand(interp, cmdPtr->name, Tcl_DStringValue(&cmdName));
 	Tcl_DStringFree(&cmdName);
-#endif
         Tcl_CreateCommand(interp, cmdPtr->name, cmdPtr->cmdProc,
             (ClientData) redirInfo, (Tcl_CmdDeleteProc *) free);
     }
@@ -754,21 +715,6 @@ Ck_CreateMainWindow(interp, className)
      * Set variables for the intepreter.
      */
 
-#if (TCL_MAJOR_VERSION < 8)
-    if (Tcl_GetVar(interp, "ck_library", TCL_GLOBAL_ONLY) == NULL) {
-        /*
-         * A library directory hasn't already been set, so figure out
-         * which one to use.
-         */
-
-	char *libDir = getenv("CK_LIBRARY");
-
-        if (libDir == NULL) {
-            libDir = CK_LIBRARY;
-        }
-        Tcl_SetVar(interp, "ck_library", libDir, TCL_GLOBAL_ONLY);
-    }
-#endif
     Tcl_SetVar(interp, "ck_version", CK_VERSION, TCL_GLOBAL_ONLY);
 
     /*
@@ -809,42 +755,12 @@ Ck_Init(interp)
     char *p, *name, *class;
     int code;
     static char initCmd[] =
-#if (TCL_MAJOR_VERSION >= 8)
 "proc init {} {\n\
     global ck_library ck_version\n\
     rename init {}\n\
     tcl_findLibrary ck $ck_version 0 ck.tcl CK_LIBRARY ck_library\n\
 }\n\
 init";
-#else
-"proc init {} {\n\
-    global ck_library ck_version env\n\
-    rename init {}\n\
-    set dirs {}\n\
-    if [info exists env(CK_LIBRARY)] {\n\
-        lappend dirs $env(CK_LIBRARY)\n\
-    }\n\
-    lappend dirs $ck_library\n\
-    lappend dirs [file dirname [info library]]/lib/ck$ck_version\n\
-    catch {lappend dirs [file dirname [file dirname \\\n\
-        [info nameofexecutable]]]/lib/ck$ck_version}\n\
-    set lib ck$ck_version\n\
-    lappend dirs [file dirname [file dirname [pwd]]]/$lib/library\n\
-    lappend dirs [file dirname [file dirname [info library]]]/$lib/library\n\
-    lappend dirs [file dirname [pwd]]/library\n\
-    foreach i $dirs {\n\
-        set ck_library $i\n\
-        if ![catch {uplevel #0 source $i/ck.tcl}] {\n\
-            return\n\
-        }\n\
-    }\n\
-    set msg \"Can't find a usable ck.tcl in the following directories: \n\"\n\
-    append msg \"    $dirs\n\"\n\
-    append msg \"This probably means that Ck wasn't installed properly.\n\"\n\
-    error $msg\n\
-}\n\
-init";
-#endif
 
     p = Tcl_GetVar(interp, "argv0", TCL_GLOBAL_ONLY);
     if (p == NULL || *p == '\0')
@@ -860,13 +776,6 @@ init";
     mainWindow = Ck_CreateMainWindow(interp, class);
     ckfree(class);
 
-#if !((TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4))
-    if (Tcl_PkgRequire(interp, "Tcl", TCL_VERSION, 0) == NULL)
-        return TCL_ERROR;
-    code = Tcl_PkgProvide(interp, "Ck", CK_VERSION);
-    if (code != TCL_OK)
-        return TCL_ERROR;
-#endif
     return Tcl_Eval(interp, initCmd);
 }
 
@@ -1138,15 +1047,7 @@ Ck_DestroyWindow(winPtr)
 		    fflush(stdout);
 		} else {
 #ifdef HAVE_GPM
-#if (TCL_MAJOR_VERSION >= 8)
 		    Tcl_DeleteFileHandler((int) mainPtr->mouseData);
-#else
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-		    Tk_DeleteFileHandler((int) mainPtr->mouseData);
-#else
-		    Tcl_DeleteFileHandler((Tcl_File) mainPtr->mouseData);
-#endif
-#endif
 		    Gpm_Close();
 #endif
 		}
@@ -2039,20 +1940,12 @@ DoRefresh(clientData)
     }
     mainPtr->refreshCount = 0;
     if (mainPtr->refreshDelay > 0) {
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-	struct timeval tv;
-	double t0;
-
-	gettimeofday(&tv, (struct timezone *) NULL);
-	t0 = (tv.tv_sec + 0.000001 * tv.tv_usec) * 1000;
-#else
 	Tcl_Time tv;
 	double t0;
 	extern void TclpGetTime _ANSI_ARGS_((Tcl_Time *timePtr));
 
 	TclpGetTime(&tv);
 	t0 = (tv.sec + 0.000001 * tv.usec) * 1000;
-#endif
 	if (t0 - mainPtr->lastRefresh < mainPtr->refreshDelay) {
 	    mainPtr->refreshTimer = Tk_CreateTimerHandler(
 		mainPtr->refreshDelay - (int) (t0 - mainPtr->lastRefresh),
@@ -2773,7 +2666,6 @@ InputHandler2(clientData)
 
 #endif
 
-#if (TCL_MAJOR_VERSION >= 8)
 /*
  *----------------------------------------------------------------------
  *
@@ -2821,4 +2713,3 @@ CkEvtCheck(clientData, flags)
     Ck_QueueFullResizeEvent(ckMainInfo->winPtr);
   }
 }
-#endif

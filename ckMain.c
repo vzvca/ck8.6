@@ -66,38 +66,25 @@ Ck_Main(argc, argv, appInitProc)
     char *args, *msg, *argv0;
     char buf[20];
     int code;
-#if !((TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4))
     Tcl_Channel errChannel;
-#endif
 
-#if !((TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4))
     Tcl_FindExecutable(argv[0]);
-#endif
 
     interp = Tcl_CreateInterp();
 
 #ifndef __WIN32__
     if (!isatty(0) || !isatty(1)) {
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-	fprintf(stderr, "standard input/output must be terminal\n");
-
-#else
 	errChannel = Tcl_GetStdChannel(TCL_STDERR);
 	if (errChannel)
 	    Tcl_Write(errChannel,
 		"standard input/output must be terminal\n", -1);
-#endif
 	Tcl_Eval(interp, "exit 1");
-#if (TCL_MAJOR_VERSION >= 8)
 	Tcl_Exit(1);
-#else
 	exit(1);    /* Just in case */
 #endif
     }
-#endif
 
 #ifdef TCL_MEM_DEBUG
-    Tcl_InitMemory(interp);
     Tcl_InitMemory(interp);
     Tcl_CreateCommand(interp, "checkmem", CheckmemCmd, (ClientData) 0,
             (Tcl_CmdDeleteProc *) NULL);
@@ -163,32 +150,6 @@ Ck_Main(argc, argv, appInitProc)
      * file if the application specified one and if the file exists.
      */
 
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-    if (tcl_RcFileName != NULL) {
-	Tcl_DString temp;
-        char *fullName;
-	FILE *f;
-
-        Tcl_DStringInit(&temp);
-        fullName = Tcl_TildeSubst(interp, fileName, &temp);
-        if (fullName == NULL)
-	  fprintf(stderr, "%s\n", Tcl_GetString(Tcl_GetObjResult(interp)));
-        else {
-
-	    /*
-	     * Test for the existence of the rc file before trying to read it.
-	     */
-
-	    f = fopen(fullName, "r");
-            if (f != NULL) {
-	        fclose(f);
-                if (Tcl_EvalFile(interp, fullName) != TCL_OK)
-		    fprintf(stderr, "%s\n", Tcl_GetString(Tcl_GetObjResult(interp)));
-	    }
-	    Tcl_DStringFree(&temp);
-	}
-    }
-#else
     fileName = Tcl_GetVar(interp, "tcl_rcFileName", TCL_GLOBAL_ONLY);
     if (fileName != NULL) {
         Tcl_Channel c;
@@ -223,7 +184,6 @@ Ck_Main(argc, argv, appInitProc)
 	    Tcl_DStringFree(&temp);
 	}
     }
-#endif
 
 mainLoop:
     /*
@@ -247,12 +207,8 @@ mainLoop:
      * Invoke Tcl exit command.
      */
 
-    Tcl_Eval(interp, "exit");
-#if (TCL_MAJOR_VERSION >= 8)
+    Tcl_Eval(interp, "after idle exit");
     Tcl_Exit(1);
-#else
-    exit(1);    /* Just in case */
-#endif
 
 error:
     msg = Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY);
@@ -261,22 +217,14 @@ error:
     }
 errorExit:
     if (msg != NULL) {
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-	fprintf(stderr, "%s\n", msg);
-#else
 	errChannel = Tcl_GetStdChannel(TCL_STDERR);
 	if (errChannel) {
 	    Tcl_Write(errChannel, msg, -1);
 	    Tcl_Write(errChannel, "\n", 1);
 	}
-#endif
     }
-    Tcl_Eval(interp, "exit 1");
-#if (TCL_MAJOR_VERSION >= 8)
+    Tcl_Eval(interp, "after idle {exit 1}");
     Tcl_Exit(1);
-#else
-    exit(1);    /* Just in case */
-#endif
 }
 
 /*
