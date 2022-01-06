@@ -114,12 +114,9 @@ Ck_ExitCmd(clientData, interp, argc, argv)
 	}
 	Ck_DestroyWindow((CkWindow *) clientData);
     }
+    CkpEndMouse();
     endwin();	/* just in case */
-#if (TCL_MAJOR_VERSION >= 8)
     Tcl_Exit(value);
-#else
-    exit(value);
-#endif
     /* NOTREACHED */
     return TCL_OK;
 }

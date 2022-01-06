@@ -81,9 +81,7 @@ Tcl_AppInit(interp)
 	return TCL_ERROR;
     }
 
-#if !((TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4))
     Tcl_StaticPackage(interp, "Ck", Ck_Init, (Tcl_PackageInitProc *) NULL);
-#endif
 
     /*
      * Call the init procedures for included packages.  Each call should
@@ -108,11 +106,7 @@ Tcl_AppInit(interp)
      * then no user-specific startup file will be run under any conditions.
      */
 
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-    tcl_RcFileName = "~/.cwshrc";
-#else
     Tcl_SetVar(interp, "tcl_rcFileName", "~/.cwshrc", TCL_GLOBAL_ONLY);
-#endif
     return TCL_OK;
 }
 

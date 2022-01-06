@@ -900,42 +900,6 @@ ReadOptionFile(interp, winPtr, fileName, priority)
 				 * or TK_INTERACTIVE_PRIO.  Must be between
 				 * 0 and TK_MAX_PRIO. */
 {
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-    char *realName, *buffer;
-    int fileId, result;
-    struct stat statBuf;
-    Tcl_DString newName;
-
-    realName = Tcl_TildeSubst(interp, fileName, &newName);
-    if (realName == NULL) {
-	return TCL_ERROR;
-    }
-    fileId = open(realName, O_RDONLY, 0);
-    Tcl_DStringFree(&newName);
-    if (fileId < 0) {
-	Tcl_AppendResult(interp, "couldn't read file \"", fileName, "\"",
-		(char *) NULL);
-	return TCL_ERROR;
-    }
-    if (fstat(fileId, &statBuf) == -1) {
-	Tcl_AppendResult(interp, "couldn't stat file \"", fileName, "\"",
-		(char *) NULL);
-	close(fileId);
-	return TCL_ERROR;
-    }
-    buffer = (char *) ckalloc((unsigned) statBuf.st_size+1);
-    if (read(fileId, buffer, (unsigned) statBuf.st_size) != statBuf.st_size) {
-	Tcl_AppendResult(interp, "error reading file \"", fileName, "\"",
-		(char *) NULL);
-	close(fileId);
-	return TCL_ERROR;
-    }
-    close(fileId);
-    buffer[statBuf.st_size] = 0;
-    result = AddFromString(interp, winPtr, buffer, priority);
-    ckfree(buffer);
-    return result;
-#else
     char *realName, *buffer;
     int result, bufferSize;
     Tcl_Channel chan;
@@ -976,7 +940,6 @@ ReadOptionFile(interp, winPtr, fileName, priority)
     result = AddFromString(interp, winPtr, buffer, priority);
     ckfree(buffer);
     return result;
-#endif
 }
 
 /*

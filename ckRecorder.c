@@ -22,15 +22,9 @@ typedef struct {
     Tcl_Interp *interp;
     int timerRunning;
     Tk_TimerToken timer;
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-    struct timeval lastEvent;
-    FILE *record;
-    FILE *replay;
-#else
     Tcl_Time lastEvent;
     Tcl_Channel record;
     Tcl_Channel replay;
-#endif
     int withDelay;
     CkEvent event;
 } Recorder;
@@ -43,12 +37,8 @@ static Recorder *ckRecorder = NULL;
 
 static int	RecorderInput _ANSI_ARGS_((ClientData clientData,
 		    CkEvent *eventPtr));
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-static int	DStringGets _ANSI_ARGS_((FILE *filePtr, Tcl_DString *dsPtr));
-#else
 static int	DStringGets _ANSI_ARGS_((Tcl_Channel chan,
 		    Tcl_DString *dsPtr));
-#endif
 static void	DeliverEvent _ANSI_ARGS_((ClientData clientData));
 static void	RecorderReplay _ANSI_ARGS_((ClientData clientData));
 
@@ -70,12 +60,8 @@ RecorderInput(clientData, eventPtr)
 {
     Recorder *recPtr = (Recorder *) clientData;
     int hadEvent = 0, type = eventPtr->any.type;
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-    struct timeval now;
-#else
     Tcl_Time now;
     extern void TclpGetTime _ANSI_ARGS_((Tcl_Time *timePtr));
-#endif
     char buffer[64];
     char *keySym, *barCode, *result;
     char *argv[16];
@@ -89,23 +75,6 @@ RecorderInput(clientData, eventPtr)
     	type != CK_EV_MOUSE_UP && type != CK_EV_MOUSE_DOWN)
     	return 0;
     	
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-    gettimeofday(&now, (struct timezone *) NULL);
-    if (recPtr->withDelay && recPtr->lastEvent.tv_sec != 0 &&
-	recPtr->lastEvent.tv_usec != 0) {
-	double diff;
-
-	diff = now.tv_sec * 1000 + now.tv_usec / 1000;
-	diff -= recPtr->lastEvent.tv_sec * 1000 +
-	    recPtr->lastEvent.tv_usec / 1000;
-	if (diff > 50) {
-	    if (diff > 3600000)
-		diff = 3600000;
-	    fprintf(recPtr->record, "<Delay> %d\n", (int) diff);
-	    hadEvent++;
-	}
-    }
-#else
     TclpGetTime(&now);
     if (recPtr->withDelay && recPtr->lastEvent.sec != 0 &&
 	recPtr->lastEvent.usec != 0) {
@@ -123,7 +92,6 @@ RecorderInput(clientData, eventPtr)
 	    hadEvent++;
 	}
     }
-#endif
 
     switch (type) {
 	case CK_EV_KEYPRESS:
@@ -143,12 +111,8 @@ RecorderInput(clientData, eventPtr)
 		    eventPtr->key.winPtr->pathName;
 		result = Tcl_Merge(3, argv);
 printPctSNL:
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-		fprintf(recPtr->record, "%s\n", result);
-#else
 		Tcl_Write(recPtr->record, result, strlen(result));
 		Tcl_Write(recPtr->record, "\n", 1);
-#endif
 		ckfree(result);
 		hadEvent++;
 	    }
@@ -192,11 +156,7 @@ printPctSNL:
     }
 
     if (hadEvent) {
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-	fflush(recPtr->record);
-#else
 	Tcl_Flush(recPtr->record);
-#endif
 	recPtr->lastEvent = now;
     }
 
@@ -218,32 +178,6 @@ printPctSNL:
  *----------------------------------------------------------------------
  */
 
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-static int
-DStringGets(filePtr, dsPtr)
-    FILE *filePtr;
-    Tcl_DString *dsPtr;
-{
-    int count, c, p = EOF;
-    char buf;
-
-    for (count = 0;;) {
-	c = getc(filePtr);
-	if (c == EOF)
-	    return count ? TCL_OK : TCL_ERROR;
-	else if (c == '\n') {
-	    if (p == '\\')
-		c = ' ';
-	    else
-		return TCL_OK;
-	}
-	buf = c;
-	Tcl_DStringAppend(dsPtr, &buf, 1);
-	p = c;
-    }
-    /* Not reached. */	
-}
-#else
 static int
 DStringGets(chan, dsPtr)
     Tcl_Channel chan;
@@ -268,7 +202,6 @@ DStringGets(chan, dsPtr)
     }
     /* Not reached. */	
 }
-#endif
 
 /*
  *----------------------------------------------------------------------
@@ -425,11 +358,7 @@ doMouse:
 	Tcl_DStringTrunc(&input, 0);
     }
     if (getsResult != TCL_OK) {
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-	fclose(recPtr->replay);
-#else
 	Tcl_Close(NULL, recPtr->replay);
-#endif
 	recPtr->replay = NULL;
     } else if (delayValue != 0) {
 	recPtr->timerRunning = 1;
@@ -476,11 +405,7 @@ Ck_RecorderCmd(clientData, interp, argc, argv)
 	recPtr->mainPtr = mainPtr;
 	recPtr->interp = NULL;
 	recPtr->timerRunning = 0;
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-	recPtr->lastEvent.tv_sec = recPtr->lastEvent.tv_usec = 0;
-#else
 	recPtr->lastEvent.sec = recPtr->lastEvent.usec = 0;
-#endif
 	recPtr->record = NULL;
 	recPtr->replay = NULL;
 	recPtr->withDelay = 0;
@@ -497,11 +422,7 @@ Ck_RecorderCmd(clientData, interp, argc, argv)
     if ((c == 'r') && (strncmp(argv[1], "replay", length) == 0)) {
 	char *fileName;
 	Tcl_DString buffer;
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-	FILE *newReplay;
-#else
 	Tcl_Channel newReplay;
-#endif
 
 	if (argc != 3) {
 	    Tcl_AppendResult(interp, "wrong # args: should be \"",
@@ -509,27 +430,6 @@ Ck_RecorderCmd(clientData, interp, argc, argv)
 	    return TCL_ERROR;
 	}
 
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-	fileName = Tcl_TildeSubst(interp, argv[2], &buffer);
-	if (fileName == NULL) {
-replayError:
-	    Tcl_DStringFree(&buffer);
-	    return TCL_ERROR;
-	}
-	newReplay = fopen(fileName, "r");
-	if (newReplay == NULL) {
-	    Tcl_AppendResult(interp, "error opening \"", fileName,
-	        "\": ", Tcl_PosixError(interp), (char *) NULL);
-	    goto replayError;
-	}
-	Tcl_DStringFree(&buffer);
-	DStringGets(newReplay, &buffer);
-	if (strncmp("# CK-RECORDER", Tcl_DStringValue(&buffer), 13) != 0) {
-	    fclose(newReplay);
-	    Tcl_AppendResult(interp, "invalid file for replay", (char *) NULL);
-	    goto replayError;
-	}
-#else
 	fileName = Tcl_TranslateFileName(interp, argv[2], &buffer);
 	if (fileName == NULL) {
 replayError:
@@ -546,15 +446,10 @@ replayError:
 	    Tcl_AppendResult(interp, "invalid file for replay", (char *) NULL);
 	    goto replayError;
 	}
-#endif
 	if (recPtr->replay != NULL) {
 	    if (recPtr->timerRunning)
 		Tk_DeleteTimerHandler(recPtr->timer);
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-	    fclose(recPtr->replay);
-#else
 	    Tcl_Close(NULL, recPtr->replay);
-#endif
 	    recPtr->timerRunning = 0;
 	}
 	recPtr->replay = newReplay;
@@ -565,13 +460,8 @@ replayError:
 	char *fileName;
 	int withDelay = 0, fileArg = 2;
 	Tcl_DString buffer;
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-	FILE *newRecord;
-	time_t now;
-#else
 	Tcl_Channel newRecord;
 	char *string;
-#endif
 
 	if (argc < 3 || argc > 4) {
 badStartArgs:
@@ -585,34 +475,6 @@ badStartArgs:
 	    withDelay++;
 	    fileArg++;
 	}
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-	fileName = Tcl_TildeSubst(interp, argv[fileArg], &buffer);
-	if (fileName == NULL) {
-startError:
-	    Tcl_DStringFree(&buffer);
-	    return TCL_ERROR;
-	}
-	newRecord = fopen(fileName, "w");
-	if (newRecord == NULL) {
-	    Tcl_AppendResult(interp, "error opening \"", fileName,
-	        "\": ", Tcl_PosixError(interp), (char *) NULL);
-	    goto startError;
-	}
-	if (recPtr->record != NULL)
-	    fclose(recPtr->record);
-	else {
-	    recPtr->lastEvent.tv_sec = recPtr->lastEvent.tv_usec = 0;
-	    Ck_CreateGenericHandler(RecorderInput, recPtr);
-	}
-	recPtr->record = newRecord;
-	recPtr->withDelay = withDelay;
-	time(&now);
-	fprintf(recPtr->record, "# CK-RECORDER\n# %s", ctime(&now));
-	fprintf(recPtr->record, "# %s %s\n",
-	    Tcl_GetVar(interp, "argv0", TCL_GLOBAL_ONLY),
-	    Tcl_GetVar(interp, "argv", TCL_GLOBAL_ONLY));
-	Tcl_DStringFree(&buffer);
-#else
 	fileName = Tcl_TranslateFileName(interp, argv[fileArg], &buffer);
 	if (fileName == NULL) {
 startError:
@@ -643,7 +505,6 @@ startError:
 	Tcl_Write(recPtr->record, string, strlen(string));
 	Tcl_Write(recPtr->record, "\n", 1);
 	Tcl_DStringFree(&buffer);
-#endif
     } else if ((c == 's') && (strncmp(argv[1], "stop", length) == 0) &&
 	(length > 1)) {
 	if (argc > 3) {
@@ -658,20 +519,12 @@ badStopArgs:
 	    if (recPtr->replay != NULL) {
 		if (recPtr->timerRunning)
 		    Tk_DeleteTimerHandler(recPtr->timer);
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-		fclose(recPtr->replay);
-#else
 		Tcl_Close(NULL, recPtr->replay);
-#endif
 		recPtr->replay = NULL;
 		recPtr->timerRunning = 0;
 	    }
 	} else if (recPtr->record != NULL) {
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-	    fclose(recPtr->record);
-#else
 	    Tcl_Close(NULL, recPtr->record);
-#endif
 	    Ck_DeleteGenericHandler(RecorderInput, (ClientData) recPtr);
 	    recPtr->record = NULL;
 	}

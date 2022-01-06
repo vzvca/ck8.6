@@ -204,14 +204,14 @@ TEXTOBJS = ckText.o ckTextBTree.o ckTextDisp.o ckTextIndex.o \
 
 OBJS = ckBind.o ckBorder.o ckCmds.o ckConfig.o ckEvent.o ckFocus.o \
 	ckGeometry.o ckGet.o ckGrid.o ckMain.o ckOption.o ckPack.o ckPlace.o \
-	ckPreserve.o ckRecorder.o ckUtil.o ckWindow.o \
+	ckRecorder.o ckUtil.o ckWindow.o \
 	$(WIDGOBJS) $(TEXTOBJS)
 
 #	ckPreserve.o ckRecorder.o ckUtil.o ckWindow.o tkEvent.o \
 
 SRCS = ckBind.c ckBorder.c ckCmds.c ckConfig.c ckEvent.c ckFocus.c \
 	ckGeometry.c ckGet.c ckGrid.c ckMain.c ckOption.c ckPack.c ckPlace.c \
-	ckPreserve.c ckRecorder.c ckUtil.c ckWindow.c \
+	ckRecorder.c ckUtil.c ckWindow.c \
 	ckButton.c ckEntry.c ckFrame.c ckListbox.c \
 	ckMenu.c ckMenubutton.c ckMessage.c ckScrollbar.c \
 	ckText.c ckTextBTree.c ckTextDisp.c ckTextIndex.c \

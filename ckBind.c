@@ -870,7 +870,8 @@ Ck_BindEvent(bindingTable, eventPtr, winPtr, numObjects, objectPtr)
     detail = ringPtr->key.keycode;
   }
   else if (ringPtr->type == CK_EV_MOUSE_DOWN ||
-           ringPtr->type == CK_EV_MOUSE_UP) {
+           ringPtr->type == CK_EV_MOUSE_UP ||
+	   ringPtr->type == CK_EV_MOUSE_MOVE) {
     detail = ringPtr->mouse.button;
   }
   else if (ringPtr->type == CK_EV_VIRTUAL) {

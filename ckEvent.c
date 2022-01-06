@@ -704,7 +704,7 @@ CkHandleInput(clientData, mask)
 
     if (code == KEY_MOUSE) {
         MEVENT mEvent;
-	int i;
+	int i, modifiers = 0;
 
 	if (mainPtr->flags & CK_MOUSE_XTERM) {
 	    goto getMouse;
@@ -713,29 +713,54 @@ CkHandleInput(clientData, mask)
         if (getmouse(&mEvent) == ERR) {
 	    return;
 	}
+	
+	/* compute modifiers */
+	modifiers |= (mEvent.bstate & BUTTON_CTRL) ? CK_MOD_CONTROL : 0;
+	modifiers |= (mEvent.bstate & BUTTON_SHIFT) ? CK_MOD_SHIFT : 0;
+	modifiers |= (mEvent.bstate & BUTTON_ALT) ? CK_MOD_ALT : 0;
 
-	// @vca: fixme - handle more than 3 buttons - curses supports up to 5
-	for (i = 1; i <= 3; i++) {
-	    if (BUTTON_PRESS(mEvent.bstate, i)) {
-		event.mouse.type = CK_EV_MOUSE_DOWN;
-		goto mouseEventNC;
-	    } else if (BUTTON_RELEASE(mEvent.bstate, i)) {
-		event.mouse.type = CK_EV_MOUSE_UP;
-mouseEventNC:
-	        event.mouse.button = i;
-		event.mouse.rootx = mEvent.x;
-		event.mouse.rooty = mEvent.y;
-		event.mouse.x = mEvent.x;
-		event.mouse.y = mEvent.y;
-		event.mouse.winPtr = Ck_GetWindowXY(mainPtr, &event.mouse.x,
-		    &event.mouse.y, 1);
-		goto mkEvent;
-	    }
+	// @vca: to handle mouse motion events with button(s) pressed
+	//       we will need to track the mouse state between events
+	//       otherwise motion events with button(s) pressed
+	//       will be reported as several MousePressed events
+	
+	for (i = 1; i <= 5; i++) {
+	  int mods = modifiers;
 
-	    // @vca: handle click, double click, motion
+	  /* update modifiers */
+	  mods = (BUTTON_TRIPLE_CLICK(mEvent.bstate, i)) ? CK_MOD_TRIPLE: 0;
+	  mods = (BUTTON_DOUBLE_CLICK(mEvent.bstate, i)) ? CK_MOD_DOUBLE: 0;
+	  
+	  if (BUTTON_PRESS(mEvent.bstate, i)) {
+	    event.mouse.type = CK_EV_MOUSE_DOWN;
+	    goto mouseEventNC;
+	  }
+	  else if (BUTTON_RELEASE(mEvent.bstate, i)) {
+	    event.mouse.type = CK_EV_MOUSE_UP;
+	  mouseEventNC:
+	    event.mouse.button = i;
+	    event.mouse.modifiers = mods;
+	    event.mouse.rootx = mEvent.x;
+	    event.mouse.rooty = mEvent.y;
+	    event.mouse.x = mEvent.x;
+	    event.mouse.y = mEvent.y;
+	    event.mouse.winPtr = Ck_GetWindowXY(mainPtr, &event.mouse.x,
+						&event.mouse.y, 1);
+	    goto mkEvent;
+	  }
 	}
 
-	// reached for mouse motion events
+	// reached for mouse motion events (no buttons down)
+	event.mouse.type = CK_EV_MOUSE_MOVE;
+	event.mouse.button = 0;
+	event.mouse.modifiers = modifiers;
+	event.mouse.rootx = mEvent.x;
+	event.mouse.rooty = mEvent.y;
+	event.mouse.x = mEvent.x;
+	event.mouse.y = mEvent.y;
+	event.mouse.winPtr = Ck_GetWindowXY(mainPtr, &event.mouse.x,
+					    &event.mouse.y, 1);
+	goto mkEvent;
     }
 #endif
 
@@ -744,7 +769,7 @@ mouseEventNC:
 	int i;
 
 	request_mouse_pos();
-	for (i = 0; i < 3; i++) {
+	for (i = 0; i < 5; i++) {
 	    if (Mouse_status.button[i] == BUTTON_PRESSED) {
 		event.mouse.type = CK_EV_MOUSE_DOWN;
 		goto mouseEvt;
@@ -832,9 +857,10 @@ mouseEvent:
 
     /* full resize */
     if ( code == KEY_RESIZE ) {
-      event.any.type   = CK_EV_RESIZE;
-      event.any.winPtr = mainPtr->winPtr;
-      goto mkEvent;
+      //event.any.type   = CK_EV_RESIZE;
+      //event.any.winPtr = mainPtr->winPtr;
+      //goto mkEvent;
+      goto readagain;
     }
     
 keyEvent:
@@ -918,8 +944,6 @@ Ck_HandleQEvent(evPtr, flags)
  *--------------------------------------------------------------
  */
 
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-#else
 void
 CkHandleGPMInput(clientData, mask)
     ClientData clientData;      /* Pointer to main info. */
@@ -969,7 +993,6 @@ CkHandleGPMInput(clientData, mask)
 	Tcl_QueueEvent(&qev->header, TCL_QUEUE_TAIL);
     }
 }
-#endif /* TCL_MAJOR_VERSION == 7 && TCL_MINOR_VERSION <= 4 */
 #endif /* HAVE_GPM */
 
 /*

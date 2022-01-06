@@ -187,6 +187,56 @@ typedef struct {
 /*
  *--------------------------------------------------------------
  *
+ * CkpStartMouse --
+ *
+ *	Called to start mouse reporting
+ *
+ * Results:
+ *	Nothing
+ *
+ * Side effects:
+ *	None
+ *
+ *--------------------------------------------------------------
+ */
+
+void CkpStartMouse()
+{
+  if ((ckMainInfo != NULL) && (ckMainInfo->flags & CK_HAS_MOUSE)) {
+    fflush(stdout);
+    fputs("\033[?1003h", stdout);
+    fflush(stdout);
+  }
+}
+
+
+/*
+ *--------------------------------------------------------------
+ *
+ * CkpEndMouse --
+ *
+ *	Called to stop mouse reporting
+ *
+ * Results:
+ *	Nothing
+ *
+ * Side effects:
+ *	None
+ *
+ *--------------------------------------------------------------
+ */
+
+void CkpEndMouse()
+{
+  fflush(stdout);
+  fputs("\033[?1003l", stdout);
+  fflush(stdout);
+}
+
+
+/*
+ *--------------------------------------------------------------
+ *
  * onSigwinch --
  *
  *	Called when SIGWINCH is received
@@ -401,7 +451,7 @@ Ck_CreateMainWindow(interp, className)
     Tcl_Interp *interp;		/* Interpreter to use for error reporting. */
     char *className;		/* Class name of the new main window. */
 {
-    int dummy;
+  int dummy, mask;
     Tcl_HashEntry *hPtr;
     CkMainInfo *mainPtr;
     CkWindow *winPtr;
@@ -571,13 +621,14 @@ Ck_CreateMainWindow(interp, className)
 #ifdef NCURSES_MOUSE_VERSION
     mouseinterval(1);
     // @vca: capture all mouse events
-    mousemask(ALL_MOUSE_EVENTS,NULL);
+    mask = mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);
     mainPtr->flags |= (getmouse(&mEvent) != ERR) ? CK_HAS_MOUSE : 0;
-    // @vca: according to ncurses manual, getmouse will return an error if there is no event in the key
+    // @vca: according to ncurses manual, getmouse will return an error if there is no event in the queue
     // @vca: as a consequence, CK_HAS_MOUSE will not be set and mouse reporting will fail in the application
     // @vca: for the moment I force mouse reporting. It seems to be  a good solution with curses 6.0 under cygwin running mintty
     // @vca: as a terminal emulator. mintty advertises itself with TERM=xterm
     mainPtr->flags |= CK_HAS_MOUSE;
+    CkpStartMouse();
 #endif	/* NCURSES_MOUSE_VERSION */
 
 #ifdef __WIN32__
@@ -596,10 +647,7 @@ Ck_CreateMainWindow(interp, className)
 	(term[0] != '\0' && strncmp(term + 1, "xterm", 5) == 0);
     if (!(mainPtr->flags & CK_HAS_MOUSE) && isxterm) {
 	mainPtr->flags |= CK_HAS_MOUSE | CK_MOUSE_XTERM;
-	fflush(stdout);
-	// @vca: fixme - this sequence only triggers mouse button reporting
-	fputs("\033[?1000h", stdout);
-	fflush(stdout);
+	CkpStartMouse();
     }
 #endif	/* __WIN32__ */
 
@@ -2331,6 +2379,7 @@ ExecCmd(clientData, interp, argc, argv)
         argv[1] = argv[0];
     	curs_set(1);
 	nodelay(stdscr, FALSE);
+	CkpEndMouse();
         endwin();
 #ifdef SIGINT
 #ifdef HAVE_SIGACTION
@@ -2361,6 +2410,7 @@ ExecCmd(clientData, interp, argc, argv)
         argv[0] = argv[1];
         argv[1] = savedargv1;
 	nodelay(stdscr, TRUE);
+	CkpStartMouse();
         Ck_EventuallyRefresh(redirInfo->mainPtr->winPtr);
     }
     return result;

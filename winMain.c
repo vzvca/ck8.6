@@ -132,12 +132,8 @@ Tcl_AppInit(interp)
     if (Ck_Init(interp) == TCL_ERROR) {
 	goto error;
     }
-#if (TCL_MAJOR_VERSION == 7) && (TCL_MINOR_VERSION <= 4)
-    tcl_RcFileName = "~/.cwshrc";
-#else
     Tcl_StaticPackage(interp, "Ck", Ck_Init, (Tcl_PackageInitProc *) NULL);
     Tcl_SetVar(interp, "tcl_rcFileName", "~/.cwshrc", TCL_GLOBAL_ONLY);
-#endif
     return TCL_OK;
 
 error:
