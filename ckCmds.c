@@ -65,6 +65,44 @@ Ck_DestroyCmd(clientData, interp, argc, argv)
 /*
  *----------------------------------------------------------------------
  *
+ * Ck_DestroyCmdObj --
+ *
+ *	This procedure is invoked to process the "destroy" Tcl command.
+ *	See the user documentation for details on what it does.
+ *
+ * Results:
+ *	A standard Tcl result.
+ *
+ * Side effects:
+ *	See the user documentation.
+ *
+ *----------------------------------------------------------------------
+ */
+
+int
+Ck_DestroyCmdObj(clientData, interp, objc, objv)
+    ClientData clientData;	/* Main window associated with
+				 * interpreter. */
+    Tcl_Interp *interp;		/* Current interpreter. */
+    int objc;			/* Number of arguments. */
+    Tcl_Obj *objv[];		/* Tcl_Obj* array of arguments. */
+{
+    CkWindow *winPtr;
+    CkWindow *mainPtr = (CkWindow *) clientData;
+    int i;
+
+    for (i = 1; i < objc; i++) {
+      winPtr = Ck_NameToWindow(interp, Tcl_GetString(objv[i]), mainPtr);
+	if (winPtr == NULL)
+	    return TCL_ERROR;
+	Ck_DestroyWindow(winPtr);
+    }
+    return TCL_OK;
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
  * Ck_ExitCmd --
  *
  *	This procedure is invoked to process the "exit" Tcl command.
@@ -113,6 +151,64 @@ Ck_ExitCmd(clientData, interp, argc, argv)
 	    ckMainInfo->flags &= ~CK_NOCLR_ON_EXIT;
 	}
 	Ck_DestroyWindow((CkWindow *) clientData);
+    }
+    CkpEndMouse();
+    endwin();	/* just in case */
+    Tcl_Exit(value);
+    /* NOTREACHED */
+    return TCL_OK;
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * Ck_ExitCmdObj --
+ *
+ *	This procedure is invoked to process the "exit" Tcl command.
+ *	See the user documentation for details on what it does.
+ *	Note: this command replaces the Tcl "exit" command in order
+ *	to properly destroy all windows.
+ *
+ * Results:
+ *	A standard Tcl result.
+ *
+ * Side effects:
+ *	See the user documentation.
+ *
+ *----------------------------------------------------------------------
+ */
+
+int
+Ck_ExitCmdObj(clientData, interp, objc, objv)
+    ClientData clientData;	/* Main window associated with
+				 * interpreter. */
+    Tcl_Interp *interp;		/* Current interpreter. */
+    int objc;			/* Number of arguments. */
+    Tcl_Obj *objv[];		/* Tcl_Obj* array of arguments. */
+{
+    extern CkMainInfo *ckMainInfo;
+    int index = 1, noclear = 0, value = 0;
+
+    if (objc > 3) {
+      Tcl_WrongNumArgs(interp, 1, objv, "?-noclear? ?returnCode?");
+      return TCL_ERROR;
+    }
+    if (objc > 1 && strcmp(Tcl_GetString(objv[1]), "-noclear") == 0) {
+	index++;
+	noclear++;
+    }
+    if (objc > index &&
+	Tcl_GetIntFromObj(interp, objv[index], &value) != TCL_OK) {
+	return TCL_ERROR;
+    }
+
+    if (ckMainInfo != NULL) {
+      if (noclear) {
+	ckMainInfo->flags |= CK_NOCLR_ON_EXIT;
+      } else {
+	ckMainInfo->flags &= ~CK_NOCLR_ON_EXIT;
+      }
+      Ck_DestroyWindow((CkWindow *) clientData);
     }
     CkpEndMouse();
     endwin();	/* just in case */
@@ -176,6 +272,59 @@ Ck_LowerCmd(clientData, interp, argc, argv)
 /*
  *----------------------------------------------------------------------
  *
+ * Ck_LowerCmdObj --
+ *
+ *	This procedure is invoked to process the "lower" Tcl command.
+ *	See the user documentation for details on what it does.
+ *
+ * Results:
+ *	A standard Tcl result.
+ *
+ * Side effects:
+ *	See the user documentation.
+ *
+ *----------------------------------------------------------------------
+ */
+
+int
+Ck_LowerCmdObj(clientData, interp, objc, objv)
+    ClientData clientData;	/* Main window associated with
+				 * interpreter. */
+    Tcl_Interp *interp;		/* Current interpreter. */
+    int objc;			/* Number of arguments. */
+    Tcl_Obj *objv[];		/* Tcl_Obj* array of arguments. */
+{
+    CkWindow *mainPtr = (CkWindow *) clientData;
+    CkWindow *winPtr, *other;
+
+    if ((objc != 2) && (objc != 3)) {
+      Tcl_WrongNumArgs(interp, 1, objv, "window ?belowThis?");
+	return TCL_ERROR;
+    }
+
+    winPtr = Ck_NameToWindow(interp, Tcl_GetString(objv[1]), mainPtr);
+    if (winPtr == NULL)
+	return TCL_ERROR;
+    if (objc == 2)
+	other = NULL;
+    else {
+      other = Ck_NameToWindow(interp, Tcl_GetString(objv[2]), mainPtr);
+      if (other == NULL)
+	return TCL_ERROR;
+    }
+    if (Ck_RestackWindow(winPtr, CK_BELOW, other) != TCL_OK) {
+      Tcl_AppendResult(interp,
+		       "can't lower \"", Tcl_GetString(objv[1]),
+		       "\" below \"", Tcl_GetString(objv[2]), "\"",
+		       (char *) NULL);
+      return TCL_ERROR;
+    }
+    return TCL_OK;
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
  * Ck_RaiseCmd --
  *
  *	This procedure is invoked to process the "raise" Tcl command.
@@ -228,6 +377,59 @@ Ck_RaiseCmd(clientData, interp, argc, argv)
 /*
  *----------------------------------------------------------------------
  *
+ * Ck_RaiseCmdObj --
+ *
+ *	This procedure is invoked to process the "raise" Tcl command.
+ *	See the user documentation for details on what it does.
+ *
+ * Results:
+ *	A standard Tcl result.
+ *
+ * Side effects:
+ *	See the user documentation.
+ *
+ *----------------------------------------------------------------------
+ */
+
+int
+Ck_RaiseCmdObj(clientData, interp, objc, objv)
+    ClientData clientData;	/* Main window associated with
+				 * interpreter. */
+    Tcl_Interp *interp;		/* Current interpreter. */
+    int objc;			/* Number of arguments. */
+    Tcl_Obj *objv[];		/* Tcl_Obj* array of arguments. */
+{
+    CkWindow *mainPtr = (CkWindow *) clientData;
+    CkWindow *winPtr, *other;
+
+    if ((objc != 2) && (objc != 3)) {
+      Tcl_WrongNumArgs(interp, 1, objv, "window ?aboveThis?");
+      return TCL_ERROR;
+    }
+
+    winPtr = Ck_NameToWindow(interp, Tcl_GetString(objv[1]), mainPtr);
+    if (winPtr == NULL)
+	return TCL_ERROR;
+    if (objc == 2)
+	other = NULL;
+    else {
+      other = Ck_NameToWindow(interp, Tcl_GetString(objv[2]), mainPtr);
+      if (other == NULL)
+	return TCL_ERROR;
+    }
+    if (Ck_RestackWindow(winPtr, CK_ABOVE, other) != TCL_OK) {
+      Tcl_AppendResult(interp,
+		       "can't raise \"", Tcl_GetString(objv[1]),
+		       "\" above \"", Tcl_GetString(objv[2]), "\"",
+		       (char *) NULL);
+      return TCL_ERROR;
+    }
+    return TCL_OK;
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
  * Ck_BellCmd --
  *
  *	This procedure is invoked to process the "bell" Tcl command.
@@ -249,6 +451,36 @@ Ck_BellCmd(clientData, interp, argc, argv)
     Tcl_Interp *interp;		/* Current interpreter. */
     int argc;			/* Number of arguments. */
     char **argv;		/* Argument strings. */
+{
+    beep();
+    doupdate();
+    return TCL_OK;
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * Ck_BellCmdObj --
+ *
+ *	This procedure is invoked to process the "bell" Tcl command.
+ *	See the user documentation for details on what it does.
+ *
+ * Results:
+ *	A standard Tcl result.
+ *
+ * Side effects:
+ *	See the user documentation.
+ *
+ *----------------------------------------------------------------------
+ */
+
+int
+Ck_BellCmdObj(clientData, interp, objc, objv)
+    ClientData clientData;	/* Main window associated with
+				 * interpreter. */
+    Tcl_Interp *interp;		/* Current interpreter. */
+    int objc;			/* Number of arguments. */
+    Tcl_Obj *objv[];		/* Tcl_Obj* array of arguments. */
 {
     beep();
     doupdate();
