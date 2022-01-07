@@ -90,16 +90,19 @@ typedef struct {
 
 CkCmdObj objCommands[] =
   {
-    {"bell",		Ck_BellCmdObj},
-    {"destroy",		Ck_DestroyCmdObj},
-    {"focus",		Ck_FocusCmdObj},
-    {"exit",		Ck_ExitCmdObj},
-    {"lower",		Ck_LowerCmdObj},
-    {"option",		Ck_OptionCmdObj},
-    {"raise",		Ck_RaiseCmdObj},
-    {"update",		Ck_UpdateCmdObj},
-    
-    {(char *) NULL,	(CkCmdObjProc *) NULL}
+   {"bell",		Ck_BellCmdObj},
+   {"bind",		Ck_BindCmdObj},
+   {"bindtags",	        Ck_BindtagsCmdObj},
+   {"curses",           Ck_CursesCmdObj},
+   {"destroy",		Ck_DestroyCmdObj},
+   {"focus",		Ck_FocusCmdObj},
+   {"exit",		Ck_ExitCmdObj},
+   {"lower",		Ck_LowerCmdObj},
+   {"option",		Ck_OptionCmdObj},
+   {"raise",		Ck_RaiseCmdObj},
+   {"update",		Ck_UpdateCmdObj},
+   {"winfo",		Ck_WinfoCmdObj},
+   {(char *) NULL,	(CkCmdObjProc *) NULL}
   };			  
 
 CkCmd commands[] =
@@ -108,23 +111,23 @@ CkCmd commands[] =
      * Commands that are part of the intrinsics:
      */
 
-    //@vca {"bell",		Ck_BellCmd},
-    {"bind",		Ck_BindCmd},
-    {"bindtags",	Ck_BindtagsCmd},
-    {"curses",          Ck_CursesCmd},
-    //@vca {"destroy",		Ck_DestroyCmd},
-    {"exit",		Ck_ExitCmd},
-    //@vca {"focus",		Ck_FocusCmd},
+    //{"bell",		Ck_BellCmd},
+    //{"bind",		Ck_BindCmd},
+    //{"bindtags",	Ck_BindtagsCmd},
+    //{"curses",          Ck_CursesCmd},
+    //{"destroy",		Ck_DestroyCmd},
+    //{"exit",		Ck_ExitCmd},
+    //{"focus",		Ck_FocusCmd},
     {"grid",		Ck_GridCmd},
-    //@vca {"lower",		Ck_LowerCmd},
-    //@vca {"option",		Ck_OptionCmd},
+    //{"lower",		Ck_LowerCmd},
+    //{"option",		Ck_OptionCmd},
     {"pack",		Ck_PackCmd},
     {"place",		Ck_PlaceCmd},
-    //@vca {"raise",		Ck_RaiseCmd},
+    //{"raise",		Ck_RaiseCmd},
     {"recorder",	Ck_RecorderCmd},
-    //@vca {"tkwait",		Ck_TkwaitCmd},
-    //@vca {"update",		Ck_UpdateCmd},
-    {"winfo",		Ck_WinfoCmd},
+    {"tkwait",		Ck_TkwaitCmd},
+    //{"update",		Ck_UpdateCmd},
+    //{"winfo",		Ck_WinfoCmd},
 
     /*
      * Widget-creation commands.
@@ -166,8 +169,8 @@ static void	RefreshThem _ANSI_ARGS_((CkWindow *winPtr));
 static void     UpdateHWCursor _ANSI_ARGS_((CkMainInfo *mainPtr));
 static CkWindow *GetWindowXY _ANSI_ARGS_((CkWindow *winPtr, int *xPtr,
 			int *yPtr));
-static int	DeadAppCmd _ANSI_ARGS_((ClientData clientData,
-			Tcl_Interp *interp, int argc, char **argv));
+static int	DeadAppCmdObj _ANSI_ARGS_((ClientData clientData,
+			Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]));
 static int      ExecCmd _ANSI_ARGS_((ClientData clientData,
 			Tcl_Interp *interp, int argc, char **argv));
 static int      PutsCmd _ANSI_ARGS_((ClientData clientData,
@@ -757,16 +760,16 @@ Ck_CreateMainWindow(interp, className)
     /*
      * Bind in Ck's commands.
      */
+    for (cmdObjPtr = objCommands; cmdObjPtr->name != NULL; cmdObjPtr++) {
+      Tcl_CreateObjCommand(interp, cmdObjPtr->name, cmdObjPtr->cmdProc,
+			   (ClientData) winPtr, (Tcl_CmdDeleteProc *) NULL);
+    }
 
     for (cmdPtr = commands; cmdPtr->name != NULL; cmdPtr++) {
 	Tcl_CreateCommand(interp, cmdPtr->name, cmdPtr->cmdProc,
 		(ClientData) winPtr, (Tcl_CmdDeleteProc *) NULL);
     }
 
-    for (cmdObjPtr = objCommands; cmdObjPtr->name != NULL; cmdObjPtr++) {
-      Tcl_CreateObjCommand(interp, cmdObjPtr->name, cmdObjPtr->cmdProc,
-			   (ClientData) winPtr, (Tcl_CmdDeleteProc *) NULL);
-    }
 
     /*
      * Redirect some critical Tcl commands to our own procedures
@@ -1091,6 +1094,7 @@ Ck_DestroyWindow(winPtr)
     hPtr = Tcl_FindHashEntry(&winPtr->mainPtr->winTable, (char *) winPtr);
     if (hPtr != NULL)
 	Tcl_DeleteHashEntry(hPtr);
+    
     if (winPtr->pathName != NULL) {
 	CkMainInfo *mainPtr = winPtr->mainPtr;
 
@@ -1099,13 +1103,24 @@ Ck_DestroyWindow(winPtr)
 	Tcl_DeleteHashEntry(Tcl_FindHashEntry(&mainPtr->nameTable,
 		winPtr->pathName));
 	if (mainPtr->winPtr == winPtr) {
+	    CkCmdObj *cmdObjPtr;
 	    CkCmd *cmdPtr;
 
-	    for (cmdPtr = commands; cmdPtr->name != NULL; cmdPtr++)
-		if (cmdPtr->cmdProc != Ck_ExitCmd)
-		    Tcl_CreateCommand(mainPtr->interp, cmdPtr->name,
-			DeadAppCmd, (ClientData) NULL,
-			(Tcl_CmdDeleteProc *) NULL);
+	    for (cmdPtr = commands; cmdPtr->name != NULL; cmdPtr++) {
+	      if (cmdPtr->cmdProc != Ck_ExitCmd) {
+		Tcl_CreateObjCommand(mainPtr->interp, cmdPtr->name,
+				     DeadAppCmdObj, (ClientData) NULL,
+				  (Tcl_CmdDeleteProc *) NULL);
+	      }
+	    }
+	    for (cmdObjPtr = objCommands; cmdObjPtr->name != NULL; cmdObjPtr++) {
+	      if (cmdObjPtr->cmdProc != Ck_ExitCmdObj) {
+		Tcl_CreateObjCommand(mainPtr->interp, cmdObjPtr->name,
+				     DeadAppCmdObj, (ClientData) NULL,
+				     (Tcl_CmdDeleteProc *) NULL);
+	      }
+	    }
+	    
 	    Tcl_DeleteHashTable(&mainPtr->nameTable);
 	    Ck_DeleteBindingTable(mainPtr->bindingTable);
 
@@ -2343,7 +2358,7 @@ Ck_ClearToBot(winPtr, x, y)
 /*
  *----------------------------------------------------------------------
  *
- * DeadAppCmd --
+ * DeadAppCmdObj --
  *
  *	Report error since toolkit gone.
  *
@@ -2354,11 +2369,11 @@ Ck_ClearToBot(winPtr, x, y)
  */
 
 static int
-DeadAppCmd(clientData, interp, argc, argv)
+DeadAppCmdObj(clientData, interp, objc, objv)
     ClientData clientData;
     Tcl_Interp *interp;
-    int argc;
-    char **argv;
+    int objc;
+    Tcl_Obj* CONST objv[];
 {
   Tcl_SetObjResult(interp, Tcl_NewStringObj("toolkit uninstalled",-1));
     return TCL_ERROR;

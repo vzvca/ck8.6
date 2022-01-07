@@ -615,6 +615,7 @@ Ck_OptionCmdObj(clientData, interp, objc, objv)
       Ck_AddOption(winPtr, Tcl_GetString(objv[2]), Tcl_GetString(objv[3]), priority);
       return TCL_OK;
     }
+    break;
   case CMD_CLEAR:
     {
       CkMainInfo *mainPtr;
@@ -631,6 +632,7 @@ Ck_OptionCmdObj(clientData, interp, objc, objv)
       cachedWindow = NULL;
       return TCL_OK;
     }
+    break;
   case CMD_GET:
     {
       CkWindow *winPtr2;
@@ -650,6 +652,7 @@ Ck_OptionCmdObj(clientData, interp, objc, objv)
       }
       return TCL_OK;
     }
+    break;
   case CMD_READFILE:
     {
       int priority;
@@ -668,6 +671,7 @@ Ck_OptionCmdObj(clientData, interp, objc, objv)
       }
       return ReadOptionFile(interp, winPtr, Tcl_GetString(objv[2]), priority);
     }
+    break;
   default:
     /* -- should not be reached ever !! -- */
     Tcl_AppendResult(interp, "bad option \"", Tcl_GetString(objv[1]),

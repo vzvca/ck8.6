@@ -14,7 +14,7 @@ array set S {title "Montana Solitaire" lm 30 bm 30 tm 100 padx 5 pady 5
 proc DoDisplay {} {
     global S
  
-    eval destroy [winfo child .]
+    eval destroy [winfo children .]
     DoMenus
     
     frame .c  -width $S(w) -height $S(h) -bg $S(color) -attr dim
