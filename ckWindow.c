@@ -100,6 +100,8 @@ CkCmdObj objCommands[] =
    {"lower",		Ck_LowerCmdObj},
    {"option",		Ck_OptionCmdObj},
    {"raise",		Ck_RaiseCmdObj},
+   {"recorder",	        Ck_RecorderCmdObj},
+   {"tkwait",		Ck_TkwaitCmdObj},
    {"update",		Ck_UpdateCmdObj},
    {"winfo",		Ck_WinfoCmdObj},
    {(char *) NULL,	(CkCmdObjProc *) NULL}
@@ -124,8 +126,8 @@ CkCmd commands[] =
     {"pack",		Ck_PackCmd},
     {"place",		Ck_PlaceCmd},
     //{"raise",		Ck_RaiseCmd},
-    {"recorder",	Ck_RecorderCmd},
-    {"tkwait",		Ck_TkwaitCmd},
+    //{"recorder",	Ck_RecorderCmd},
+    //{"tkwait",		Ck_TkwaitCmd},
     //{"update",		Ck_UpdateCmd},
     //{"winfo",		Ck_WinfoCmd},
 

@@ -2098,6 +2098,133 @@ Ck_TkwaitCmd(clientData, interp, argc, argv)
     Tcl_ResetResult(interp);
     return TCL_OK;
 }
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * Ck_TkwaitCmdObj --
+ *
+ *	This procedure is invoked to process the "tkwait" Tcl command.
+ *	See the user documentation for details on what it does.
+ *
+ * Results:
+ *	A standard Tcl result.
+ *
+ * Side effects:
+ *	See the user documentation.
+ *
+ *----------------------------------------------------------------------
+ */
+
+int
+Ck_TkwaitCmdObj(clientData, interp, objc, objv)
+    ClientData clientData;	/* Main window associated with
+				 * interpreter. */
+    Tcl_Interp *interp;		/* Current interpreter. */
+    int objc;			/* Number of arguments. */
+    Tcl_Obj* CONST objv[];      /* Tcl_Obj* array of arguments. */
+{
+  static char *commands[] =
+    {
+     "variable",
+     "visibility",
+     "window",
+     NULL
+    };
+  enum
+  {
+   CMD_VARIABLE,
+   CMD_VISIBILITY,
+   CMD_WINDOW
+  };
+  
+  CkWindow *mainPtr = (CkWindow *) clientData;
+  int index, done;
+  char *argv2;
+  
+  if (objc != 3) {
+    Tcl_WrongNumArgs( interp, 1, objv, "variable|visible|window name");
+    return TCL_ERROR;
+  }
+  if (Tcl_GetIndexFromObj( interp, objv[1], commands, "option", TCL_EXACT, &index) != TCL_OK) {
+    return TCL_ERROR;
+  }
+
+  argv2 = Tcl_GetString(objv[2]);
+  switch (index) {
+  case CMD_VARIABLE:
+    {
+      if (Tcl_TraceVar(interp, argv2,
+		       TCL_GLOBAL_ONLY|TCL_TRACE_WRITES|TCL_TRACE_UNSETS,
+		       WaitVariableProc, (ClientData) &done) != TCL_OK) {
+	return TCL_ERROR;
+      }
+      done = 0;
+      while (!done) {
+	Tk_DoOneEvent(0);
+      }
+      Tcl_UntraceVar(interp, argv2,
+		     TCL_GLOBAL_ONLY|TCL_TRACE_WRITES|TCL_TRACE_UNSETS,
+		     WaitVariableProc, (ClientData) &done);
+    }
+    break;
+  case CMD_VISIBILITY:
+    {
+      CkWindow *winPtr;
+
+      winPtr = Ck_NameToWindow(interp, argv2, mainPtr);
+      if (winPtr == NULL) {
+	return TCL_ERROR;
+      }
+      Ck_CreateEventHandler(winPtr,
+			    CK_EV_MAP | CK_EV_UNMAP | CK_EV_EXPOSE | CK_EV_DESTROY,
+			    WaitVisibilityProc, (ClientData) &done);
+      done = 0;
+      while (!done) {
+	Tk_DoOneEvent(0);
+      }
+      Ck_DeleteEventHandler(winPtr,
+			    CK_EV_MAP | CK_EV_UNMAP | CK_EV_EXPOSE | CK_EV_DESTROY,
+			    WaitVisibilityProc, (ClientData) &done);
+    }
+    break;
+  case CMD_WINDOW:
+    {
+      CkWindow *winPtr;
+
+      winPtr = Ck_NameToWindow(interp, argv2, mainPtr);
+      if (winPtr == NULL) {
+	return TCL_ERROR;
+      }
+      Ck_CreateEventHandler(winPtr, CK_EV_DESTROY,
+			    WaitWindowProc, (ClientData) &done);
+      done = 0;
+      while (!done) {
+	Tk_DoOneEvent(0);
+      }
+      /*
+       * Note:  there's no need to delete the event handler.  It was
+       * deleted automatically when the window was destroyed.
+       */
+    }
+    break;
+  default:
+    {
+      /* -- should never be reached -- */
+      Tcl_AppendResult(interp, "bad option \"", Tcl_GetString(objv[1]),
+		       "\": must be variable, visibility, or window", (char *) NULL);
+      return TCL_ERROR;
+    }
+  }
+
+  /*
+   * Clear out the interpreter's result, since it may have been set
+   * by event handlers.
+   */
+  
+  Tcl_ResetResult(interp);
+  return TCL_OK;
+}
 
 static char *
 WaitVariableProc(clientData, interp, name1, name2, flags)

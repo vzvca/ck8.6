@@ -535,5 +535,200 @@ badStopArgs:
     }
     return TCL_OK;
 }
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * Ck_RecorderCmdObj --
+ *
+ *	This procedure is invoked to process the "recorder" Tcl command.
+ *	See the user documentation for details on what it does.
+ *
+ * Results:
+ *	A standard Tcl result.
+ *
+ * Side effects:
+ *	See the user documentation.
+ *
+ *----------------------------------------------------------------------
+ */
+
+int
+Ck_RecorderCmdObj(clientData, interp, objc, objv)
+     ClientData clientData;	/* Main window associated with
+				 * interpreter. */
+     Tcl_Interp *interp;		/* Current interpreter. */
+     int objc;			/* Number of arguments. */
+Tcl_Obj* CONST objv[];      /* Tcl_Obj* array of arguments. */
+{
+  static char *commands[] =
+    {
+     "replay",
+     "start",
+     "stop",
+     NULL
+    };
+  enum
+  {
+   CMD_REPLAY,
+   CMD_START,
+   CMD_STOP
+  };
+  
+  Recorder *recPtr = ckRecorder;
+  CkWindow *mainPtr = (CkWindow *) clientData;
+  int index;
+
+  if (recPtr == NULL) {
+    recPtr = (Recorder *) ckalloc(sizeof (Recorder));
+    recPtr->mainPtr = mainPtr;
+    recPtr->interp = NULL;
+    recPtr->timerRunning = 0;
+    recPtr->lastEvent.sec = recPtr->lastEvent.usec = 0;
+    recPtr->record = NULL;
+    recPtr->replay = NULL;
+    recPtr->withDelay = 0;
+    ckRecorder = recPtr;
+  }
+
+  if (objc < 2) {
+    Tcl_WrongNumArgs(interp, 1, objv, "option ?arg?");
+    return TCL_ERROR;
+  }
+  if (Tcl_GetIndexFromObj( interp, objv[1], commands, "option", TCL_EXACT, &index) != TCL_OK) {
+    return TCL_ERROR;
+  }
+
+  switch (index) {
+  case CMD_REPLAY:
+    {
+      char *fileName;
+      Tcl_DString buffer;
+      Tcl_Channel newReplay;
+
+      if (objc != 3) {
+	Tcl_WrongNumArgs( interp, 2, objv, "fileName");
+	return TCL_ERROR;
+      }
+
+      fileName = Tcl_TranslateFileName(interp, Tcl_GetString(objv[2]), &buffer);
+      if (fileName == NULL) {
+      replayError:
+	Tcl_DStringFree(&buffer);
+	return TCL_ERROR;
+      }
+      newReplay = Tcl_OpenFileChannel(interp, fileName, "r", 0);
+      if (newReplay == NULL)
+	goto replayError;
+      Tcl_DStringFree(&buffer);
+      Tcl_Gets(newReplay, &buffer);
+      if (strncmp("# CK-RECORDER", Tcl_DStringValue(&buffer), 13) != 0) {
+	Tcl_Close(NULL, newReplay);
+	Tcl_AppendResult(interp, "invalid file for replay", (char *) NULL);
+	goto replayError;
+      }
+      if (recPtr->replay != NULL) {
+	if (recPtr->timerRunning)
+	  Tk_DeleteTimerHandler(recPtr->timer);
+	Tcl_Close(NULL, recPtr->replay);
+	recPtr->timerRunning = 0;
+      }
+      recPtr->replay = newReplay;
+      recPtr->interp = interp;
+      Tk_DoWhenIdle(RecorderReplay, (ClientData) recPtr);
+    }
+    break;
+  case CMD_START:
+    {
+      char *fileName;
+      int withDelay = 0, fileArg = 2;
+      Tcl_DString buffer;
+      Tcl_Channel newRecord;
+      char *string, *argv2;
+
+      if (objc < 3 || objc > 4) {
+	Tcl_WrongNumArgs(interp, 2, objv, "?-withdelay? fileName");
+	return TCL_ERROR;
+      }
+      argv2 = Tcl_GetString(objv[2]);
+      if (objc == 4) {
+	if (strcmp(argv2, "-withdelay") != 0) {
+	  Tcl_AppendResult(interp, "expecting \"-withdelay\" but got \"",
+			   argv2, "\"", (char *) NULL);
+	  return TCL_ERROR;
+	}
+	withDelay++;
+	fileArg++;
+      }
+      fileName = Tcl_GetString(objv[fileArg]);
+      fileName = Tcl_TranslateFileName(interp, fileName, &buffer);
+      if (fileName == NULL) {
+      startError:
+	Tcl_DStringFree(&buffer);
+	return TCL_ERROR;
+      }
+      newRecord = Tcl_OpenFileChannel(interp, fileName, "w", 0666);
+      if (newRecord == NULL)
+	goto startError;
+      if (recPtr->record != NULL)
+	Tcl_Close(NULL, recPtr->record);
+      else {
+	recPtr->lastEvent.sec = recPtr->lastEvent.usec = 0;
+	Ck_CreateGenericHandler(RecorderInput, (ClientData) recPtr);
+      }
+      recPtr->record = newRecord;
+      recPtr->withDelay = withDelay;
+      string = "# CK-RECORDER\n# ";
+      Tcl_Write(recPtr->record, string, strlen(string));
+      Tcl_Eval(interp, "clock format [clock seconds]");
+      Tcl_Write(recPtr->record, Tcl_GetString(Tcl_GetObjResult(interp)), -1);
+      Tcl_ResetResult(interp);
+      Tcl_Write(recPtr->record, "\n# ", 3);
+      string = Tcl_GetVar(interp, "argv0", TCL_GLOBAL_ONLY);
+      Tcl_Write(recPtr->record, string, strlen(string));
+      Tcl_Write(recPtr->record, " ", 1);
+      string = Tcl_GetVar(interp, "argv", TCL_GLOBAL_ONLY);
+      Tcl_Write(recPtr->record, string, strlen(string));
+      Tcl_Write(recPtr->record, "\n", 1);
+      Tcl_DStringFree(&buffer);
+    }
+    break;
+  case CMD_STOP:
+    {
+      if (objc > 3) {
+	Tcl_WrongNumArgs(interp, 2, objv, "?replay?");
+	return TCL_ERROR;
+      }
+      if (objc == 3) {
+	if (strcmp(Tcl_GetString(objv[2]), "replay") != 0) {
+	  Tcl_AppendResult(interp, "expecting \"replay\" but got \"",
+			   Tcl_GetString(objv[2]), "\"", (char *) NULL);
+	  return TCL_ERROR;
+	}
+	if (recPtr->replay != NULL) {
+	  if (recPtr->timerRunning)
+	    Tk_DeleteTimerHandler(recPtr->timer);
+	  Tcl_Close(NULL, recPtr->replay);
+	  recPtr->replay = NULL;
+	  recPtr->timerRunning = 0;
+	}
+      }
+      else if (recPtr->record != NULL) {
+	Tcl_Close(NULL, recPtr->record);
+	Ck_DeleteGenericHandler(RecorderInput, (ClientData) recPtr);
+	recPtr->record = NULL;
+      }
+    }
+    break;
+  default:
+    {
+      /* -- should never be reached -- */
+      Tcl_AppendResult(interp, "wrong # args: should be \"",
+		       Tcl_GetString(objv[0]), " replay, start, or stop\"", (char *) NULL);
+      return TCL_ERROR;
+    }
+  }
+  return TCL_OK;
+}
 
 

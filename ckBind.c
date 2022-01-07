@@ -177,6 +177,12 @@ static EventInfo eventArray[CK_MAX_EV] =
    {"Shift",            0,                      CK_EV_KEYPRESS | CK_EV_MOUSE},
    {"Double",           0,                      CK_EV_MOUSE_DOWN},
    {"Triple",           0,                      CK_EV_MOUSE_DOWN},
+   {"Button1",          0,                      CK_EV_MOUSE_MOVE},
+   {"Button2",          0,                      CK_EV_MOUSE_MOVE},
+   {"Button3",          0,                      CK_EV_MOUSE_MOVE},
+   {"B1",               0,                      CK_EV_MOUSE_MOVE},
+   {"B2",               0,                      CK_EV_MOUSE_MOVE},
+   {"B3",               0,                      CK_EV_MOUSE_MOVE},
    {"Destroy",          CK_EV_DESTROY,          CK_EV_DESTROY},
    {"Map",              CK_EV_MAP,              CK_EV_MAP},
    {"Unmap",            CK_EV_UNMAP,            CK_EV_UNMAP},
@@ -1038,6 +1044,24 @@ ParseModifiersHelper(interp, flags, field)
   else if (strcmp(field, "Triple") == 0) {
     f = CK_MOD_TRIPLE;
   }
+  else if (strcmp(field, "Button1") == 0) {
+    f = CK_MOD_B1;
+  }
+  else if (strcmp(field, "Button2") == 0) {
+    f = CK_MOD_B2;
+  }
+  else if (strcmp(field, "Button3") == 0) {
+    f = CK_MOD_B3;
+  }
+  else if (strcmp(field, "B1") == 0) {
+    f = CK_MOD_B1;
+  }
+  else if (strcmp(field, "B2") == 0) {
+    f = CK_MOD_B2;
+  }
+  else if (strcmp(field, "B3") == 0) {
+    f = CK_MOD_B3;
+  }
   else {
     /* not a flag - might be an error or signal
      * the end of modifiers sequence */
@@ -1101,6 +1125,10 @@ ParseModifiers(interp, pp, field, eventMask)
 	/* last parsed field wasn't a modifier 
 	 * return accumulated modifiers parsed so far. */
         return modifiers;
+      }
+      if ( modifier == ~0 ) {
+	/* the just parsed modifier was already specified */
+	return ~0;
       }
       modifiers |= modifier;
       
@@ -1291,6 +1319,13 @@ FindSequence(interp, bindPtr, object, eventString, create)
 
     modifiers = ParseModifiers(interp, &p, field, &eventMask);
     if ( modifiers == ~0 ) {
+      return NULL;
+    }
+    if ( eventMask == 0 ) {
+      /* the modifiers sequence is not compatible
+       * with any event type ! */
+      Tcl_AppendResult(interp, "invalid modifiers sequence",
+		       (char *) NULL);
       return NULL;
     }
         

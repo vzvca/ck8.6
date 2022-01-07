@@ -152,7 +152,10 @@ typedef union {
 #define CK_MOD_SHIFT    0x00000400
 #define CK_MOD_DOUBLE   0x00000800
 #define CK_MOD_TRIPLE   0x00001000
-#define CK_MOD_ALL      0x00001F00  /* all above flags ORed */
+#define CK_MOD_B1       0x00002000
+#define CK_MOD_B2       0x00004000
+#define CK_MOD_B3       0x00008000
+#define CK_MOD_ALL      0x0000FF00  /* all above flags ORed */
 
 /*
  * Additional key codes
