@@ -74,33 +74,56 @@ Ck_Uid ckNormalUid = NULL;
 typedef int (CkCmdProc) _ANSI_ARGS_((ClientData clientData,
 				     Tcl_Interp *interp,
 				     int argc, char **argv));
+typedef int (CkCmdObjProc) _ANSI_ARGS_((ClientData clientData,
+					Tcl_Interp *interp,
+					int objc, Tcl_Obj *CONST objv[]));
 
 typedef struct {
     char *name;				/* Name of command. */
     CkCmdProc *cmdProc;			/* Command procedure. */
 } CkCmd;
 
-CkCmd commands[] = {
+typedef struct {
+    char *name;				/* Name of command. */
+    CkCmdObjProc *cmdProc;      	/* Command procedure. */
+} CkCmdObj;
+
+CkCmdObj objCommands[] =
+  {
+    {"bell",		Ck_BellCmdObj},
+    {"destroy",		Ck_DestroyCmdObj},
+    {"focus",		Ck_FocusCmdObj},
+    {"exit",		Ck_ExitCmdObj},
+    {"lower",		Ck_LowerCmdObj},
+    {"option",		Ck_OptionCmdObj},
+    {"raise",		Ck_RaiseCmdObj},
+    {"update",		Ck_UpdateCmdObj},
+    
+    {(char *) NULL,	(CkCmdObjProc *) NULL}
+  };			  
+
+CkCmd commands[] =
+  {
     /*
      * Commands that are part of the intrinsics:
      */
 
-    {"bell",		Ck_BellCmd},
+    //@vca {"bell",		Ck_BellCmd},
     {"bind",		Ck_BindCmd},
     {"bindtags",	Ck_BindtagsCmd},
     {"curses",          Ck_CursesCmd},
-    {"destroy",		Ck_DestroyCmd},
+    //@vca {"destroy",		Ck_DestroyCmd},
     {"exit",		Ck_ExitCmd},
-    {"focus",		Ck_FocusCmd},
+    //@vca {"focus",		Ck_FocusCmd},
     {"grid",		Ck_GridCmd},
-    {"lower",		Ck_LowerCmd},
-    {"option",		Ck_OptionCmd},
+    //@vca {"lower",		Ck_LowerCmd},
+    //@vca {"option",		Ck_OptionCmd},
     {"pack",		Ck_PackCmd},
     {"place",		Ck_PlaceCmd},
-    {"raise",		Ck_RaiseCmd},
+    //@vca {"raise",		Ck_RaiseCmd},
     {"recorder",	Ck_RecorderCmd},
-    {"tkwait",		Ck_TkwaitCmd},
-    {"update",		Ck_UpdateCmd},
+    //@vca {"tkwait",		Ck_TkwaitCmd},
+    //@vca {"update",		Ck_UpdateCmd},
     {"winfo",		Ck_WinfoCmd},
 
     /*
@@ -455,6 +478,7 @@ Ck_CreateMainWindow(interp, className)
     Tcl_HashEntry *hPtr;
     CkMainInfo *mainPtr;
     CkWindow *winPtr;
+    CkCmdObj *cmdObjPtr;
     CkCmd *cmdPtr;
 #ifdef SIGTSTP
 #ifdef HAVE_SIGACTION
@@ -737,6 +761,11 @@ Ck_CreateMainWindow(interp, className)
     for (cmdPtr = commands; cmdPtr->name != NULL; cmdPtr++) {
 	Tcl_CreateCommand(interp, cmdPtr->name, cmdPtr->cmdProc,
 		(ClientData) winPtr, (Tcl_CmdDeleteProc *) NULL);
+    }
+
+    for (cmdObjPtr = objCommands; cmdObjPtr->name != NULL; cmdObjPtr++) {
+      Tcl_CreateObjCommand(interp, cmdObjPtr->name, cmdObjPtr->cmdProc,
+			   (ClientData) winPtr, (Tcl_CmdDeleteProc *) NULL);
     }
 
     /*

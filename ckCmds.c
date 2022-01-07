@@ -85,7 +85,7 @@ Ck_DestroyCmdObj(clientData, interp, objc, objv)
 				 * interpreter. */
     Tcl_Interp *interp;		/* Current interpreter. */
     int objc;			/* Number of arguments. */
-    Tcl_Obj *objv[];		/* Tcl_Obj* array of arguments. */
+    Tcl_Obj* CONST objv[];      /* Tcl_Obj* array of arguments. */
 {
     CkWindow *winPtr;
     CkWindow *mainPtr = (CkWindow *) clientData;
@@ -184,7 +184,7 @@ Ck_ExitCmdObj(clientData, interp, objc, objv)
 				 * interpreter. */
     Tcl_Interp *interp;		/* Current interpreter. */
     int objc;			/* Number of arguments. */
-    Tcl_Obj *objv[];		/* Tcl_Obj* array of arguments. */
+    Tcl_Obj* CONST objv[];      /* Tcl_Obj* array of arguments. */
 {
     extern CkMainInfo *ckMainInfo;
     int index = 1, noclear = 0, value = 0;
@@ -292,7 +292,7 @@ Ck_LowerCmdObj(clientData, interp, objc, objv)
 				 * interpreter. */
     Tcl_Interp *interp;		/* Current interpreter. */
     int objc;			/* Number of arguments. */
-    Tcl_Obj *objv[];		/* Tcl_Obj* array of arguments. */
+    Tcl_Obj* CONST objv[];      /* Tcl_Obj* array of arguments. */
 {
     CkWindow *mainPtr = (CkWindow *) clientData;
     CkWindow *winPtr, *other;
@@ -397,7 +397,7 @@ Ck_RaiseCmdObj(clientData, interp, objc, objv)
 				 * interpreter. */
     Tcl_Interp *interp;		/* Current interpreter. */
     int objc;			/* Number of arguments. */
-    Tcl_Obj *objv[];		/* Tcl_Obj* array of arguments. */
+    Tcl_Obj* CONST objv[];      /* Tcl_Obj* array of arguments. */
 {
     CkWindow *mainPtr = (CkWindow *) clientData;
     CkWindow *winPtr, *other;
@@ -480,7 +480,7 @@ Ck_BellCmdObj(clientData, interp, objc, objv)
 				 * interpreter. */
     Tcl_Interp *interp;		/* Current interpreter. */
     int objc;			/* Number of arguments. */
-    Tcl_Obj *objv[];		/* Tcl_Obj* array of arguments. */
+    Tcl_Obj* CONST objv[];      /* Tcl_Obj* array of arguments. */
 {
     beep();
     doupdate();
@@ -533,6 +533,72 @@ Ck_UpdateCmd(clientData, interp, argc, argv)
 	Tcl_AppendResult(interp, "wrong # args: should be \"",
 		argv[0], " ?idletasks|screen?\"", (char *) NULL);
 	return TCL_ERROR;
+    }
+
+    /*
+     * Handle all pending events, and repeat over and over
+     * again until all pending events have been handled.
+     */
+
+    while (Tk_DoOneEvent(flags) != 0) {
+	/* Empty loop body */
+    }
+
+    /*
+     * Must clear the interpreter's result because event handlers could
+     * have executed commands.
+     */
+
+    Tcl_ResetResult(interp);
+    return TCL_OK;
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * Ck_UpdateCmdObj --
+ *
+ *	This procedure is invoked to process the "update" Tcl command.
+ *	See the user documentation for details on what it does.
+ *
+ * Results:
+ *	A standard Tcl result.
+ *
+ * Side effects:
+ *	See the user documentation.
+ *
+ *----------------------------------------------------------------------
+ */
+
+int
+Ck_UpdateCmdObj(clientData, interp, objc, objv)
+    ClientData clientData;	/* Main window associated with
+				 * interpreter. */
+    Tcl_Interp *interp;		/* Current interpreter. */
+    int objc;			/* Number of arguments. */
+    Tcl_Obj* CONST objv[];      /* Tcl_Obj* array of arguments. */
+{
+    CkWindow *mainPtr = (CkWindow *) clientData;
+    int flags;
+
+    if (objc == 1)
+	flags = TK_DONT_WAIT;
+    else if (objc == 2) {
+      char *argv1 = Tcl_GetString(objv[1]);
+      if (strncmp(argv1, "screen", strlen(argv1)) == 0) {
+	wrefresh(curscr);
+	Ck_EventuallyRefresh(mainPtr);
+	return TCL_OK;
+      }
+      if (strncmp(argv1, "idletasks", strlen(argv1)) != 0) {
+	Tcl_AppendResult(interp, "bad argument \"", argv1,
+			 "\": must be idletasks or screen", (char *) NULL);
+	return TCL_ERROR;
+      }
+	flags = TK_IDLE_EVENTS;
+    } else {
+      Tcl_WrongNumArgs(interp, 1, objv, "?idletasks|screen?");
+      return TCL_ERROR;
     }
 
     /*
@@ -741,6 +807,245 @@ Ck_CursesCmd(clientData, interp, argc, argv)
 	return TCL_ERROR;
     }
     return TCL_OK;
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * Ck_CursesCmdObj --
+ *
+ *	This procedure is invoked to process the "curses" Tcl command.
+ *	See the user documentation for details on what it does.
+ *
+ * Results:
+ *	A standard Tcl result.
+ *
+ * Side effects:
+ *	See the user documentation.
+ *
+ *----------------------------------------------------------------------
+ */
+
+int
+Ck_CursesCmdObj(clientData, interp, objc, objv)
+    ClientData clientData;	/* Main window associated with
+				 * interpreter. */
+    Tcl_Interp *interp;		/* Current interpreter. */
+    int objc;			/* Number of arguments. */
+    Tcl_Obj* CONST objv[];      /* Tcl_Obj* array of arguments. */
+{
+  static char *commands[] =
+    {
+     "barcode",
+     "baudrate",
+     "encoding",
+     "gchar",
+     "haskey",
+     "purgeinput",
+     "refreshdelay",
+     "reversekludge",
+     "screendump",
+     "suspend",
+     NULL
+    };
+  enum
+  {
+   CMD_BARCODE,
+   CMD_BAUDRATE,
+   CMD_ENCODING,
+   CMD_GCHAR,
+   CMD_HASKEY,
+   CMD_PURGEINPUT,
+   CMD_REFRESHDELAY,
+   CMD_REVERSEKLUDGE,
+   CMD_SCREENDUMP,
+   CMD_SUSPEND
+  };
+
+  CkWindow *winPtr = (CkWindow *) clientData;
+  CkMainInfo *mainPtr = winPtr->mainPtr;
+  int index;
+  
+
+  if (objc < 2) {
+    Tcl_WrongNumArgs(interp, 1, objv, "option ?arg?");
+    return TCL_ERROR;
+  }
+  if (Tcl_GetIndexFromObj( interp, objv[1], commands, "option", TCL_EXACT, &index) != TCL_OK) {
+    return TCL_ERROR;
+  }
+
+  switch(index) {
+  case CMD_BARCODE:
+    return CkBarcodeCmdObj(clientData, interp, objc, objv);
+
+  case CMD_BAUDRATE:
+    {
+      if (objc != 2) {
+	Tcl_WrongNumArgs(interp, 2, objv, "");
+	return TCL_ERROR;
+      }
+      Tcl_SetObjResult( interp, Tcl_NewIntObj(baudrate()));
+      return TCL_OK;
+    }
+  case CMD_ENCODING:
+    {
+      if (objc == 2) {
+	return Ck_GetEncoding(interp);
+      }
+      else if (objc == 3) {
+	return Ck_SetEncoding(interp, Tcl_GetString(objv[2]));
+      }
+      else {
+	Tcl_WrongNumArgs(interp, 2, objv, "?name?");
+	return TCL_ERROR;
+      }
+    }
+  case CMD_GCHAR:
+    {
+      char buf[64];
+      long gchar;
+      int gc;
+
+      if (objc == 3) {
+	if (Ck_GetGChar(interp, Tcl_GetString(objv[2]), &gchar) != TCL_OK) {
+	  return TCL_ERROR;
+	}
+	Tcl_SetObjResult( interp, Tcl_NewLongObj(gchar));
+      }
+      else if (objc == 4) {
+	if (Tcl_GetIntFromObj(interp, objv[3], &gc) != TCL_OK) {
+	  return TCL_ERROR;
+	}
+	gchar = gc;
+	if (Ck_SetGChar(interp, Tcl_GetString(objv[2]), gchar) != TCL_OK) {
+	  return TCL_ERROR;
+	}
+      }
+      else {
+	Tcl_WrongNumArgs( interp, 2, objv, "charName ?value?");
+	return TCL_ERROR;
+      }
+    }
+  case CMD_HASKEY:
+    {
+	if (objc > 3) {
+	  Tcl_WrongNumArgs(interp, 2, objv, "?keySym?");
+	  return TCL_ERROR;
+	}
+	if (objc == 2) {
+	    return CkAllKeyNames(interp);
+	}
+	return CkTermHasKey(interp, Tcl_GetString(objv[2]));
+    }
+  case CMD_PURGEINPUT:
+    {
+	if (objc != 2) {
+	  Tcl_WrongNumArgs( interp, 2, objv, "");
+	  return TCL_ERROR;
+	}
+	while (getch() != ERR) {
+	  /* Empty loop body. */
+	}
+	return TCL_OK;
+    }
+  case CMD_REFRESHDELAY:
+    {
+	if (objc == 2) {
+	  Tcl_SetObjResult( interp, Tcl_NewIntObj(mainPtr->refreshDelay));
+	  return TCL_OK;
+	}
+	else if (objc == 3) {
+	    int delay;
+
+	    if (Tcl_GetIntFromObj(interp, objv[2], &delay) != TCL_OK) {
+		return TCL_ERROR;
+	    }
+	    mainPtr->refreshDelay = delay < 0 ? 0 : delay;
+	    return TCL_OK;
+	}
+	else {
+	  Tcl_WrongNumArgs( interp, 2, objv, "?milliseconds?");
+	  return TCL_ERROR;
+	}
+    }
+  case CMD_REVERSEKLUDGE:
+    {
+	int onoff;
+
+	if (objc == 2) {
+	  Tcl_SetObjResult(interp, Tcl_NewIntObj(!!(mainPtr->flags & CK_REVERSE_KLUDGE)));
+	}
+	else if (objc == 3) {
+	  if (Tcl_GetBooleanFromObj(interp, objv[2], &onoff) != TCL_OK) {
+	    return TCL_ERROR;
+	  }
+	  mainPtr->flags |= CK_REVERSE_KLUDGE;
+	}
+	else {
+	    Tcl_WrongNumArgs( interp, 2, objv, "?bool?");
+	    return TCL_ERROR;
+        }
+    }
+  case CMD_SCREENDUMP:
+    {
+	Tcl_DString buffer;
+	char *fileName;
+#ifdef HAVE_SCR_DUMP
+	int ret;
+#endif
+
+	if (objc != 3) {
+	  Tcl_WrongNumArgs( interp, 2, objv, "filename");
+	  return TCL_ERROR;
+	}
+	Tcl_DStringInit(&buffer);
+	fileName = Tcl_TildeSubst(interp, Tcl_GetString(objv[2]), &buffer);
+	if (fileName == NULL) {
+	    Tcl_DStringFree(&buffer);
+	    return TCL_ERROR;
+	}
+#ifdef HAVE_SCR_DUMP
+	ret = scr_dump(fileName);
+	Tcl_DStringFree(&buffer);
+	if (ret != OK) {
+	  Tcl_SetObjResult(interp, Tcl_NewStringObj("screen dump failed",-1));
+	  return TCL_ERROR;
+	}
+	return TCL_OK;
+#else
+	Tcl_SetObjResult(interp, Tcl_NewStringObj("screen dump not supported by this curses",-1));
+	return TCL_ERROR;
+#endif
+    }
+    case CMD_SUSPEND:
+      {
+	if (objc != 2) {
+	  Tcl_WrongNumArgs( interp, 2, objv, "");
+	  return TCL_ERROR;
+	}
+#ifndef __WIN32__
+	curs_set(1);
+	endwin();
+#ifdef SIGTSTP
+	kill(getpid(), SIGTSTP);
+#else
+	kill(getpid(), SIGSTOP);
+#endif
+	Ck_EventuallyRefresh(winPtr);
+#endif
+    }
+  default:
+    {
+      /* -- should never be reached -- */
+      Tcl_AppendResult(interp, "bad option \"", Tcl_GetString(objv[1]),
+		       "\": must be barcode, baudrate, encoding, gchar, haskey, ",
+		       "purgeinput, refreshdelay, reversekludge, screendump or suspend",
+		       (char *) NULL);
+      return TCL_ERROR;
+    }
+  }
+  return TCL_OK;
 }
 
 /*

@@ -579,7 +579,7 @@ Ck_OptionCmdObj(clientData, interp, objc, objv)
                                  * interpreter. */
      Tcl_Interp *interp;                /* Current interpreter. */
      int objc;                  /* Number of arguments. */
-     Tcl_Obj *objv[];           /* Tcl_Obj* array of arguments. */
+     Tcl_Obj* CONST objv[];     /* Tcl_Obj* array of arguments. */
 {
   static char *commands[] = { "add", "clear", "get", "readfile", NULL };
   enum { CMD_ADD, CMD_CLEAR, CMD_GET, CMD_READFILE };

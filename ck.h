@@ -615,6 +615,8 @@ extern Ck_Uid ckDisabledUid;
 EXTERN int	CkAllKeyNames _ANSI_ARGS_((Tcl_Interp *interp));
 EXTERN int	CkBarcodeCmd _ANSI_ARGS_((ClientData clientData,
 					  Tcl_Interp *interp, int argc, char **argv));
+EXTERN int	CkBarcodeCmdObj _ANSI_ARGS_((ClientData clientData,
+					     Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]));
 EXTERN void	CkBindEventProc _ANSI_ARGS_((CkWindow *winPtr,
 					     CkEvent *eventPtr));
 EXTERN int	CkCopyAndGlobalEval _ANSI_ARGS_((Tcl_Interp *interp,
@@ -796,39 +798,74 @@ EXTERN void	Ck_UnmapWindow _ANSI_ARGS_((CkWindow *winPtr));
 
 EXTERN int	Ck_BellCmd _ANSI_ARGS_((ClientData clientData,
 					Tcl_Interp *interp, int argc, char **argv));
+EXTERN int	Ck_BellCmdObj _ANSI_ARGS_((ClientData clientData,
+					   Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]));
 EXTERN int	Ck_BindCmd _ANSI_ARGS_((ClientData clientData,
 					Tcl_Interp *interp, int argc, char **argv));
+EXTERN int	Ck_BindCmdObj _ANSI_ARGS_((ClientData clientData,
+					   Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]));
 EXTERN int	Ck_BindtagsCmd _ANSI_ARGS_((ClientData clientData,
 					    Tcl_Interp *interp, int argc, char **argv));
+EXTERN int	Ck_BindtagsCmdObj _ANSI_ARGS_((ClientData clientData,
+					   Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]));
 EXTERN int	Ck_CursesCmd _ANSI_ARGS_((ClientData clientData,
 					  Tcl_Interp *interp, int argc, char **argv));
+EXTERN int	Ck_CursesCmdObj _ANSI_ARGS_((ClientData clientData,
+					   Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]));
 EXTERN int	Ck_DestroyCmd _ANSI_ARGS_((ClientData clientData,
 					   Tcl_Interp *interp, int argc, char **argv));
+EXTERN int	Ck_DestroyCmdObj _ANSI_ARGS_((ClientData clientData,
+					   Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]));
 EXTERN int	Ck_ExitCmd _ANSI_ARGS_((ClientData clientData,
 					Tcl_Interp *interp, int argc, char **argv));
+EXTERN int	Ck_ExitCmdObj _ANSI_ARGS_((ClientData clientData,
+					   Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]));
 EXTERN int	Ck_FocusCmd _ANSI_ARGS_((ClientData clientData,
 					 Tcl_Interp *interp, int argc, char **argv));
+EXTERN int	Ck_FocusCmdObj _ANSI_ARGS_((ClientData clientData,
+					   Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]));
 EXTERN int	Ck_GridCmd _ANSI_ARGS_((ClientData clientData,
 					Tcl_Interp *interp, int argc, char **argv));
+EXTERN int	Ck_GridCmdObj _ANSI_ARGS_((ClientData clientData,
+					   Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]));
 EXTERN int	Ck_LowerCmd _ANSI_ARGS_((ClientData clientData,
 					 Tcl_Interp *interp, int argc, char **argv));
+EXTERN int	Ck_LowerCmdObj _ANSI_ARGS_((ClientData clientData,
+					   Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]));
 EXTERN int	Ck_OptionCmd _ANSI_ARGS_((ClientData clientData,
 					  Tcl_Interp *interp, int argc, char **argv));
+EXTERN int	Ck_OptionCmdObj _ANSI_ARGS_((ClientData clientData,
+					   Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]));
 EXTERN int	Ck_PackCmd _ANSI_ARGS_((ClientData clientData,
 					Tcl_Interp *interp, int argc, char **argv));
+EXTERN int	Ck_PackCmdObj _ANSI_ARGS_((ClientData clientData,
+					   Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]));
 EXTERN int	Ck_PlaceCmd _ANSI_ARGS_((ClientData clientData,
 					 Tcl_Interp *interp, int argc, char **argv));
+EXTERN int	Ck_PlaceCmdObj _ANSI_ARGS_((ClientData clientData,
+					   Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]));
 EXTERN int	Ck_RaiseCmd _ANSI_ARGS_((ClientData clientData,
 					 Tcl_Interp *interp, int argc, char **argv));
+EXTERN int	Ck_RaiseCmdObj _ANSI_ARGS_((ClientData clientData,
+					   Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]));
 EXTERN int	Ck_RecorderCmd _ANSI_ARGS_((ClientData clientData,
 					    Tcl_Interp *interp, int argc, char **argv));
+EXTERN int	Ck_RecorderCmdObj _ANSI_ARGS_((ClientData clientData,
+					   Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]));
 EXTERN int	Ck_TkwaitCmd _ANSI_ARGS_((ClientData clientData,
 					  Tcl_Interp *interp, int argc, char **argv));
+EXTERN int	Ck_TkwaitCmdObj _ANSI_ARGS_((ClientData clientData,
+					   Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]));
 EXTERN int	Ck_UpdateCmd _ANSI_ARGS_((ClientData clientData,
 					  Tcl_Interp *interp, int argc, char **argv));
+EXTERN int	Ck_UpdateCmdObj _ANSI_ARGS_((ClientData clientData,
+					   Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]));
 EXTERN int	Ck_WinfoCmd _ANSI_ARGS_((ClientData clientData,
 					 Tcl_Interp *interp, int argc, char **argv));
+EXTERN int	Ck_WinfoCmdObj _ANSI_ARGS_((ClientData clientData,
+					   Tcl_Interp *interp, int objc, Tcl_Obj* CONST objv[]));
 
+//@vca: next 2 to be removed - here for Tcl 7 compat
 EXTERN int	Tk_AfterCmd _ANSI_ARGS_((ClientData clientData,
 					 Tcl_Interp *interp, int argc, char **argv));
 EXTERN int	Tk_FileeventCmd _ANSI_ARGS_((ClientData clientData,

@@ -1216,3 +1216,82 @@ badArgs:
     }
     return TCL_ERROR;
 }
+
+/*
+ *--------------------------------------------------------------
+ *
+ * CkBarcodeCmdObj --
+ *
+ *	Minor command handler to deal with barcode reader.
+ *	Called by "curses" Tcl command.
+ *
+ * Results:
+ *	TCL_OK or TCL_ERROR.
+ *
+ *
+ *--------------------------------------------------------------
+ */
+
+int
+CkBarcodeCmdObj(clientData, interp, objc, objv)
+    ClientData clientData;      /* Main window associated with
+			         * interpreter. */
+    Tcl_Interp *interp;         /* Current interpreter. */
+    int objc;			/* Number of arguments. */
+    Tcl_Obj * CONST objv[];     /* Tcl_Obj* array of arguments. */
+{
+    CkMainInfo *mainPtr = ((CkWindow *) (clientData))->mainPtr;
+    BarcodeData *bd = (BarcodeData *) mainPtr->barcodeData;
+
+    if (objc == 2) {
+      if (mainPtr->flags & CK_HAS_BARCODE) {
+	char buffer[32];
+	sprintf(buffer, "%d %d %d", bd->startChar, bd->endChar,
+		bd->pkttime);
+	Tcl_AppendResult(interp, buffer, (char *) NULL);
+      }
+      return TCL_OK;
+    } else if (objc == 3) {
+      if (strcmp(Tcl_GetString(objv[2]), "off") != 0) {
+	Tcl_AppendResult(interp, "expecting \"off\" but got \"",
+			 Tcl_GetString(objv[2]), "\"", (char *) NULL);
+	return TCL_ERROR;
+      }
+      if (mainPtr->flags & CK_HAS_BARCODE) {
+	Tk_DeleteTimerHandler(bd->timer);
+	mainPtr->flags &= ~CK_HAS_BARCODE;
+	mainPtr->barcodeData = NULL;
+	ckfree((char *) bd);
+      }
+      return TCL_OK;
+    } else if (objc == 4 || objc == 5) {
+	int start, end, pkttime;
+
+	if (Tcl_GetIntFromObj(interp, objv[2], &start) != TCL_OK ||
+	    Tcl_GetIntFromObj(interp, objv[3], &end) != TCL_OK) {
+	    return TCL_ERROR;
+	}
+	if (objc > 4 && Tcl_GetIntFromObj(interp, objv[4], &pkttime) != TCL_OK) {
+	  return TCL_ERROR;
+	}
+	if (!(mainPtr->flags & CK_HAS_BARCODE)) {
+	    bd = (BarcodeData *) ckalloc(sizeof (BarcodeData));
+	    mainPtr->flags |= CK_HAS_BARCODE;
+	    mainPtr->barcodeData = (ClientData) bd;
+	    bd->pkttime = DEFAULT_BARCODE_TIMEOUT;
+	    bd->timer = (Tk_TimerToken) NULL;
+	    bd->delivered = 0;
+	    bd->index = -1;
+	}
+	if (objc > 4 && pkttime > 50) {
+	  bd->pkttime = pkttime;
+	}
+	bd->startChar = start;
+	bd->endChar = end;
+	return TCL_OK;
+    } else {
+      Tcl_WrongNumArgs( interp, 2, objv, "?off? or startChar endChar ?timeout?");
+      return TCL_ERROR;
+    }
+    return TCL_ERROR;
+}

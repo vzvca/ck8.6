@@ -103,7 +103,7 @@ Ck_FocusCmdObj(clientData, interp, objc, objv)
 				 * interpreter. */
     Tcl_Interp *interp;		/* Current interpreter. */
     int objc;			/* Number of arguments. */
-    Tcl_Obj *objv[];		/* Argument strings. */
+    Tcl_Obj * CONST objv[];	/* Tcl_Obj* array of arguments. */
 {
     CkWindow *winPtr = (CkWindow *) clientData;
     CkWindow *newPtr, *focusWinPtr;
