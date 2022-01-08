@@ -15,6 +15,9 @@ I got interested in this library to learn `curses`.
  * More colors and a way to define custom colors
  * Support for `<Alt-key>` form of bindings
  * Support for virtual events form of bindings (like `<<Paste>>`)
+ * Support for mouse `<Motion>` event
+ * Support for mouse `<Button-4>` and `<Button-5>`
+ * Removed Tcl 7.x specific code
 
 Incoming changes
  * Add a spinbox widget.
@@ -77,7 +80,7 @@ There is a 'tee' command which can be used to redirect what is read from the TTY
 
 There are currently some bugs and missing features in the terminal widget :
   * Missing : Select / Copy text with mouse.
-  * Missing : Mouse reporting is not implemented. It should be possible to *forward* mouse events to the terminal widget. It will be added but requires a better support of mouse in the application (see section about mouse).
+  * Partial : Mouse reporting is partially implemented. Mouse events are *forwarded* to the terminal widget.
   * Bug : display of framing characters when the terminal advertises itself as `xterm`
   * Bug : terminal type `linux` is not working.
   * Others to discover ...
