@@ -11,7 +11,11 @@ pack .f -fill both -expand yes
 
 bind .f <Key-q> {exit 0}
 
-bind .f <Motion> { settxt "Mouse @ %y %x" }
-bind .f <1> { settxt "Ring !"; bell }
+bind .f <Motion> { settxt "Mouse @ %x %y" }
+bind .f <1> { settxt "Button-1 !" }
+bind .f <ButtonRelease-3> { settxt "Release-3 !" }
+
+bind .f <Button-4> { settxt "Button-4 !" }
+bind .f <Button-5> { settxt "Button-5 !" }
 
 focus .f

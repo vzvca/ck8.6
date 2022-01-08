@@ -1411,7 +1411,7 @@ FindSequence(interp, bindPtr, object, eventString, create)
           if (patPtr->detail == NoSymbol) {
 	    if (*p == '>' ) {
 	      /* handle <KeyPress> sequence without any key specified */
-              patPtr->detail = -1;
+              patPtr->detail = 0;
 	    }
             else if (isprint(field[0]) && (field[1]==0)) {
               patPtr->detail = field[0];

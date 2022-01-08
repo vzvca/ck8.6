@@ -62,6 +62,8 @@ proc new-term { {ckey "b"} } {
     mk-button t${TX} "Term #${TX}" "set-term .t${TX}"
     bind .l.t${TX} <Control-q> "close-term .t${TX}"
     bind .l.t${TX} <Control-o> "new-term"
+
+    bindtags .t${TX} .t${TX} 
 }
 
 proc close-term { t } {

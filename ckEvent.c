@@ -704,7 +704,7 @@ CkHandleInput(clientData, mask)
 
     if (code == KEY_MOUSE) {
         MEVENT mEvent;
-	int i, modifiers = 0;
+	int i, button = 0, modifiers = 0;
 
 	if (mainPtr->flags & CK_MOUSE_XTERM) {
 	    goto getMouse;
@@ -728,12 +728,22 @@ CkHandleInput(clientData, mask)
 	  int mods = modifiers;
 
 	  /* update modifiers */
-	  mods = (BUTTON_TRIPLE_CLICK(mEvent.bstate, i)) ? CK_MOD_TRIPLE: 0;
-	  mods = (BUTTON_DOUBLE_CLICK(mEvent.bstate, i)) ? CK_MOD_DOUBLE: 0;
+	  // @todo: these modifiers don't seem to be reported by curses
+	  mods |= (BUTTON_TRIPLE_CLICK(mEvent.bstate, i)) ? CK_MOD_TRIPLE: 0;
+	  mods |= (BUTTON_DOUBLE_CLICK(mEvent.bstate, i)) ? CK_MOD_DOUBLE: 0;
 	  
 	  if (BUTTON_PRESS(mEvent.bstate, i)) {
-	    event.mouse.type = CK_EV_MOUSE_DOWN;
-	    goto mouseEventNC;
+	    if (!(mEvent.bstate & REPORT_MOUSE_POSITION)) { 
+	      event.mouse.type = CK_EV_MOUSE_DOWN;
+	      goto mouseEventNC;
+	    }
+	    else {
+	      /* this is a mouse move with button pressed
+	       * report it */
+	      // @todo: this code is never executed
+	      button = i;
+	      break;
+	    }
 	  }
 	  else if (BUTTON_RELEASE(mEvent.bstate, i)) {
 	    event.mouse.type = CK_EV_MOUSE_UP;
@@ -751,16 +761,20 @@ CkHandleInput(clientData, mask)
 	}
 
 	// reached for mouse motion events (no buttons down)
-	event.mouse.type = CK_EV_MOUSE_MOVE;
-	event.mouse.button = 0;
-	event.mouse.modifiers = modifiers;
-	event.mouse.rootx = mEvent.x;
-	event.mouse.rooty = mEvent.y;
-	event.mouse.x = mEvent.x;
-	event.mouse.y = mEvent.y;
-	event.mouse.winPtr = Ck_GetWindowXY(mainPtr, &event.mouse.x,
-					    &event.mouse.y, 1);
-	goto mkEvent;
+	if (mEvent.bstate & REPORT_MOUSE_POSITION) {
+	  event.mouse.type = CK_EV_MOUSE_MOVE;
+	  event.mouse.button = button;
+	  event.mouse.modifiers = modifiers;
+	  event.mouse.rootx = mEvent.x;
+	  event.mouse.rooty = mEvent.y;
+	  event.mouse.x = mEvent.x;
+	  event.mouse.y = mEvent.y;
+	  event.mouse.winPtr = Ck_GetWindowXY(mainPtr, &event.mouse.x,
+					      &event.mouse.y, 1);
+	  goto mkEvent;
+	}
+
+	goto readagain;
     }
 #endif
 

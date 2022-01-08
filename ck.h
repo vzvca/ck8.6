@@ -271,13 +271,11 @@ typedef struct CkMainInfo {
   struct CkWindow *focusPtr;	/* Identifies window that currently has the
 				 * focus. NULL means nobody has the focus.
 				 * Managed by ckFocus.c. */
-  Ck_BindingTable bindingTable;
-  /* Used in conjunction with "bind" command
-   * to bind events to Tcl commands. */
-  struct ElArray *optionRootPtr;
-  /* Top level of option hierarchy for this
-   * main window.  NULL means uninitialized.
-   * Managed by ckOption.c. */
+  Ck_BindingTable bindingTable; /* Used in conjunction with "bind" command
+				 * to bind events to Tcl commands. */
+  struct ElArray *optionRootPtr;/* Top level of option hierarchy for this
+				 * main window.  NULL means uninitialized.
+				 * Managed by ckOption.c. */
   int maxWidth, maxHeight;      /* Max dimensions of curses screen. */
   int refreshCount;		/* Counts number of calls
 				 * to Ck_EventuallyRefresh. */
@@ -291,6 +289,10 @@ typedef struct CkMainInfo {
 #if CK_USE_UTF
   Tcl_Encoding isoEncoding;
 #endif
+
+  struct CkWindow *mousePtr;    /* if a button is currently down
+				 * it holds the window where it was pressed. */
+  int button;                   /* current mouse button */
 } CkMainInfo;
 
 #define CK_HAS_COLOR        1

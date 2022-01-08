@@ -20,7 +20,7 @@
 #include "ck.h"
 #include "default.h"
 
-extern int setenv (const char *__string, const char *__value, int __overwrite);;
+extern int setenv (const char *__string, const char *__value, int __overwrite);
 
 /*
  * Code below is taken form MTM
@@ -428,18 +428,20 @@ typedef struct Terminal_s {
  *                              are not sent to the forked subprocess.
  *                              They are interpreted to move around in the buffer.
  *
- * MODE_EXPECT:                 The user doesn't interact with the terminal.
- *                              the interaction is delegated to a TCL script
- *                              or C function that automates the dialog.
- *
  */
 
 #define REDRAW_PENDING          1
 #define DISCONNECTED            2
 #define MODE_INTERACT           4
 #define MODE_COMMAND            8
-#define MODE_EXPECT             16
 #define DISPLAY_BANNER          32
+#define DISPLAY_TRAILER         64
+#define MOUSE_REPORT_1000      128  /* if set mouse buttons events are forwarded */
+#define MOUSE_REPORT_1001      256  /* unsupported mouse mode */
+#define MOUSE_REPORT_1002      512  /* if set mouse motion & buttons events are forwarded */
+#define MOUSE_REPORT_1003      (MOUSE_REPORT_1000 | MOUSE_REPORT_1002)
+
+#define MOUSE_REPORT (MOUSE_REPORT_1000 | MOUSE_REPORT_1002 | MOUSE_REPORT_1003)
 
 static int ExecParseProc(ClientData clientData,
 			 Tcl_Interp *interp, CkWindow *winPtr,
@@ -553,6 +555,8 @@ static int      TerminalWidgetCmd _ANSI_ARGS_((ClientData clientData,
 
 static void     TerminalKeyEventProc _ANSI_ARGS_((ClientData clientData,
 						  CkEvent *eventPtr));
+static void     TerminalMouseEventProc _ANSI_ARGS_((ClientData clientData,
+			  			    CkEvent *eventPtr));
 static void     TerminalPtyProc _ANSI_ARGS_((ClientData clientData, int flags));
 static void     SendToTerminal  _ANSI_ARGS_((Terminal *terminalPtr, char *text));
 static void     TerminalGiveFocus  _ANSI_ARGS_((Terminal *terminalPtr));
@@ -1165,6 +1169,7 @@ HANDLER(ris) {
  */
 HANDLER(mode) {
   bool set = (w == L'h');
+  int flg = 0;
   for (int i = 0; i < argc; i++) switch (P0(i)){
     case  1: n->pnm = set;              break;
     case  3: CALL(cls);                 break;
@@ -1174,6 +1179,23 @@ HANDLER(mode) {
     case 20: n->lnm = set;              break;
     case 25: s->vis = set? 1 : 0;       break;
     case 34: s->vis = set? 1 : 2;       break;
+    case 1000:
+      flg = MOUSE_REPORT_1000; goto doflg;
+    case 1001:
+      /* @vca: unsupported */
+      break;
+    case 1002:
+      flg = MOUSE_REPORT_1002; goto doflg;
+    case 1003:
+      flg = MOUSE_REPORT_1003;
+    doflg:
+      if (set) {
+	term->flags |= flg;
+      }
+      else {
+	term->flags &= ~flg;
+      }
+      break;
     case 1048: CALL((set? sc : rc));    break;
     case 1049:
       CALL((set? sc : rc)); /* fall-through */
@@ -1739,9 +1761,6 @@ draw(NODE *n) /* Draw a node. */
     if ( terminalPtr->flags & MODE_COMMAND ) {
       mvwprintw( winPtr->window, 0, width - 7, "COMMAND" );
     }
-    else if ( terminalPtr->flags & MODE_EXPECT ) {
-      mvwprintw( winPtr->window, 0, width - 6, "EXPECT" );
-    }
     else {
       mvwprintw( winPtr->window, 0, width - 6, "NORMAL" );
     }
@@ -2208,6 +2227,9 @@ CkInitTerminal(interp, winPtr, argc, argv)
     Ck_CreateEventHandler(terminalPtr->winPtr,
             CK_EV_KEYPRESS,
             TerminalKeyEventProc, (ClientData) terminalPtr);
+    Ck_CreateEventHandler(terminalPtr->winPtr,
+	    CK_EV_MOUSE_DOWN | CK_EV_MOUSE_UP | CK_EV_MOUSE_MOVE,
+            TerminalMouseEventProc, (ClientData) terminalPtr);
 
     if (ConfigureTerminal(interp, terminalPtr, argc, argv, 0) != TCL_OK) {
         Ck_DestroyWindow(terminalPtr->winPtr);
@@ -2919,7 +2941,7 @@ TerminalEventProc(clientData, eventPtr)
  * TerminalKeyEventProc --
  *
  *      This procedure is invoked by the dispatcher on
- *      key input on the terminal. It handles mouse events too.
+ *      key input on the terminal.
  *
  * Results:
  *      None.
@@ -2955,10 +2977,118 @@ TerminalKeyEventProc(clientData, eventPtr)
         terminalPtr->flags |= REDRAW_PENDING;
       }
     }
+}
+
+/*
+ *--------------------------------------------------------------
+ *
+ * TerminalMouseEventProc --
+ *
+ *      This procedure is invoked by the dispatcher on
+ *      mouse input on the terminal.
+ *
+ * Results:
+ *      None.
+ *
+ * Side effects:
+ *      The mouse events are forwarded to slave pty
+ *      if it has asked to do so.
+ *
+ *--------------------------------------------------------------
+ */
 
-    if (eventPtr->type = CK_EV_MOUSE_UP ) {
-      // @todo: if mouse reporting was requested
-      //        send the mouse events to the pty
+static void
+TerminalMouseEventProc(clientData, eventPtr)
+    ClientData clientData;      /* Information about window. */
+    CkEvent *eventPtr;          /* Information about event. */
+{
+    Terminal *terminalPtr = (Terminal *) clientData;
+    NODE *nodePtr = terminalPtr->node;
+    char buf[7];
+    int snd, b, mod, x, y, sz;
+    
+    /* do not handle more keypress
+     * if the terminal is disconnected */
+    if ( (terminalPtr->flags & DISCONNECTED) != 0 ) {
+      return;
+    }
+
+    /* if the terminal doesn't report mouse skip */
+    if (!(terminalPtr->flags & MOUSE_REPORT)) {
+      return;
+    }
+
+    /* Do not report mouse when in command or scrolling mode */
+    if (terminalPtr->flags & MODE_COMMAND) {
+      return;
+    }
+    if (terminalPtr->node->s->tos != terminalPtr->node->s->off) {
+      return;
+    }
+        
+    /* See https://www.xfree86.org/current/ctlseqs.html#Mouse%20Tracking */
+    x = eventPtr->mouse.x + '!'; // '!' is 33 = 32+1 
+    y = eventPtr->mouse.y + '!';
+    b = 0;
+    snd = 0;
+
+    /* Encode modifiers */
+    mod = 0;
+    if (eventPtr->mouse.modifiers & CK_MOD_ALT) {
+      mod |= 0x04;
+    }
+    if (eventPtr->mouse.modifiers & CK_MOD_SHIFT) {
+      mod |= 0x08;
+    }
+    if (eventPtr->mouse.modifiers & CK_MOD_CONTROL) {
+      mod |= 0x10;
+    }
+
+    
+    if ((terminalPtr->flags == MOUSE_REPORT_1003)) {
+      if ( eventPtr->mouse.type == CK_EV_MOUSE_MOVE ) {
+	if ( !eventPtr->mouse.button ) {
+	  snd = 1;
+	  /* 3 is the value for "no mouse button pressed" */
+	  b = 32 + 3 + 32;
+	}
+      }
+    }
+
+    if ((terminalPtr->flags & MOUSE_REPORT_1002)) {
+      if ( eventPtr->mouse.type == CK_EV_MOUSE_MOVE ) {
+	if ( eventPtr->mouse.button ) {
+	  b = 32;
+	  goto encodeButton;
+	}
+      }
+    }
+    
+    if ((terminalPtr->flags & MOUSE_REPORT_1000)) {
+      if ( eventPtr->mouse.type == CK_EV_MOUSE_DOWN ) {
+      encodeButton:
+	snd = 1;
+	switch (eventPtr->mouse.button) {
+	case 1: case 2: case 3:
+	  b += 32 + (eventPtr->mouse.button - 1);
+	  break;
+	case 4: case 5:
+	  b += 32 + (eventPtr->mouse.button - 4) + 64;
+	  break;
+	default:
+	  snd = 0;
+	}
+      }
+      if ( eventPtr->mouse.type == CK_EV_MOUSE_UP ) {
+	snd = 1;
+	/* 3 is the value for "no mouse button pressed" */
+	b = 32 + 3;
+      }
+    }
+    
+    if (snd) {
+      sprintf( buf, "\033[M%c%c%c", b | mod, x, y);
+      SENDN(nodePtr, buf, sizeof(buf)-1);
     }
 }
 
