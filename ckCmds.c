@@ -27,44 +27,6 @@ static void       WaitWindowProc _ANSI_ARGS_((ClientData clientData,
 /*
  *----------------------------------------------------------------------
  *
- * Ck_DestroyCmd --
- *
- *	This procedure is invoked to process the "destroy" Tcl command.
- *	See the user documentation for details on what it does.
- *
- * Results:
- *	A standard Tcl result.
- *
- * Side effects:
- *	See the user documentation.
- *
- *----------------------------------------------------------------------
- */
-
-int
-Ck_DestroyCmd(clientData, interp, argc, argv)
-    ClientData clientData;	/* Main window associated with
-				 * interpreter. */
-    Tcl_Interp *interp;		/* Current interpreter. */
-    int argc;			/* Number of arguments. */
-    char **argv;		/* Argument strings. */
-{
-    CkWindow *winPtr;
-    CkWindow *mainPtr = (CkWindow *) clientData;
-    int i;
-
-    for (i = 1; i < argc; i++) {
-	winPtr = Ck_NameToWindow(interp, argv[i], mainPtr);
-	if (winPtr == NULL)
-	    return TCL_ERROR;
-	Ck_DestroyWindow(winPtr);
-    }
-    return TCL_OK;
-}
-
-/*
- *----------------------------------------------------------------------
- *
  * Ck_DestroyCmdObj --
  *
  *	This procedure is invoked to process the "destroy" Tcl command.
@@ -97,65 +59,6 @@ Ck_DestroyCmdObj(clientData, interp, objc, objv)
 	    return TCL_ERROR;
 	Ck_DestroyWindow(winPtr);
     }
-    return TCL_OK;
-}
-
-/*
- *----------------------------------------------------------------------
- *
- * Ck_ExitCmd --
- *
- *	This procedure is invoked to process the "exit" Tcl command.
- *	See the user documentation for details on what it does.
- *	Note: this command replaces the Tcl "exit" command in order
- *	to properly destroy all windows.
- *
- * Results:
- *	A standard Tcl result.
- *
- * Side effects:
- *	See the user documentation.
- *
- *----------------------------------------------------------------------
- */
-
-int
-Ck_ExitCmd(clientData, interp, argc, argv)
-    ClientData clientData;	/* Main window associated with
-				 * interpreter. */
-    Tcl_Interp *interp;		/* Current interpreter. */
-    int argc;			/* Number of arguments. */
-    char **argv;		/* Argument strings. */
-{
-    extern CkMainInfo *ckMainInfo;
-    int index = 1, noclear = 0, value = 0;
-
-    if (argc > 3) {
-	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
-		" ?-noclear? ?returnCode?\"", (char *) NULL);
-	return TCL_ERROR;
-    }
-    if (argc > 1 && strcmp(argv[1], "-noclear") == 0) {
-	index++;
-	noclear++;
-    }
-    if (argc > index &&
-	Tcl_GetInt(interp, argv[index], &value) != TCL_OK) {
-	return TCL_ERROR;
-    }
-
-    if (ckMainInfo != NULL) {
-	if (noclear) {
-	    ckMainInfo->flags |= CK_NOCLR_ON_EXIT;
-	} else {
-	    ckMainInfo->flags &= ~CK_NOCLR_ON_EXIT;
-	}
-	Ck_DestroyWindow((CkWindow *) clientData);
-    }
-    CkpEndMouse();
-    endwin();	/* just in case */
-    Tcl_Exit(value);
-    /* NOTREACHED */
     return TCL_OK;
 }
 
@@ -220,58 +123,6 @@ Ck_ExitCmdObj(clientData, interp, objc, objv)
 /*
  *----------------------------------------------------------------------
  *
- * Ck_LowerCmd --
- *
- *	This procedure is invoked to process the "lower" Tcl command.
- *	See the user documentation for details on what it does.
- *
- * Results:
- *	A standard Tcl result.
- *
- * Side effects:
- *	See the user documentation.
- *
- *----------------------------------------------------------------------
- */
-
-int
-Ck_LowerCmd(clientData, interp, argc, argv)
-    ClientData clientData;	/* Main window associated with
-				 * interpreter. */
-    Tcl_Interp *interp;		/* Current interpreter. */
-    int argc;			/* Number of arguments. */
-    char **argv;		/* Argument strings. */
-{
-    CkWindow *mainPtr = (CkWindow *) clientData;
-    CkWindow *winPtr, *other;
-
-    if ((argc != 2) && (argc != 3)) {
-	Tcl_AppendResult(interp, "wrong # args: should be \"",
-		argv[0], " window ?belowThis?\"", (char *) NULL);
-	return TCL_ERROR;
-    }
-
-    winPtr = Ck_NameToWindow(interp, argv[1], mainPtr);
-    if (winPtr == NULL)
-	return TCL_ERROR;
-    if (argc == 2)
-	other = NULL;
-    else {
-	other = Ck_NameToWindow(interp, argv[2], mainPtr);
-	if (other == NULL)
-	    return TCL_ERROR;
-    }
-    if (Ck_RestackWindow(winPtr, CK_BELOW, other) != TCL_OK) {
-	Tcl_AppendResult(interp, "can't lower \"", argv[1], "\" below \"",
-		argv[2], "\"", (char *) NULL);
-	return TCL_ERROR;
-    }
-    return TCL_OK;
-}
-
-/*
- *----------------------------------------------------------------------
- *
  * Ck_LowerCmdObj --
  *
  *	This procedure is invoked to process the "lower" Tcl command.
@@ -318,58 +169,6 @@ Ck_LowerCmdObj(clientData, interp, objc, objv)
 		       "\" below \"", Tcl_GetString(objv[2]), "\"",
 		       (char *) NULL);
       return TCL_ERROR;
-    }
-    return TCL_OK;
-}
-
-/*
- *----------------------------------------------------------------------
- *
- * Ck_RaiseCmd --
- *
- *	This procedure is invoked to process the "raise" Tcl command.
- *	See the user documentation for details on what it does.
- *
- * Results:
- *	A standard Tcl result.
- *
- * Side effects:
- *	See the user documentation.
- *
- *----------------------------------------------------------------------
- */
-
-int
-Ck_RaiseCmd(clientData, interp, argc, argv)
-    ClientData clientData;	/* Main window associated with
-				 * interpreter. */
-    Tcl_Interp *interp;		/* Current interpreter. */
-    int argc;			/* Number of arguments. */
-    char **argv;		/* Argument strings. */
-{
-    CkWindow *mainPtr = (CkWindow *) clientData;
-    CkWindow *winPtr, *other;
-
-    if ((argc != 2) && (argc != 3)) {
-	Tcl_AppendResult(interp, "wrong # args: should be \"",
-		argv[0], " window ?aboveThis?\"", (char *) NULL);
-	return TCL_ERROR;
-    }
-
-    winPtr = Ck_NameToWindow(interp, argv[1], mainPtr);
-    if (winPtr == NULL)
-	return TCL_ERROR;
-    if (argc == 2)
-	other = NULL;
-    else {
-	other = Ck_NameToWindow(interp, argv[2], mainPtr);
-	if (other == NULL)
-	    return TCL_ERROR;
-    }
-    if (Ck_RestackWindow(winPtr, CK_ABOVE, other) != TCL_OK) {
-	Tcl_AppendResult(interp, "can't raise \"", argv[1], "\" above \"",
-		argv[2], "\"", (char *) NULL);
-	return TCL_ERROR;
     }
     return TCL_OK;
 }
@@ -430,36 +229,6 @@ Ck_RaiseCmdObj(clientData, interp, objc, objv)
 /*
  *----------------------------------------------------------------------
  *
- * Ck_BellCmd --
- *
- *	This procedure is invoked to process the "bell" Tcl command.
- *	See the user documentation for details on what it does.
- *
- * Results:
- *	A standard Tcl result.
- *
- * Side effects:
- *	See the user documentation.
- *
- *----------------------------------------------------------------------
- */
-
-int
-Ck_BellCmd(clientData, interp, argc, argv)
-    ClientData clientData;	/* Main window associated with
-				 * interpreter. */
-    Tcl_Interp *interp;		/* Current interpreter. */
-    int argc;			/* Number of arguments. */
-    char **argv;		/* Argument strings. */
-{
-    beep();
-    doupdate();
-    return TCL_OK;
-}
-
-/*
- *----------------------------------------------------------------------
- *
  * Ck_BellCmdObj --
  *
  *	This procedure is invoked to process the "bell" Tcl command.
@@ -484,72 +253,6 @@ Ck_BellCmdObj(clientData, interp, objc, objv)
 {
     beep();
     doupdate();
-    return TCL_OK;
-}
-
-/*
- *----------------------------------------------------------------------
- *
- * Ck_UpdateCmd --
- *
- *	This procedure is invoked to process the "update" Tcl command.
- *	See the user documentation for details on what it does.
- *
- * Results:
- *	A standard Tcl result.
- *
- * Side effects:
- *	See the user documentation.
- *
- *----------------------------------------------------------------------
- */
-
-int
-Ck_UpdateCmd(clientData, interp, argc, argv)
-    ClientData clientData;	/* Main window associated with
-				 * interpreter. */
-    Tcl_Interp *interp;		/* Current interpreter. */
-    int argc;			/* Number of arguments. */
-    char **argv;		/* Argument strings. */
-{
-    CkWindow *mainPtr = (CkWindow *) clientData;
-    int flags;
-
-    if (argc == 1)
-	flags = TK_DONT_WAIT;
-    else if (argc == 2) {
-	if (strncmp(argv[1], "screen", strlen(argv[1])) == 0) {
-            wrefresh(curscr);
-	    Ck_EventuallyRefresh(mainPtr);
-	    return TCL_OK;
-	}
-	if (strncmp(argv[1], "idletasks", strlen(argv[1])) != 0) {
-	    Tcl_AppendResult(interp, "bad argument \"", argv[1],
-		    "\": must be idletasks or screen", (char *) NULL);
-	    return TCL_ERROR;
-	}
-	flags = TK_IDLE_EVENTS;
-    } else {
-	Tcl_AppendResult(interp, "wrong # args: should be \"",
-		argv[0], " ?idletasks|screen?\"", (char *) NULL);
-	return TCL_ERROR;
-    }
-
-    /*
-     * Handle all pending events, and repeat over and over
-     * again until all pending events have been handled.
-     */
-
-    while (Tk_DoOneEvent(flags) != 0) {
-	/* Empty loop body */
-    }
-
-    /*
-     * Must clear the interpreter's result because event handlers could
-     * have executed commands.
-     */
-
-    Tcl_ResetResult(interp);
     return TCL_OK;
 }
 
@@ -1389,7 +1092,10 @@ Ck_WinfoCmdObj(clientData, interp, objc, objv)
     break;
   case CMD_EXISTS:
     {
-      SETUP("exists");
+      if (objc != 3) {
+	Tcl_WrongNumArgs( interp, 2, objv, "window");
+	return TCL_ERROR;
+      }
       if (Ck_NameToWindow(interp, Tcl_GetString(objv[2]), mainPtr) == NULL) {
 	Tcl_SetObjResult(interp, Tcl_NewIntObj(0));
       } else {
@@ -1528,82 +1234,6 @@ Ck_WinfoCmdObj(clientData, interp, objc, objv)
     }
   }
   return TCL_OK;
-}
-
-/*
- *----------------------------------------------------------------------
- *
- * Ck_BindCmd --
- *
- *	This procedure is invoked to process the "bind" Tcl command.
- *	See the user documentation for details on what it does.
- *
- * Results:
- *	A standard Tcl result.
- *
- * Side effects:
- *	See the user documentation.
- *
- *----------------------------------------------------------------------
- */
-
-int
-Ck_BindCmd(clientData, interp, argc, argv)
-    ClientData clientData;	/* Main window associated with interpreter. */
-    Tcl_Interp *interp;		/* Current interpreter. */
-    int argc;			/* Number of arguments. */
-    char **argv;		/* Argument strings. */
-{
-    CkWindow *mainWin = (CkWindow *) clientData;
-    CkWindow *winPtr;
-    ClientData object;
-
-    if ((argc < 2) || (argc > 4)) {
-	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
-		" window ?pattern? ?command?\"", (char *) NULL);
-	return TCL_ERROR;
-    }
-    if (argv[1][0] == '.') {
-	winPtr = (CkWindow *) Ck_NameToWindow(interp, argv[1], mainWin);
-	if (winPtr == NULL) {
-	    return TCL_ERROR;
-	}
-	object = (ClientData) winPtr->pathName;
-	
-    } else {
-	winPtr = (CkWindow *) clientData;
-	object = (ClientData) Ck_GetUid(argv[1]);
-    }
-
-    if (argc == 4) {
-	int append = 0;
-
-	if (argv[3][0] == 0) {
-	    return Ck_DeleteBinding(interp, winPtr->mainPtr->bindingTable,
-		    object, argv[2]);
-	}
-	if (argv[3][0] == '+') {
-	    argv[3]++;
-	    append = 1;
-	}
-	if (Ck_CreateBinding(interp, winPtr->mainPtr->bindingTable,
-		object, argv[2], argv[3], append) != TCL_OK) {
-	    return TCL_ERROR;
-	}
-    } else if (argc == 3) {
-	char *command;
-
-	command = Ck_GetBinding(interp, winPtr->mainPtr->bindingTable,
-		object, argv[2]);
-	if (command == NULL) {
-	    Tcl_ResetResult(interp);
-	    return TCL_OK;
-	}
-	Tcl_SetObjResult( interp, Tcl_NewStringObj(command,-1));
-    } else {
-	Ck_GetAllBindings(interp, winPtr->mainPtr->bindingTable, object);
-    }
-    return TCL_OK;
 }
 
 /*
@@ -1779,97 +1409,6 @@ CkBindEventProc(winPtr, eventPtr)
 /*
  *----------------------------------------------------------------------
  *
- * Ck_BindtagsCmd --
- *
- *	This procedure is invoked to process the "bindtags" Tcl command.
- *	See the user documentation for details on what it does.
- *
- * Results:
- *	A standard Tcl result.
- *
- * Side effects:
- *	See the user documentation.
- *
- *----------------------------------------------------------------------
- */
-
-int
-Ck_BindtagsCmd(clientData, interp, argc, argv)
-    ClientData clientData;	/* Main window associated with interpreter. */
-    Tcl_Interp *interp;		/* Current interpreter. */
-    int argc;			/* Number of arguments. */
-    char **argv;		/* Argument strings. */
-{
-    CkWindow *mainWin = (CkWindow *) clientData;
-    CkWindow *winPtr, *winPtr2;
-    int i, tagArgc;
-    char *p, **tagArgv;
-
-    if ((argc < 2) || (argc > 3)) {
-	Tcl_AppendResult(interp, "wrong # args: should be \"", argv[0],
-		" window ?tags?\"", (char *) NULL);
-	return TCL_ERROR;
-    }
-    winPtr = (CkWindow *) Ck_NameToWindow(interp, argv[1], mainWin);
-    if (winPtr == NULL) {
-	return TCL_ERROR;
-    }
-    if (argc == 2) {
-	if (winPtr->numTags == 0) {
-	    Tcl_AppendElement(interp, winPtr->pathName);
-	    Tcl_AppendElement(interp, winPtr->classUid);
-	    for (winPtr2 = winPtr; winPtr2 != NULL && 
-		 !(winPtr2->flags & CK_TOPLEVEL);
-		 winPtr2 = winPtr2->parentPtr) {
-		 /* Empty loop body. */
-	    }
-	    if (winPtr != winPtr2 && winPtr2 != NULL)
-		Tcl_AppendElement(interp, winPtr2->pathName);
-	    Tcl_AppendElement(interp, "all");
-	} else {
-	    for (i = 0; i < winPtr->numTags; i++) {
-		Tcl_AppendElement(interp, (char *) winPtr->tagPtr[i]);
-	    }
-	}
-	return TCL_OK;
-    }
-    if (winPtr->tagPtr != NULL) {
-	CkFreeBindingTags(winPtr);
-    }
-    if (argv[2][0] == 0) {
-	return TCL_OK;
-    }
-    if (Tcl_SplitList(interp, argv[2], &tagArgc, &tagArgv) != TCL_OK) {
-	return TCL_ERROR;
-    }
-    winPtr->numTags = tagArgc;
-    winPtr->tagPtr = (ClientData *) ckalloc(tagArgc * sizeof(ClientData));
-    for (i = 0; i < tagArgc; i++) {
-	p = tagArgv[i];
-	if (p[0] == '.') {
-	    char *copy;
-
-	    /*
-	     * Handle names starting with "." specially: store a malloc'ed
-	     * string, rather than a Uid;  at event time we'll look up the
-	     * name in the window table and use the corresponding window,
-	     * if there is one.
-	     */
-
-	    copy = (char *) ckalloc((unsigned) (strlen(p) + 1));
-	    strcpy(copy, p);
-	    winPtr->tagPtr[i] = (ClientData) copy;
-	} else {
-	    winPtr->tagPtr[i] = (ClientData) Ck_GetUid(p);
-	}
-    }
-    ckfree((char *) tagArgv);
-    return TCL_OK;
-}
-
-/*
- *----------------------------------------------------------------------
- *
  * Ck_BindtagsCmdObj --
  *
  *	This procedure is invoked to process the "bindtags" Tcl command.
@@ -1997,106 +1536,6 @@ CkFreeBindingTags(winPtr)
     ckfree((char *) winPtr->tagPtr);
     winPtr->numTags = 0;
     winPtr->tagPtr = NULL;
-}
-
-/*
- *----------------------------------------------------------------------
- *
- * Ck_TkwaitCmd --
- *
- *	This procedure is invoked to process the "tkwait" Tcl command.
- *	See the user documentation for details on what it does.
- *
- * Results:
- *	A standard Tcl result.
- *
- * Side effects:
- *	See the user documentation.
- *
- *----------------------------------------------------------------------
- */
-
-int
-Ck_TkwaitCmd(clientData, interp, argc, argv)
-    ClientData clientData;	/* Main window associated with
-				 * interpreter. */
-    Tcl_Interp *interp;		/* Current interpreter. */
-    int argc;			/* Number of arguments. */
-    char **argv;		/* Argument strings. */
-{
-    CkWindow *mainPtr = (CkWindow *) clientData;
-    int c, done;
-    size_t length;
-
-    if (argc != 3) {
-	Tcl_AppendResult(interp, "wrong # args: should be \"",
-		argv[0], " variable|visible|window name\"", (char *) NULL);
-	return TCL_ERROR;
-    }
-    c = argv[1][0];
-    length = strlen(argv[1]);
-    if ((c == 'v') && (strncmp(argv[1], "variable", length) == 0)
-	    && (length >= 2)) {
-	if (Tcl_TraceVar(interp, argv[2],
-		TCL_GLOBAL_ONLY|TCL_TRACE_WRITES|TCL_TRACE_UNSETS,
-		WaitVariableProc, (ClientData) &done) != TCL_OK) {
-	    return TCL_ERROR;
-	}
-	done = 0;
-	while (!done) {
-	    Tk_DoOneEvent(0);
-	}
-	Tcl_UntraceVar(interp, argv[2],
-		TCL_GLOBAL_ONLY|TCL_TRACE_WRITES|TCL_TRACE_UNSETS,
-		WaitVariableProc, (ClientData) &done);
-    } else if ((c == 'v') && (strncmp(argv[1], "visibility", length) == 0)
-	    && (length >= 2)) {
-	CkWindow *winPtr;
-
-	winPtr = Ck_NameToWindow(interp, argv[2], mainPtr);
-	if (winPtr == NULL) {
-	    return TCL_ERROR;
-	}
-	Ck_CreateEventHandler(winPtr,
-	    CK_EV_MAP | CK_EV_UNMAP | CK_EV_EXPOSE | CK_EV_DESTROY,
-	    WaitVisibilityProc, (ClientData) &done);
-	done = 0;
-	while (!done) {
-	    Tk_DoOneEvent(0);
-	}
-	Ck_DeleteEventHandler(winPtr,
-	    CK_EV_MAP | CK_EV_UNMAP | CK_EV_EXPOSE | CK_EV_DESTROY,
-	    WaitVisibilityProc, (ClientData) &done);
-    } else if ((c == 'w') && (strncmp(argv[1], "window", length) == 0)) {
-	CkWindow *winPtr;
-
-	winPtr = Ck_NameToWindow(interp, argv[2], mainPtr);
-	if (winPtr == NULL) {
-	    return TCL_ERROR;
-	}
-	Ck_CreateEventHandler(winPtr, CK_EV_DESTROY,
-	    WaitWindowProc, (ClientData) &done);
-	done = 0;
-	while (!done) {
-	    Tk_DoOneEvent(0);
-	}
-	/*
-	 * Note:  there's no need to delete the event handler.  It was
-	 * deleted automatically when the window was destroyed.
-	 */
-    } else {
-	Tcl_AppendResult(interp, "bad option \"", argv[1],
-		"\": must be variable, visibility, or window", (char *) NULL);
-	return TCL_ERROR;
-    }
-
-    /*
-     * Clear out the interpreter's result, since it may have been set
-     * by event handlers.
-     */
-
-    Tcl_ResetResult(interp);
-    return TCL_OK;
 }
 
 /*

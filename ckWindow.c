@@ -103,7 +103,7 @@ CkCmdObj objCommands[] =
       {"recorder",	        Ck_RecorderCmdObj},
       {"tkwait",		Ck_TkwaitCmdObj},
       {"update",		Ck_UpdateCmdObj},
-   //   {"winfo",		Ck_WinfoCmdObj},
+      {"winfo",		Ck_WinfoCmdObj},
    {(char *) NULL,	(CkCmdObjProc *) NULL}
   };			  
 
@@ -129,7 +129,7 @@ CkCmd commands[] =
    //    {"recorder",	Ck_RecorderCmd},
    //    {"tkwait",		Ck_TkwaitCmd},
    //    {"update",		Ck_UpdateCmd},
-    {"winfo",		Ck_WinfoCmd},
+       //    {"winfo",		Ck_WinfoCmd},
 
     /*
      * Widget-creation commands.

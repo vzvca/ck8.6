@@ -660,7 +660,6 @@ CkHandleInput(clientData, mask)
 		    bd->index = -1;
 		}
 		goto readagain;
-		//@vca return;
 	    } else {
 		/* Leave space for one NUL byte. */
 		if (bd->index < sizeof (bd->buffer) - 1) {
@@ -693,7 +692,6 @@ CkHandleInput(clientData, mask)
 		bd->index++;
 	    }
 	    goto readagain;
-	    //@vca return;
 	}
     }
 

@@ -26,6 +26,14 @@ set BANNER [join {
     ""
 } "\r\n"]
 
+proc next-term { t } {
+    global TX
+}
+
+proc prev-term { t } {
+    global TX
+}
+
 proc mk-button { name text command {pack left} } {
     button .l.${name} -text " ${text} " -command $command
     bind .l.${name} <Left>  {focus [ck_focusPrev %W]}
@@ -51,14 +59,16 @@ proc new-term { {ckey "b"} } {
     global TX BANNER
     incr TX
     terminal .t${TX} -exec /bin/bash -term xterm-256color \
-	-commandkey ${ckey} -banner [format ${BANNER} ${ckey}]
+	-commandkey ${ckey} -banner [format ${BANNER} ${ckey}] 
+#	-border {ulcorner hline urcorner vline lrcorner hline llcorner vline}
 
     bind .t${TX} <Button-1> {focus %W}
 
     # -- binding to virtual events
     bind .t${TX} <<Close>> {close-term %W}
     bind .t${TX} <<New>>   new-term
-
+    #bind .t${TX} <Control-b><Control-g> exit
+    
     mk-button t${TX} "Term #${TX}" "set-term .t${TX}"
     bind .l.t${TX} <Control-q> "close-term .t${TX}"
     bind .l.t${TX} <Control-o> "new-term"

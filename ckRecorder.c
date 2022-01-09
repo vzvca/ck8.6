@@ -4,6 +4,7 @@
  *	This file provides a simple event recorder.
  *
  * Copyright (c) 1996-1999 Christian Werner
+ * Copyright (c) 2022 vzvca
  *
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
@@ -55,112 +56,123 @@ static void	RecorderReplay _ANSI_ARGS_((ClientData clientData));
 
 static int
 RecorderInput(clientData, eventPtr)
-    ClientData clientData;
-    CkEvent *eventPtr;
+     ClientData clientData;
+     CkEvent *eventPtr;
 {
-    Recorder *recPtr = (Recorder *) clientData;
-    int hadEvent = 0, type = eventPtr->any.type;
-    Tcl_Time now;
-    extern void TclpGetTime _ANSI_ARGS_((Tcl_Time *timePtr));
-    char buffer[64];
-    char *keySym, *barCode, *result;
-    char *argv[16];
+  Recorder *recPtr = (Recorder *) clientData;
+  int hadEvent = 0, type = eventPtr->any.type;
+  Tcl_Time now;
+  extern void TclpGetTime _ANSI_ARGS_((Tcl_Time *timePtr));
+  char buffer[64];
+  char *keySym, *barCode, *result;
+  char *argv[16];
 
-    if (recPtr->record == NULL) {
-	Ck_DeleteGenericHandler(RecorderInput, clientData);
-	return 0;
-    }
-
-    if (type != CK_EV_KEYPRESS && type != CK_EV_BARCODE &&
-    	type != CK_EV_MOUSE_UP && type != CK_EV_MOUSE_DOWN)
-    	return 0;
-    	
-    TclpGetTime(&now);
-    if (recPtr->withDelay && recPtr->lastEvent.sec != 0 &&
-	recPtr->lastEvent.usec != 0) {
-	double diff;
-	char string[100];
-
-	diff = now.sec * 1000 + now.usec / 1000;
-	diff -= recPtr->lastEvent.sec * 1000 +
-	    recPtr->lastEvent.usec / 1000;
-	if (diff > 50) {
-	    if (diff > 3600000)
-		diff = 3600000;
-	    sprintf(string, "<Delay> %d\n", (int) diff);
-	    Tcl_Write(recPtr->record, string, strlen(string));
-	    hadEvent++;
-	}
-    }
-
-    switch (type) {
-	case CK_EV_KEYPRESS:
-	    argv[2] = NULL;
-	    keySym = CkKeysymToString(eventPtr->key.keycode, 1);
-	    if (strcmp(keySym, "NoSymbol") != 0)
-		argv[2] = keySym;
-	    else if (eventPtr->key.keycode > 0 &&
-		eventPtr->key.keycode < 256) {
-		/* Unsafe, ie not portable */
-		sprintf(buffer, "0x%2x", eventPtr->key.keycode);
-		argv[2] = buffer;
-	    }
-	    if (argv[2] != NULL) {
-		argv[0] = "<Key>";
-		argv[1] = eventPtr->key.winPtr == NULL ? "" :
-		    eventPtr->key.winPtr->pathName;
-		result = Tcl_Merge(3, argv);
-printPctSNL:
-		Tcl_Write(recPtr->record, result, strlen(result));
-		Tcl_Write(recPtr->record, "\n", 1);
-		ckfree(result);
-		hadEvent++;
-	    }
-	    break;
-
-	case CK_EV_BARCODE:
-	    barCode = CkGetBarcodeData(recPtr->mainPtr->mainPtr);
-	    if (barCode != NULL) {
-		argv[0] = "<BarCode>";
-		argv[1] = eventPtr->key.winPtr == NULL ? "" :
-		    eventPtr->key.winPtr->pathName;
-		argv[2] = barCode;
-		result = Tcl_Merge(3, argv);
-	        goto printPctSNL;
-	    }
-	    break;
-
-	case CK_EV_MOUSE_UP:
-	case CK_EV_MOUSE_DOWN:
-	    {
-	        char bbuf[16], xbuf[16], ybuf[16], rxbuf[16], rybuf[16];
-
-	        argv[0] = type == CK_EV_MOUSE_DOWN ?
-		    "<ButtonPress>" : "<ButtonRelease>";
-		argv[1] = eventPtr->mouse.winPtr == NULL ? "" :
-		    eventPtr->mouse.winPtr->pathName;
-		sprintf(bbuf, "%d", eventPtr->mouse.button);
-		argv[2] = bbuf;
-		sprintf(xbuf, "%d", eventPtr->mouse.x);
-		argv[3] = xbuf;
-		sprintf(ybuf, "%d", eventPtr->mouse.y);
-		argv[4] = ybuf;
-		sprintf(rxbuf, "%d", eventPtr->mouse.rootx);
-		argv[5] = rxbuf;
-		sprintf(rybuf, "%d", eventPtr->mouse.rooty);
-		argv[6] = rybuf;
-		result = Tcl_Merge(7, argv);
-	        goto printPctSNL;
-	    }
-	    break;
-    }
-
-    if (hadEvent) {
-	Tcl_Flush(recPtr->record);
-	recPtr->lastEvent = now;
-    }
-
+  if (recPtr->record == NULL) {
+    Ck_DeleteGenericHandler(RecorderInput, clientData);
     return 0;
+  }
+
+  if (type != CK_EV_KEYPRESS && type != CK_EV_BARCODE &&
+      type != CK_EV_MOUSE_UP && type != CK_EV_MOUSE_DOWN)
+    return 0;
+    	
+  TclpGetTime(&now);
+  if (recPtr->withDelay && recPtr->lastEvent.sec != 0 &&
+      recPtr->lastEvent.usec != 0) {
+    double diff;
+    char string[100];
+
+    diff = now.sec * 1000 + now.usec / 1000;
+    diff -= recPtr->lastEvent.sec * 1000 +
+      recPtr->lastEvent.usec / 1000;
+    if (diff > 50) {
+      if (diff > 3600000)
+	diff = 3600000;
+      sprintf(string, "<Delay> %d\n", (int) diff);
+      Tcl_Write(recPtr->record, string, strlen(string));
+      hadEvent++;
+    }
+  }
+
+  switch (type) {
+  case CK_EV_KEYPRESS:
+    argv[2] = NULL;
+    keySym = CkKeysymToString(eventPtr->key.keycode, 1);
+    if (strcmp(keySym, "NoSymbol") != 0)
+      argv[2] = keySym;
+    else if (eventPtr->key.keycode > 0 &&
+	     eventPtr->key.keycode < 256) {
+      /* Unsafe, ie not portable */
+      sprintf(buffer, "0x%2x", eventPtr->key.keycode);
+      argv[2] = buffer;
+    }
+    if (argv[2] != NULL) {
+      argv[0] = "<Key>";
+      argv[1] = eventPtr->key.winPtr == NULL ? "" :
+	eventPtr->key.winPtr->pathName;
+      result = Tcl_Merge(3, argv);
+    printPctSNL:
+      Tcl_Write(recPtr->record, result, strlen(result));
+      Tcl_Write(recPtr->record, "\n", 1);
+      ckfree(result);
+      hadEvent++;
+    }
+    break;
+
+  case CK_EV_BARCODE:
+    barCode = CkGetBarcodeData(recPtr->mainPtr->mainPtr);
+    if (barCode != NULL) {
+      argv[0] = "<BarCode>";
+      argv[1] = eventPtr->key.winPtr == NULL ? "" :
+	eventPtr->key.winPtr->pathName;
+      argv[2] = barCode;
+      result = Tcl_Merge(3, argv);
+      goto printPctSNL;
+    }
+    break;
+
+  case CK_EV_MOUSE_UP:
+  case CK_EV_MOUSE_DOWN:
+  case CK_EV_MOUSE_MOVE:
+    {
+      char bbuf[16], xbuf[16], ybuf[16], rxbuf[16], rybuf[16];
+
+      switch(type) {
+      case CK_EV_MOUSE_UP:
+	argv[0] = "<ButtonPress>";
+	break;
+      case CK_EV_MOUSE_DOWN:
+	argv[0] = "<ButtonRelease>";
+	break;
+      case CK_EV_MOUSE_MOVE:
+	argv[0] = "<Motion>";
+	break;
+      }
+      argv[1] = eventPtr->mouse.winPtr == NULL ? "" :
+	eventPtr->mouse.winPtr->pathName;
+      /* the button encodes the modifiers */
+      sprintf(bbuf, "%d", eventPtr->mouse.button);
+      argv[2] = bbuf;
+      sprintf(xbuf, "%d", eventPtr->mouse.x);
+      argv[3] = xbuf;
+      sprintf(ybuf, "%d", eventPtr->mouse.y);
+      argv[4] = ybuf;
+      sprintf(rxbuf, "%d", eventPtr->mouse.rootx);
+      argv[5] = rxbuf;
+      sprintf(rybuf, "%d", eventPtr->mouse.rooty);
+      argv[6] = rybuf;
+      result = Tcl_Merge(7, argv);
+      goto printPctSNL;
+    }
+    break;
+  }
+
+  if (hadEvent) {
+    Tcl_Flush(recPtr->record);
+    recPtr->lastEvent = now;
+  }
+
+  return 0;
 }
 
 /*
@@ -338,6 +350,11 @@ doMouse:
 		if (argc != 7)
 		    goto badNumArgs;
 		event.any.type = CK_EV_MOUSE_UP;
+		goto doMouse;
+	    } else if (strcmp(argv[0], "<Motion>") == 0) {
+		if (argc != 7)
+		    goto badNumArgs;
+		event.any.type = CK_EV_MOUSE_MOVE;
 		goto doMouse;
 	    }
 	    ckfree((char *) argv);
