@@ -1109,11 +1109,9 @@ Ck_DestroyWindow(winPtr)
 	    CkCmd *cmdPtr;
 
 	    for (cmdPtr = commands; cmdPtr->name != NULL; cmdPtr++) {
-	      if (cmdPtr->cmdProc != Ck_ExitCmd) {
-		Tcl_CreateObjCommand(mainPtr->interp, cmdPtr->name,
-				     DeadAppCmdObj, (ClientData) NULL,
-				  (Tcl_CmdDeleteProc *) NULL);
-	      }
+	      Tcl_CreateObjCommand(mainPtr->interp, cmdPtr->name,
+				   DeadAppCmdObj, (ClientData) NULL,
+				   (Tcl_CmdDeleteProc *) NULL);
 	    }
 	    for (cmdObjPtr = objCommands; cmdObjPtr->name != NULL; cmdObjPtr++) {
 	      if (cmdObjPtr->cmdProc != Ck_ExitCmdObj) {
