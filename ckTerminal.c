@@ -1854,9 +1854,9 @@ handlechar(NODE *n, int r, int k) /* Handle a single input character. */
   DO(false, KEY(L'\r'),          SEND(n, n->lnm? "\r\n" : "\r"); SB);
   DO(false, SCROLLUP && INSCR,   scrollback(n));
   DO(false, SCROLLDOWN && INSCR, scrollforward(n));
+  DO(false, RECENTER && INSCR,   scrollbottom(n));
   DO(false, CODE(KEY_UP) && INSCR, scrollbackx(n,1));
   DO(false, CODE(KEY_DOWN)&& INSCR,scrollforwardx(n,1));
-  DO(false, RECENTER && INSCR,   scrollbottom(n));
   DO(false, CODE(KEY_ENTER),     SEND(n, n->lnm? "\r\n" : "\r"); SB);
   DO(false, CODE(KEY_UP),        sendarrow(n, "A"); SB);
   DO(false, CODE(KEY_DOWN),      sendarrow(n, "B"); SB);
@@ -1882,9 +1882,27 @@ handlechar(NODE *n, int r, int k) /* Handle a single input character. */
   DO(false, CODE(KEY_F(10)),     SEND(n, "\033[21~"); SB);
   DO(false, CODE(KEY_F(11)),     SEND(n, "\033[23~"); SB);
   DO(false, CODE(KEY_F(12)),     SEND(n, "\033[24~"); SB);
+  DO(false, CODE(KEY_F(13)),     SEND(n, "\033[25~"); SB);
+  DO(false, CODE(KEY_F(14)),     SEND(n, "\033[26~"); SB);
+  DO(false, CODE(KEY_F(15)),     SEND(n, "\033[28~"); SB);
+  DO(false, CODE(KEY_F(16)),     SEND(n, "\033[29~"); SB);
+  DO(false, CODE(KEY_F(17)),     SEND(n, "\033[31~"); SB);
+  DO(false, CODE(KEY_F(18)),     SEND(n, "\033[32~"); SB);
+  DO(false, CODE(KEY_F(19)),     SEND(n, "\033[33~"); SB);
+  DO(false, CODE(KEY_F(20)),     SEND(n, "\033[34~"); SB);
 
+  /* complete keybindings */
+  /* as we are in keypad mode, we receive symbolic keys
+   * we have to convert back to key char sequences
+   * before sending them to pty */
+  if (r == KEY_CODE_YES) {
+#define CK_ARROW(name,val,seq) DO(false, CODE(val), SEND(n, seq); SB);
+#include "ckArrow.h"
+#undef CK_ARROW
+  }
+  
   /* add extra keys bindings - keys are just forwarded to pty */
-#define CK_NEW_KEY(name, seq, val) DO(false, CODE(name), SEND(n, seq); SB);
+#define CK_NEW_KEY(name, seq, val) DO(false, CODE(name), SENDN(n, seq, 2); SB);
 #include "ckKeys.h"
 #undef CK_NEW_KEY
   
@@ -1917,12 +1935,24 @@ handlechar(NODE *n, int r, int k) /* Handle a single input character. */
     }
   }
   
-  
-  char c[MB_LEN_MAX + 1] = {0};
-  if (wctomb(c, k) > 0){
-    scrollbottom(n);
-    SEND(n, c);
+  if (r == OK) {
+    char c[MB_LEN_MAX + 1] = {0};
+    if (wctomb(c, k) > 0){
+      scrollbottom(n);
+      SEND(n, c);
+    }
+#if 0
+    else {
+      FILE *fout = fopen("/tmp/x", "a"); fprintf(fout, "bad multibyte %d\n", k); fclose(fout);
+    }
+#endif
   }
+#if 0
+  else if ( r == KEY_CODE_YES ) {
+    FILE *fout = fopen("/tmp/x", "a"); fprintf(fout, "unsupported %d\n", k); fclose(fout);
+  }
+#endif
+  
   return setCommandMode(terminalPtr,false), true;
 }
 

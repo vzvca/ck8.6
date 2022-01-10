@@ -628,11 +628,11 @@ Ck_CreateMainWindow(interp, className)
     noecho();
     nonl();
     idlok(stdscr, TRUE);
+    intrflush(stdscr, FALSE);
     scrollok(stdscr, FALSE);
     keypad(stdscr, TRUE);
     nodelay(stdscr, TRUE);
     meta(stdscr, TRUE);
-    // @vca
     notimeout(stdscr, TRUE);
     mainPtr->maxWidth = COLS;
     mainPtr->maxHeight = LINES;

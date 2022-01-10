@@ -565,63 +565,31 @@ CkHandleInput(clientData, mask)
 
  readagain:
 
-    /* note that getch() will not block 
-     * it will return ERR if no data is available. */
-    code = getch();
-    if ( code == ERR ) return;
-    if ( code != KEY_RESIZE ) {
-      ungetch(code);
-      rc = get_wch(&w);
-      if (rc == ERR ) {
-	//    if (code == ERR) {
-	if (++errCount > 100) {
-	  Tcl_Eval(mainPtr->interp, "exit 99");
-	  Tcl_Exit(99);			/* just in case */
-	}
-	return;
+    code = rc = get_wch(&w);
+    if (code == OK) {
+      /* nothing */
+    }
+    else if (code == KEY_CODE_YES) {
+      if ((w != KEY_MOUSE) && (w != KEY_RESIZE)) {
+	goto keyEvent;
       }
-      errCount = 0;
+      if ( code == KEY_RESIZE ) {
+	goto readagain;
+      }
     }
-
-#if CK_USE_UTF
-#if 0
-    /* detect start of multichar utf-8 sequence */
-    if (mainPtr->isoEncoding == NULL && code >= 0xc0 && code < 0x100) {
-	int need = 2;
-
-	if (code >= 0xfc)
-	    need = 6;
-	else if (code >= 0xf8)
-	    need = 5;
-	else if (code >= 0xf0)
-	    need = 4;
-	else if (code >= 0xe0)
-	    need = 3;
-	nodelay(curscr, FALSE);
-	while (need-- > 0 && code >= 0x80 && code < 0x100) {
-	    ucbuf[ucp++] = code;
-	    code = getch();
-	    if (code == ERR)
-		break;
-	    if (code < 0x80 || code >= 0xc0) {
-		ungetch(code);
-		break;
-	    }
-	}
-	nodelay(curscr, TRUE);
-	if (code >= 0x100 && code != ERR)
-	    ungetch(code);
-	ucbuf[ucp] = '\0';
-	Tcl_UtfToUniChar(ucbuf, &uch);
-	code = 0;
+    else if (code == ERR) {
+      return;
     }
-#endif
-#endif
+    else {
+      /* -- this should never happen -- */
+      return;
+    }
+    
 
     /*
      * Barcode reader handling.
      */
-
+#if 0
     if (mainPtr->flags & CK_HAS_BARCODE) {
 	BarcodeData *bd = (BarcodeData *) mainPtr->barcodeData;
 
@@ -694,16 +662,18 @@ CkHandleInput(clientData, mask)
 	    goto readagain;
 	}
     }
-
+#endif
+    
 #ifdef NCURSES_MOUSE_VERSION
     /*
      * ncurses-1.9.8a has builtin mouse support for at least xterm.
      */
 
-    if (code == KEY_MOUSE) {
+    if ((code == KEY_MOUSE) || ((code == KEY_CODE_YES) && (w == KEY_MOUSE))) {
         MEVENT mEvent;
 	int i, button = 0, modifiers = 0;
 
+	
 	if (mainPtr->flags & CK_MOUSE_XTERM) {
 	    goto getMouse;
 	}
@@ -809,9 +779,9 @@ mouseEvt:
      */
 
 #ifndef __WIN32__
-    if ((mainPtr->flags & CK_MOUSE_XTERM) && (code == 0x1b || code == 0x9b)) {
+    if ((mainPtr->flags & CK_MOUSE_XTERM) && (code == 0x1b || code == 0x9b || w == 0x1b || w == 0x9b)) {
 	int code2;
-
+	
 	if (code == 0x9b)
 	    goto getM;
 	code2 = getch();
@@ -867,20 +837,31 @@ mouseEvent:
     }
 #endif
 
-    /* full resize */
-    if ( code == KEY_RESIZE ) {
-      //event.any.type   = CK_EV_RESIZE;
-      //event.any.winPtr = mainPtr->winPtr;
-      //goto mkEvent;
-      goto readagain;
-    }
     
 keyEvent:
     event.key.type = CK_EV_KEYPRESS;
     event.key.winPtr = mainPtr->focusPtr;
     event.key.curses_rc = rc;
     event.key.curses_w = w;
+    event.key.is_uch = 0;
+    
+    if ( rc == OK ) {
+      event.key.keycode = w;
+      event.key.uch = w;
+      event.key.is_uch = 1;
+      if ( w < 0x20 ) {
+	event.key.is_uch = 0;
+      }
+      if ( w > 0x100 ) {
+	event.key.keycode = 0;
+      }
+    }
+    if ( rc == KEY_CODE_YES ) {
+      event.key.keycode = w;
+      event.key.uch = 0;
+    }
 
+#if 0
     if ( code != OK ) {
       event.key.keycode = code;
     }
@@ -903,7 +884,8 @@ keyEvent:
 	 (w >= 0x20 && w < 0x100))
 	event.key.is_uch = 1;
 #endif
-
+#endif
+    
 mkEvent:
     qev = (CkQEvt *) ckalloc(sizeof (CkQEvt));
     qev->header.proc = Ck_HandleQEvent;
