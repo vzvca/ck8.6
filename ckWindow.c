@@ -669,11 +669,12 @@ Ck_CreateMainWindow(interp, className)
 #else
     term = getenv("TERM");
     isxterm = strncmp(term, "xterm", 5) == 0 ||
-        strncmp(term, "mintty", 6) == 0 ||
-        strncmp(term, "rxvt", 4) == 0 ||
-	strncmp(term, "kterm", 5) == 0 ||
-	strncmp(term, "color_xterm", 11) == 0 ||
-	(term[0] != '\0' && strncmp(term + 1, "xterm", 5) == 0);
+      strncmp(term, "mintty", 6) == 0 ||
+      strncmp(term, "rxvt", 4) == 0 ||
+      strncmp(term, "kterm", 5) == 0 ||
+      strncmp(term, "mtm", 3) == 0 ||      
+      (term[0] != '\0' && strncmp(term + 1, "xterm", 5) == 0);
+    
     if (!(mainPtr->flags & CK_HAS_MOUSE) && isxterm) {
 	mainPtr->flags |= CK_HAS_MOUSE | CK_MOUSE_XTERM;
 	CkpStartMouse();

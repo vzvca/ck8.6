@@ -44,9 +44,25 @@ $ ./configure
 $ make && sudo make install
 ~~~~
 
+If you skip the `make install`, to run the demonstration from the source directory, you will have to do the following :
+
+~~~~
+$ export CK_LIBRARY=./library
+$ ./cwsh demos/montana.tcl
+~~~~
+
+
 ## Mouse support
 
-Mouse is supported out of the box in X11 terminals windows. In true text console, mouse is supported through `gpm` which needs to be installed on the system. On debian based system, as `root` :
+Mouse is supported out of the box in X11 terminals windows which are recognized as *xterm-like* terminals.
+The following terminals (identified by TERM environment varaible) will support mouse if terminal type :
+ * starts with "xterm",
+ * or "mintty",
+ * or "rxvt",
+ * or "kterm",
+ * or "mtm" (which is the builtin terminal type).
+
+In true text console, mouse is supported through `gpm` which needs to be installed on the system. On debian based system, as `root` :
 
 ~~~~
 $ apt-get install gpm
@@ -56,7 +72,11 @@ $ systemctl start gpm.service
 
 It might be necessary to run `cwsh` with environment variable `CK_USE_GPM=1` set. Sometimes ncurses does not support gpm and `cwsh` has to support it by itself.
 
-Mouse event reporting is currently limited to button press. It is planned to add support for motion detection and distinguish button press, button release, double and triple click.
+Mouse event reporting is currently limited to :
+ * button press, button release and motion events in *xterm-like* terminals,
+ * button press, button release with GPM support.
+
+It is planned to add support for motion detection with pressed buttons and distinguish button press, button release, double and triple click.
 
 ## Resizing
 
@@ -78,6 +98,40 @@ Internally a subprocess is launched with a pseudo controlling TTY (using `forkpt
 It is possible to interact with this subprocess, the widget as a `send` command which will send arbitrary text as if the user typed it.
 There is a 'tee' command which can be used to redirect what is read from the TTY to a TCL channel. User code can read the redirected TTY input and can react to it, for example using the 'send' command. It provides `expect` like functionnality.
 
+### Installing the terminal type
+
+`mtm` comes with a terminfo description file called `mtm.ti`.  This file
+describes all of the features supported by `mtm`.
+
+This file was copied from `mtm` repository and is shipped with `ck`.
+
+If you want to install this terminal type, use the `tic` compiler that
+comes with ncurses:
+
+    tic -s -x mtm.ti
+
+This will install the following terminal types:
+
+mtm
+    This terminal type supports all of the features of mtm, but with
+    the default 8 "ANSI" colors only.
+
+mtm-256color
+    Note that mtm is not magic and cannot actually display more colors
+    than the host terminal supports.
+
+mtm-noutf
+    This terminal type supports everything the mtm terminal type does,
+    but does not advertise UTF8 capability.
+
+### Demonstration
+
+Here is a screenshot of `cacademo` running in the terminal widget.
+
+![alt text](screenshots/cacademo.png)
+
+### Bugs and missing features
+
 There are currently some bugs and missing features in the terminal widget :
   * Missing : Select / Copy text with mouse.
   * Partial : Mouse reporting is partially implemented. Mouse events are *forwarded* to the terminal widget.
@@ -85,9 +139,6 @@ There are currently some bugs and missing features in the terminal widget :
   * Bug : terminal type `linux` is not working.
   * Others to discover ...
 
-Here is a screenshot of `cacademo` running in the terminal widget.
-
-![alt text](screenshots/cacademo.png)
 
 ## Demos
 
