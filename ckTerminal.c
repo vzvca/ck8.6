@@ -1112,12 +1112,14 @@ HANDLER(decreqtparm) {
  *--------------------------------------------------------------------------
  */
 HANDLER(sgr0) {
-#if 0
+  //#if 0
+  wattrset(win, A_NORMAL);
   wcolor_set(win, 0, NULL);
   s->fg = s->bg = -1;
   wbkgdset(win, COLOR_PAIR(0) | ' ');
-#endif
-  
+  //#endif
+
+#if 0
   //@vca : try to tune background
   int p;
   wattrset(win, A_NORMAL);
@@ -1125,7 +1127,7 @@ HANDLER(sgr0) {
   wcolor_set(win, p, NULL);
   wbkgdset(win, COLOR_PAIR(p) | ' ' );
   s->fg = s->bg = -1;
-
+#endif
   ENDHANDLER;
 }
 
@@ -1221,7 +1223,7 @@ HANDLER(sgr) {
   if (!argc)
     CALL(sgr0);
 
-  short bg = s->wbg, fg = s->wfg;
+  short bg = s->bg, fg = s->fg;
   
   for (int i = 0; i < argc; i++) switch (P0(i)){
     case  0:  CALL(sgr0);                                              break;
