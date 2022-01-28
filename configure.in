@@ -202,7 +202,7 @@ fi
 
 echo checking for curses/ncurses library files
 CURSESLIBSW=nope
-dirs="../ncurses/lib /usr/lib /usr/lib64 /usr/lib/ncurses /usr/lib64/ncurses /usr/lib/`uname -m`-linux-gnu /opt/ncurses/lib /usr/local/lib /usr/local/ncurses/lib"
+dirs="../ncurses/lib /usr/lib /usr/lib64 /usr/lib/ncurses /usr/lib64/ncurses /usr/lib/`uname -m`-linux-gnu /usr/lib/arm-linux-gnueabihf /opt/ncurses/lib /usr/local/lib /usr/local/ncurses/lib"
 for i in $dirs ; do
   if test $USE_NCURSES = 0 ; then
     if test -r $i/libcurses.a || test -r $i/libcurses$SHLIB_SUFFIX ; then

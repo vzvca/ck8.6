@@ -20,6 +20,8 @@
 #include "gpm.h"
 #endif
 
+#include <pty.h>
+
 typedef struct {
     Tcl_Event header;		/* Standard event header. */
     CkEvent event;		/* Ck event data. */
