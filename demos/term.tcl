@@ -86,10 +86,87 @@ set LAYOUT [dict create]
 set CHOOSER [list]
 
 # --------------------------------------------------------------------------
+#  -- Terminal multiplexer commands --
+#
+#
+# --------------------------------------------------------------------------
+set COMMANDS {
+    {
+	name "close"
+	desc "Close current pane, others will expand."
+	cmd  pane-kill
+	shortcut "C-b C-k"
+    }
+    {
+	name "switch"
+	desc "Change pane content."
+	cmd  pane-switch
+    }
+    {
+	name "next"
+	desc "Focus next pane."
+	cmd  pane-next
+	shortcut "C-b Right"
+    }
+    {
+	name "prev"
+	desc "Focus previous pane."
+	cmd  pane-prev
+	shortcut "C-b Left"
+    }
+    {
+	name "hexpand"
+	desc "Expand pane horizontally."
+	cmd  pane-hexpand
+    }
+    {
+	name "vexpand"
+	desc "Expand pane vertically."
+	cmd  pane-vexpand
+    }
+    {
+	name "hsplit"
+	desc "Split pane horizontally."
+	cmd  pane-hsplit
+    }
+    {
+	name "vsplit"
+	desc "Split pane vertically."
+	cmd  pane-vsplit
+    }
+    {
+	name "hdecr"
+	desc "Decrease pane width."
+	cmd  pane-hdecr
+    }
+    {
+	name "hincr"
+	desc "Increase pane width."
+	cmd  pane-hincr
+    }
+    {
+	name "vdecr"
+	desc "Decrease pane height."
+	cmd  pane-vdecr
+    }
+    {
+	name "vincr"
+	desc "Increase pane height."
+	cmd  pane-vincr
+    }
+    {
+	name "fullscreen"
+	desc "Close all panes except focused one."
+	cmd  pane-fullscreen
+	shortcut "C-b C-f"
+    }
+}
+
+# --------------------------------------------------------------------------
 #  Helper
 # --------------------------------------------------------------------------
-proc report args {
-    return -code return
+proc debug msg {
+    .l.state configure -text $msg
 }
 
 
@@ -103,6 +180,7 @@ proc report args {
 # --------------------------------------------------------------------------
 proc set-widget {w1 w2} {
     # -- check if there is something to do
+    debug "set-widget $w1 $w2"
     if { $w1 eq $w2 } return
     
     global LAYOUT
@@ -114,7 +192,7 @@ proc set-widget {w1 w2} {
 		break
 	    }
 	}
-	if {$i == 4} return
+	if {$i > 4} return
 	
 	# -- check if w2 is displayed
 	# -- in this case replace it by a chooser
@@ -153,9 +231,15 @@ proc display-selected-term { w } {
     global TERM
     set idx  [$w index active]
     set wp   [winfo parent $w]
-    set term [lindex $TERM $idx]
-    set term [dict get $term "wid"]
-    display-term $wp $term
+    debug "display-selected-term $wp $idx"
+    if { $idx == 0 } {
+	display-term $wp
+    } else {
+	incr idx -1
+	set term [lindex $TERM $idx]
+	set term [dict get $term "wid"]
+	display-term $wp $term
+    }
 }
 
 # --------------------------------------------------------------------------
@@ -173,18 +257,20 @@ proc list-term { widget } {
     if { ![winfo exists ${w}] } {
 	listbox ${w}
 	bind ${w} <Return> "display-selected-term %W"
-	bind ${w} <1>      "display-selected-term %W"
+	bind ${w} <1> "%W activate @%x,%y ; display-selected-term %W"
 
 	pack  ${w}
     }
     catch { ${w} delete 0 end }
-    
+
+    ${w} insert end "New terminal"
     foreach term $TERM {
 	dict with term {
 	    ${w} insert end "Term # ${idx} : ${name}"
 	}
     }
-    #focus ${w}
+    ${w} activate 0
+    ${w} selection set 0
 }
 
 # --------------------------------------------------------------------------
@@ -204,6 +290,9 @@ proc choose-term {{create 0}} {
     if {$create == 0} {
 	foreach w $CHOOSER {
 	    if {![winfo ismapped $w]} {
+		# -- when reusing an already created choose
+		# -- make sure to reset the active index
+		$w.termlist activate 0
 		return $w
 	    }
 	}
@@ -215,21 +304,122 @@ proc choose-term {{create 0}} {
     }
 
     set f [frame .f.c${len}]
-    message ${f}.msg -width 60 -text "\nCreate a new terminal or choose an existing one.\n"
-    button ${f}.bnew -text "New Term"
+    message ${f}.msg -width 50 -text "\nCreate a new terminal or choose an existing one.\n"
 
-    ${f}.bnew    configure -command "display-term $f"
-
-    pack ${f}.msg ${f}.bnew
+    pack ${f}.msg
     list-term $f
     
     lappend CHOOSER ${f}
     return ${f}
+}
+
+# --------------------------------------------------------------------------
+#  command-update-list
+#  Updates the list of commands. The list is updating by selecting
+#  commands whose name match the content of the entry.
+# --------------------------------------------------------------------------
+proc command-update-list {} {
+    global COMMANDS
+    set w .cmd
+    set filter [string trim [$w.entry get]]
+    debug "filter: $filter"
     
-#    set w [button .f.b${len} -text "New Term"]
-#    $w configure -command "display-term $w"
-#    lappend CHOOSER $w
-#    return $w
+    $w.lst delete 0 end
+    foreach command $COMMANDS {
+	dict with command {
+	    if {[string length $filter]} {
+		if {[string first $filter $name] == 0} {
+		    $w.lst insert end [format "%-12s%s " $name $desc]
+		}
+	    } else {
+		$w.lst insert end [format "%-12s%s " $name $desc]
+	    }
+	}
+    }
+}
+
+# --------------------------------------------------------------------------
+#  command-execute
+# --------------------------------------------------------------------------
+proc command-execute {{what ""}} {
+    global COMMANDS
+    set w .cmd
+    set sz [$w.lst size]
+
+    # -- no argument give, try to find one
+    if {![string length $what]} {
+	if {$sz == 1} {
+	    set what [$w.lst get 0]
+	} elseif {$sz > 1} {
+	    set what [$w.lst get active]
+	} else {
+	    return
+	}
+    }
+
+    # -- scan commands
+    foreach command $COMMANDS {
+	dict with command {
+	    debug "scan $name"
+	    if { ($sz == 1) && ([string first $what $name] == 0) } {
+		debug "run: $cmd"
+		catch $cmd
+		break
+	    }
+	    if { $name eq $what } {
+		debug "run: $cmd"
+		catch $cmd
+		break
+	    }
+	    set txt [format "%-12s%s " $name $desc]
+	    if { $txt eq $what } {
+		debug "run: $cmd"
+		catch $cmd
+		break
+	    }
+	}
+    }
+}
+
+# --------------------------------------------------------------------------
+#  command-dialog
+#  Shows a command dialog on top of current selected term
+#  The window allows to enter a command or choose a command in a list
+# --------------------------------------------------------------------------
+proc command-dialog {} {
+    set w .cmd
+    if { ![winfo exists $w] } {
+	toplevel $w -border { ulcorner hline urcorner vline lrcorner hline llcorner vline }
+
+	label $w.title -text "Terminal Command"
+	place $w.title -y 0 -relx 0.5 -bordermode ignore -anchor center
+
+	entry $w.entry
+	frame $w.sep0 -border hline -height 1
+	scrollbar $w.scroll -command "$w.lst yview" -takefocus 0
+	listbox $w.lst -yscrollcommand "$w.scroll set"
+	frame $w.sep1 -border hline -height 1
+	button $w.close -command "lower $w" -text "Close"
+
+	pack $w.close -side bottom -ipadx 1
+	pack $w.sep1 -side bottom -fill x
+	pack $w.entry -side bottom -fill x
+	pack $w.sep0 -side bottom -fill x
+	pack $w.lst -side left -fill both -expand 1
+	pack $w.scroll -side right -fill y
+
+	# bindings
+	bind $w.entry <KeyPress> command-update-list
+	bind $w.entry <Return> {command-execute [%W get]}
+	bind $w.lst   <Return> {command-execute}
+	bind $w.lst   <1>  {%W activate @%x,%y ; command-execute}
+    }
+    
+    $w.entry delete 0 end
+    command-update-list
+    focus $w.entry
+    place $w -relx 0.5 -rely 0.5 -relwidth 0.5 -relheight 0.5 -anchor center
+    raise $w
 }
 
 # --------------------------------------------------------------------------
@@ -248,16 +438,22 @@ proc get-focused-idx {} {
 	    1 {
 		if { $focusid > 1 } {
 		    error "invalid focusid $focusid for layout $layout"
+		    set focusid 1
+		    set focused $t1
 		}
 	    }
 	    2 - 3 {
 		if { $focusid > 2 } {
 		    error "invalid focusid $focusid for layout $layout"
+		    set focusid 1
+		    set focused $t1
 		}
 	    }
 	    4 - 5 - 6 - 7 {
 		if { $focusid > 3 } {
 		    error "invalid focusid $focusid for layout $layout"
+		    set focusid 1
+		    set focused $t1
 		}
 	    }
 	}
@@ -279,11 +475,23 @@ proc swap-vars {v1 v2} {
 }
 
 # --------------------------------------------------------------------------
+#  display-layout
+#  Display a small toplevel window that shows the current layout and
+#  the currently focused widget in the layout
+# --------------------------------------------------------------------------
+proc display-layout {} {
+    toplevel .layout \
+	-border {ulcorner hline urcorner vline lrcorner hline llcorner vline} \
+	-width 3 -height 3
+    #@ todo
+}
+
+# --------------------------------------------------------------------------
 #  apply-layout --
 #  Apply directives in layout
 # --------------------------------------------------------------------------
 proc apply-layout {} {
-    global LAYOUT
+    global LAYOUT CHOOSER
     dict with LAYOUT {
 	# -- remove widgets
 	foreach slave [place slaves .f] {
@@ -343,9 +551,444 @@ proc apply-layout {} {
 	if { $layout == 8 } {
 	    place $t4 -relx $w  -rely $h  -relwidth $1w  -relheight $1h
 	}
-	focus $focused
-	.l.state configure -text "layout #$layout $w $h"
+	# -- note that if a "terminal chooser" is displayed the focus
+	# -- is transfered to the listbox widget it contains.
+	if {[lsearch $CHOOSER $focused] == -1} {
+	    focus $focused
+	} else {
+	    focus $focused.termlist
+	}
+	debug "layout #$layout $w $h $focused"
     }
+}
+
+# -------------------------------------------------------------------------
+#  pane-switch
+#  Replace the content of the focused pane with a terminal chooser
+#  dialog box.
+# -------------------------------------------------------------------------
+proc pane-switch {} {
+    global LAYOUT CHOOSER
+    dict with LAYOUT {
+	# -- if the pane content is already a terminal chooser
+	# -- there is nothing to do
+	if {[lsearch $CHOOSER $focused] != -1} return
+	set idx [get-focused-idx]
+	set focused [choose-term]
+	set t${idx} $focused
+    }
+    apply-layout
+}
+
+# -------------------------------------------------------------------------
+#  pane-next
+#  Transfer focus to the next pane in layout cycling if needed.
+# -------------------------------------------------------------------------
+proc pane-next {{inc 1}} {
+    global LAYOUT
+    set focusid [get-focused-idx]
+    incr focusid $inc
+    dict with LAYOUT {
+	switch -exact -- $layout {
+	    2 - 3 {
+		set focused [set t$focusid]
+		if {$focusid == 3} {
+		    set focused $t1
+		}
+		if {$focusid == 0} {
+		    set focused $t2
+		}
+	    }
+	    4 - 5 - 6 - 7 {
+		set focused [set t$focusid]
+		if {$focusid == 4} {
+		    set focused $t1
+		}
+		if {$focusid == 0} {
+		    set focused $t3
+		}
+	    }
+	    8 {
+		set focused [set t$focusid]
+		if {$focusid == 5} {
+		    set focused $t1
+		}
+		if {$focusid == 0} {
+		    set focused $t4
+		}
+	    }
+	}
+    }
+    apply-layout
+}
+
+# -------------------------------------------------------------------------
+#  pane-next
+#  Transfer focus to the previous pane in layout cycling if needed.
+# -------------------------------------------------------------------------
+proc pane-prev {} {
+    pane-next -1
+}
+
+# -------------------------------------------------------------------------
+#  pane-hincr
+#
+#  Increment pane width when possible. The increment might be negative.
+#  For some layouts the change is not possible, in this case the function
+#  does nothing.
+#
+#  If once incremented the width reaches 1 or 0, the layout is changed.
+# -------------------------------------------------------------------------
+proc pane-hincr {{inc 0.1001}} {
+    global LAYOUT
+    set focusid [get-focused-idx]
+    dict with LAYOUT {
+	switch -exact -- $layout {
+	    1 - 2 { return }
+	    3 {
+		set w [expr {$w + $inc}]
+		if {$w >= 1.0} {
+		    set layout 1
+		    if {$focusid == 2} {
+			swap-vars t1 t2
+			set focused $t1
+		    }
+		}
+		if {$w <= 0.0} {
+		    set layout 1
+		    if {$focusid == 1} {
+			swap-vars t1 t2
+			set focused $t1
+		    }
+		}
+	    }
+	    4 {
+		set w [expr {$w + $inc}]
+		if {$w >= 1.0} {
+		    if {$focusid == 1} {
+			set layout 1
+		    }
+		    if {$focusid == 2} {
+			set layout 2
+			swap-vars t1 t2
+			swap-vars t2 t3
+			set focused $t1
+		    }
+		    if {$focusid == 3} {
+			set layout 2
+			swap-vars t1 t2
+			swap-vars t2 t3
+			set focused $t2			
+		    }
+		}
+		if {$w <= 0.0} {
+		    if {$focusid == 1} {
+			set layout 2
+			swap-vars t1 t2
+			swap-vars t2 t3
+			set focused $t1
+		    }
+		    if {$focusid == 2 || $focusid == 3} {
+			set layout 1
+		    }
+		}
+	    }
+	    5 {
+		set w [expr {$w + $inc}]
+		if {$w >= 1.0} {
+		    if {$focusid == 1 || $focusid == 2} {
+			set layout 2
+		    }
+		    if {$focusid == 3} {
+			set layout 1
+			swap-vars t1 t3
+			set focused $t1
+		    }
+		}
+		if {$w <= 0.0} {
+		    if {$focusid == 1 || $focusid == 2} {
+			set layout 1
+			swap-vars t1 t3
+			set focused $t1
+		    }
+		    if {$focusid == 3} {
+			set layout 2
+		    }
+		}
+	    }
+	    6 {
+		if {$focusid == 1} return
+		set w [expr {$w + $inc}]
+		if {$w >= 1.0} {
+		    set layout 2
+		    if {$focusid == 3} {
+			swap-vars t2 t3
+			set focused $t2
+		    }
+		}
+		if {$w <= 0.0} {
+		    set layout 2
+		    if {$focusid == 2} {
+			swap-vars t2 t3
+		    }
+		    set focused $t2 
+		}
+	    }
+	    7 {
+		if {$focusid == 3} return
+		set w [expr {$w + $inc}]
+		if {$w >= 1.0} {
+		    set layout 2
+		    if {$focusid == 1} {
+			swap-vars t2 t3
+		    }
+		    if {$focusid == 2} {
+			swap-vars t1 t2
+			swap-vars t2 t3
+			set focused $t1
+		    }
+		}
+		if {$w <= 0.0} {
+		    set layout 2
+		    if {$focusid == 1} {
+			swap-vars t1 t2
+			swap-vars t2 t3
+		    }
+		    if {$focusid == 2} {
+			swap-vars t2 t3
+		    }
+		    set focused $t1
+		}
+	    }
+	    8 {
+		set w [expr {$w + $inc}]
+		if { $w >= 1.0 } {
+		    set layout 2
+		    if {$focusid == 1} {
+			swap-vars t2 t3
+		    }
+		    if {$focusid == 3} {
+			swap-vars t2 t3
+			set focused $t2
+		    }
+		    if {$focusid == 2} {
+			swap-vars t1 t2
+			swap-vars t2 t4
+			set focused $t1
+		    }
+		    if {$focusid == 4} {
+			swap-vars t1 t2
+			swap-vars t2 t4
+			set focused $t2
+		    }
+		}
+		if {$w <= 0.0} {
+		    set layout 2
+		    if {$focusid == 1} {
+			swap-vars t1 t2
+			swap-vars t2 t4
+			set focused $t1
+		    }
+		    if {$focusid == 2} {
+			swap-vars t2 t3
+			set focused $t1
+		    }
+		    if {$focusid == 3} {
+			swap-vars t1 t2
+			swap-vars t2 t4
+			set focused $t2
+		    }
+		    if {$focusid == 4} {
+			swap-vars t2 t3
+			set focused $t2
+		    }
+		}
+	    }
+	}
+    }
+    apply-layout
+}
+
+# -------------------------------------------------------------------------
+#  pane-hdecr
+#  Decrement pane width when possible.
+# -------------------------------------------------------------------------
+proc pane-hdecr {} {
+    pane-hincr -0.1001
+}
+
+# -------------------------------------------------------------------------
+#  pane-vincr
+#
+#  Increment pane height when possible. The increment might be negative.
+#  For some layouts the change is not possible, in this case the function
+#  does nothing.
+#
+#  If once incremented the height reaches 1 or 0, the layout is changed.
+# -------------------------------------------------------------------------
+proc pane-vincr {{inc 0.1001}} {
+    global LAYOUT
+    set focusid [get-focused-idx]
+    dict with LAYOUT {
+	switch -exact -- $layout {
+	    1 { return }
+	    2 {
+		set h [expr {$h + $inc}]
+		if {$h >= 1.0} {
+		    set layout 1
+		    if {$focusid == 2} {
+			swap-vars t1 t2
+			set focused $t1
+		    }
+		}
+		if {$h <= 0.0} {
+		    set layout 1
+		    if {$focusid == 1} {
+			swap-vars t1 t2
+			set focused $t1
+		    }			
+		}
+	    }
+	    3 { return }
+	    4 {
+		if {$focusid == 1} return
+		set h [expr {$h + $inc}]
+		if {$h >= 1.0} {
+		    set layout 3
+		    if {$focusid == 3} {
+			swap-vars t2 t3
+			set focused $t2
+		    }
+		}
+		if {$h <= 0.0} {
+		    set layout 3
+		    if {$focusid == 2} {
+			swap-vars t2 t3
+		    }
+		    set focused $t2
+		}
+	    }
+	    5 {
+		if {$focusid == 3} return
+		set h [expr {$h + $inc}]
+		if {$h >= 1.0} {
+		    set layout 3
+		    if {$focusid == 1} {
+			swap-vars t2 t3
+		    }
+		    if {$focusid == 2} {
+			swap-vars t1 t2
+			swap-vars t2 t3
+		    }
+		    set focused $t1
+		}
+		if {$h <= 0.0} {
+		    set layout 3
+		    if {$focusid == 1} {
+			swap-vars t1 t2
+			swap-vars t2 t3
+		    }
+		    if {$focusid == 2} {
+			swap-vars t2 t3
+		    }
+		    set focused $t1
+		}
+	    }
+	    6 {
+		set h [expr {$h + $inc}]
+		if {$h >= 1.0} {
+		    if {$focusid == 1} {
+			set layout 1
+		    }
+		    if {$focusid == 2} {
+			set layout 3
+			swap-vars t1 t2
+			swap-vars t2 t3
+			set focused $t1
+		    }
+		    if {$focusid == 3} {
+			set layout 3
+			swap-vars t1 t2
+			swap-vars t2 t3
+			set focused $t2			
+		    }
+		}
+		if {$h <= 0.0} {
+		    if {$focusid == 1} {
+			set layout 3
+			swap-vars t1 t2
+			swap-vars t2 t3
+		    }
+		    if {$focusid == 2 || $focusid == 3} {
+			set layout 1
+		    }
+		    set focused $t1
+		}
+	    }
+	    7 {
+		set h [expr {$h + $inc}]
+		if {$h >= 1.0} {
+		    if {$focusid == 1 || $focusid == 2} {
+			set layout 3
+		    }
+		    if {$focusid == 3} {
+			set layout 1
+			swap-vars t1 t3
+			set focused $t1
+		    }
+		}
+		if {$h <= 0.0} {
+		    if {$focusid == 1 || $focusid == 2} {
+			set layout 1
+			swap-vars t1 t3
+		    }
+		    if {$focusid == 3} {
+			set layout 3
+		    }
+		    set focused $t1
+		}
+	    }
+	    8 {
+		set h [expr {$h + $inc}]
+		if {$h >= 1.0} {
+		    set layout 3
+		    if {$focusid == 3} {
+			swap-vars t1 t3
+			swap-vars t2 t4
+			set focused $t1
+		    }
+		    if {$focusid == 4} {
+			swap-vars t1 t3
+			swap-vars t2 t4
+			set focused $t2
+		    }
+		}
+		if {$h <= 0.0} {
+		    set layout 3
+		    if {$focusid == 1} {
+			swap-vars t1 t3
+			swap-vars t2 t4
+			set focused $t1
+		    }
+		    if {$focusid == 2} {
+			swap-vars t1 t3
+			swap-vars t2 t4
+			set focused $t2
+		    }
+		}
+	    }
+	}
+    }
+    apply-layout
+}
+
+# -------------------------------------------------------------------------
+#  pane-vdecr
+#  Decrement pane height when possible.
+# -------------------------------------------------------------------------
+proc pane-vdecr {} {
+    # -- avoid numerical artifacts
+    pane-vincr -0.1001
 }
 
 # -------------------------------------------------------------------------
@@ -985,15 +1628,10 @@ dict set LAYOUT focused [dict get $LAYOUT t1]
 
 mk-button q "Quit" exit right
 mk-button h "Help" help right
-
-mk-button k  "kill" pane-kill right
-mk-button ve "v-expand"    pane-vexpand right
-mk-button he "h-expand"    pane-hexpand right
-mk-button vs "v-split"     pane-vsplit right
-mk-button hs "h-split"     pane-hsplit right
-mk-button fs "fullscreen"  pane-fullscreen right
+mk-button c "Commands" command-dialog right
 
 proc noop {} {}
 mk-button state "layout" noop
+
 
 apply-layout
