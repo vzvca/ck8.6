@@ -106,23 +106,25 @@ set COMMANDS {
 	name "next"
 	desc "Focus next pane."
 	cmd  pane-next
-	shortcut "C-b Right"
+	shortcut "C-b C-n"
     }
     {
 	name "prev"
 	desc "Focus previous pane."
 	cmd  pane-prev
-	shortcut "C-b Left"
+	shortcut "C-b C-p"
     }
     {
 	name "hexpand"
 	desc "Expand pane horizontally."
 	cmd  pane-hexpand
+	shortcut "C-b C-h"
     }
     {
 	name "vexpand"
 	desc "Expand pane vertically."
 	cmd  pane-vexpand
+	shortcut "C-b C-v"
     }
     {
 	name "hsplit"
@@ -160,6 +162,18 @@ set COMMANDS {
 	cmd  pane-fullscreen
 	shortcut "C-b C-f"
     }
+    {
+	name "help"
+	desc "Display help screen."
+	cmd  help
+	shortcut "C-b C-h"
+    }
+    {
+	name "quit"
+	desc "Close terminal multiplexer."
+	cmd  exit
+	shortcut "C-b C-q"
+    }
 }
 
 # --------------------------------------------------------------------------
@@ -169,6 +183,41 @@ proc debug msg {
     .l.state configure -text $msg
 }
 
+# --------------------------------------------------------------------------
+#  custom focus command
+#  We orverload the default focus command to make sure
+#  that the "focused" dictionary field of global variable LAYOUT
+#  keeps updated while moving the focus around.
+# --------------------------------------------------------------------------
+rename focus _focus
+proc focus { w } {
+    # -- call toolkit implementation
+    _focus $w
+
+    # -- update focus 
+    set wp $w
+    catch {set wp [winfo parent $w]}
+    global LAYOUT CHOOSER
+    dict with LAYOUT {
+	if { ($w eq $focused) || ($wp eq $focused)  } {
+	    return
+	}
+	set n 1
+	if {$layout > 1} { incr n }
+	if {$layout > 3} { incr n }
+	if {$layout > 7} { incr n }
+	for {set i 1} {$i <= $n} {incr i} {
+	    set t [set t$i]
+	    if { $t eq $w } {
+		set focused $w
+	    }
+	    if { $t eq $wp } {
+		set focused $wp
+	    }
+	}
+	debug "layout #$layout $w $h $focused"
+    }
+}
 
 # --------------------------------------------------------------------------
 #  set-widget
@@ -391,18 +440,18 @@ proc command-dialog {} {
     if { ![winfo exists $w] } {
 	toplevel $w -border { ulcorner hline urcorner vline lrcorner hline llcorner vline }
 
-	label $w.title -text "Terminal Command"
+	label $w.title -text "Type Command"
 	place $w.title -y 0 -relx 0.5 -bordermode ignore -anchor center
 
 	entry $w.entry
 	frame $w.sep0 -border hline -height 1
 	scrollbar $w.scroll -command "$w.lst yview" -takefocus 0
 	listbox $w.lst -yscrollcommand "$w.scroll set"
-	frame $w.sep1 -border hline -height 1
-	button $w.close -command "lower $w" -text "Close"
+#	frame $w.sep1 -border hline -height 1
+#	button $w.close -command "lower $w" -text "Close"
 
-	pack $w.close -side bottom -ipadx 1
-	pack $w.sep1 -side bottom -fill x
+#	pack $w.close -side bottom -ipadx 1
+#	pack $w.sep1 -side bottom -fill x
 	pack $w.entry -side bottom -fill x
 	pack $w.sep0 -side bottom -fill x
 	pack $w.lst -side left -fill both -expand 1
@@ -413,6 +462,11 @@ proc command-dialog {} {
 	bind $w.entry <Return> {command-execute [%W get]}
 	bind $w.lst   <Return> {command-execute}
 	bind $w.lst   <1>  {%W activate @%x,%y ; command-execute}
+
+	# we change the default binding order
+	# to have the typed characters already inserted
+	# before calling "command-update-list"
+	bindtags $w.entry [list Entry $w.entry $w all]
     }
     
     $w.entry delete 0 end
@@ -1574,7 +1628,8 @@ proc help {} {
     $t insert end "Mouse\n" header
     $t insert end "o Left button clicked in terminal will transfer focus to it.\n" bullet
     
-    $t config -state disabled
+    $t config -state disabled -takefocus 0
+    focus .help.dismiss
 }
 
 label .l -text "Terminal multiplexer" -bg blue
@@ -1626,8 +1681,8 @@ dict set LAYOUT focused [dict get $LAYOUT t1]
 
 #set-term .t1
 
-mk-button q "Quit" exit right
-mk-button h "Help" help right
+#mk-button q "Quit" exit right
+#mk-button h "Help" help right
 mk-button c "Commands" command-dialog right
 
 proc noop {} {}
