@@ -10,6 +10,8 @@ bind .f <Alt-g> {.f configure -bg green}
 bind .f <Alt-b> {.f configure -bg blue}
 bind .f <Alt-y> {.f configure -bg #ffff00}
 
+bind .f <Alt-B> {.f configure -bg black}
+
 bind .f <Control-x> {.f configure -bg cyan}
 
 bind .f <Key-q> {exit 0}

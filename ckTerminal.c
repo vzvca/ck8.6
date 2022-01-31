@@ -377,7 +377,8 @@ typedef struct Terminal_s {
 			       * don't request any size. */
   char *takeFocus;            /* Value of -takefocus option. */
   char *commandkey;           /* Value of -commandkey option. */
-  char *banner    ;           /* Welcome banner to display */
+  char *banner;               /* Welcome banner to display */
+  char *title;                /* Title of terminal */
   int flags;                  /* Various flags;  see below for
 			       * definitions. */
 
