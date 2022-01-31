@@ -188,6 +188,12 @@ set COMMANDS {
 	shortcut "C-b C-h"
     }
     {
+	name "commands"
+	desc "Display command dialog."
+	cmd  command-dialog
+	shortcut "C-b C-c"
+    }
+    {
 	name "quit"
 	desc "Close terminal multiplexer."
 	cmd  exit
@@ -1661,8 +1667,6 @@ proc new-term { {ckey "b"} } {
     foreach chooser $CHOOSER {
 	list-term $chooser
     }
-
-    do-bindings .f.t${TX}
     
     return .f.t${TX}
 }
@@ -1713,21 +1717,33 @@ proc load-pref-file {} {
 proc do-bindings {{w all}} {
     global COMMANDS
     set m {
-	"left"     "Left"
-	"right"    "Right"
-	"down"     "Down"
-	"up"       "Up"
+	"left"     "<Key-Left>"
+	"right"    "<Key-Right>"
+	"down"     "<Key-Down>"
+	"up"       "<Key-Up>"
+	"exclam"   "<Key-exclam>"
+	"slash"    "<Key-slash>"
+	"C-b"      "<Control-b>"
+	"C-f"      "<Control-f>"
+	"C-h"      "<Control-h>"
+	"C-k"      "<Control-k>"
+	"C-x"      "<Control-x>"
+	"C-n"      "<Control-n>"
+	"C-p"      "<Control-p>"
+	"C-h"      "<Control-h>"
+	"C-v"      "<Control-v>"
+	"C-q"      "<Control-q>"
+	"C-c"      "<Control-c>"
     }
     foreach command $COMMANDS {
 	dict with command {
+	    set key ""
 	    foreach k $shortcut {
 		set k [string map $m $k]
-		if {[string first "C-" $k] == 0} {
-		    set k "<[string map {C- Control-} [string toupper $k]]> "
-		}
 		append key $k
 	    }
-	    bind $w [string trim $key] $cmd
+	    bind $w $key $cmd
+	    debug "bind $w $key $cmd"
 	}
     }
 }
