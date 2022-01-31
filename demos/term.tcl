@@ -1,11 +1,18 @@
 # --------------------------------------------------------------------------
+#
 #  Terminal multiplexer program
 #
-#  Demonstrates the terminal widget
+#  This program was written to demonstrate the use of the terminal
+#  widget and demonstrates other Ck features.
+#
+#  It provides some of the facilities of a terminal multiplexer
+#  program like "tmux" or "screen".
+#
+#  It offers less functions, the main limitation compared to others
+#  is that it lacks session de/re-connection which is the `killer'
+#  feature of 'tmux' and 'screen'. It is planned to add this !
+#
 # --------------------------------------------------------------------------
-
-set TX  0
-set CTX 0
 
 # --------------------------------------------------------------------------
 #  -- Terminals --
@@ -23,6 +30,11 @@ set CTX 0
 #  }
 # --------------------------------------------------------------------------
 set TERM [list]
+
+# --------------------------------------------------------------------------
+#  global terminal counter
+# --------------------------------------------------------------------------
+set TX 0
 
 # --------------------------------------------------------------------------
 #  -- Screen Layouts --
@@ -98,9 +110,10 @@ set COMMANDS {
 	shortcut "C-b C-k"
     }
     {
-	name "switch"
+	name "eXchange"
 	desc "Change pane content."
 	cmd  pane-switch
+	shortcut "C-b C-x"
     }
     {
 	name "next"
@@ -130,31 +143,37 @@ set COMMANDS {
 	name "hsplit"
 	desc "Split pane horizontally."
 	cmd  pane-hsplit
+	shortcut "C-b exclam"
     }
     {
 	name "vsplit"
 	desc "Split pane vertically."
 	cmd  pane-vsplit
+	shortcut "C-b slash"
     }
     {
 	name "hdecr"
 	desc "Decrease pane width."
 	cmd  pane-hdecr
+	shortcut "C-b left"
     }
     {
 	name "hincr"
 	desc "Increase pane width."
 	cmd  pane-hincr
+	shortcut "C-b right"
     }
     {
 	name "vdecr"
 	desc "Decrease pane height."
 	cmd  pane-vdecr
+	shortcut "C-b down"
     }
     {
 	name "vincr"
 	desc "Increase pane height."
 	cmd  pane-vincr
+	shortcut "C-b up"
     }
     {
 	name "fullscreen"
@@ -176,12 +195,49 @@ set COMMANDS {
     }
 }
 
+
 # --------------------------------------------------------------------------
-#  Helper
+#  Banner that will get displayed in each terminal opened
+#  It gives some infos about control sequences to use
+# --------------------------------------------------------------------------
+set BANNER [join {
+    ""
+    "-------------------------------------------------------------------------------"
+    ""
+    "               *** Welcome to cktermux ***"
+    ""
+    "   This program demonstrates the terminal widget of ck8.6."
+    "   It implements a small terminal multiplexer program."
+    ""
+    "   Your current shell is launched in a terminal."
+    ""
+    "   The control key is set to <Control-%1$s> and starts control sequences."
+    "     * <Control-%1$s>-o        : gives focus to control buttons"
+    "     * <Control-%1$s>-<PageUp> : Starts scrolling in terminal history."
+    ""    
+    "-------------------------------------------------------------------------------"
+    ""
+    ""
+} "\r\n"]
+
+set PREFS [join {
+    "#-------------------------------------------------------------------------------"
+    "#  tmuck user settings"
+    "#-------------------------------------------------------------------------------"
+    "# do some clever customisation here ..."
+} "\n"]
+
+# --------------------------------------------------------------------------
+#  Helper - debug
 # --------------------------------------------------------------------------
 proc debug msg {
     .l.state configure -text $msg
 }
+
+# --------------------------------------------------------------------------
+#  Helper - does nothing
+# --------------------------------------------------------------------------
+proc noop {} {}
 
 # --------------------------------------------------------------------------
 #  custom focus command
@@ -700,85 +756,70 @@ proc pane-hincr {{inc 0.1001}} {
 	switch -exact -- $layout {
 	    1 - 2 { return }
 	    3 {
-		set w [expr {$w + $inc}]
+		if {$focusid == 1} {
+		    set w [expr {$w + $inc}]
+		} else {
+		    set w [expr {$w - $inc}]
+		}
 		if {$w >= 1.0} {
 		    set layout 1
-		    if {$focusid == 2} {
-			swap-vars t1 t2
-			set focused $t1
-		    }
+		    set focused $t1
 		}
 		if {$w <= 0.0} {
 		    set layout 1
-		    if {$focusid == 1} {
-			swap-vars t1 t2
-			set focused $t1
-		    }
+		    swap-vars t1 t2
+		    set focused $t1
 		}
 	    }
 	    4 {
-		set w [expr {$w + $inc}]
+		if {$focusid == 1} {
+		    set w [expr {$w + $inc}]
+		} else {
+		    set w [expr {$w - $inc}]
+		}
 		if {$w >= 1.0} {
-		    if {$focusid == 1} {
-			set layout 1
-		    }
-		    if {$focusid == 2} {
-			set layout 2
-			swap-vars t1 t2
-			swap-vars t2 t3
-			set focused $t1
-		    }
-		    if {$focusid == 3} {
-			set layout 2
-			swap-vars t1 t2
-			swap-vars t2 t3
-			set focused $t2			
-		    }
+		    set layout 1
+		    set focused $t1
 		}
 		if {$w <= 0.0} {
-		    if {$focusid == 1} {
-			set layout 2
-			swap-vars t1 t2
-			swap-vars t2 t3
+		    set layout 2
+		    swap-vars t1 t2
+		    swap-vars t2 t3
+		    if {$focusid == 3} {
+			set focused $t2
+		    } else {
 			set focused $t1
-		    }
-		    if {$focusid == 2 || $focusid == 3} {
-			set layout 1
 		    }
 		}
 	    }
 	    5 {
-		set w [expr {$w + $inc}]
+		if {$focusid == 3} {
+		    set w [expr {$w - $inc}]
+		} else {
+		    set w [expr {$w + $inc}]
+		}
 		if {$w >= 1.0} {
-		    if {$focusid == 1 || $focusid == 2} {
-			set layout 2
-		    }
+		    set layout 2
 		    if {$focusid == 3} {
-			set layout 1
-			swap-vars t1 t3
 			set focused $t1
 		    }
 		}
 		if {$w <= 0.0} {
-		    if {$focusid == 1 || $focusid == 2} {
-			set layout 1
-			swap-vars t1 t3
-			set focused $t1
-		    }
-		    if {$focusid == 3} {
-			set layout 2
-		    }
+		    set layout 1
+		    swap-vars t1 t3
+		    set focused $t1
 		}
 	    }
 	    6 {
 		if {$focusid == 1} return
-		set w [expr {$w + $inc}]
+		if {$focusid == 2} {
+		    set w [expr {$w + $inc}]
+		} else {
+		    set w [expr {$w - $inc}]
+		}
 		if {$w >= 1.0} {
 		    set layout 2
-		    if {$focusid == 3} {
-			swap-vars t2 t3
-			set focused $t2
-		    }
+		    set focused $t2
 		}
 		if {$w <= 0.0} {
 		    set layout 2
@@ -790,70 +831,41 @@ proc pane-hincr {{inc 0.1001}} {
 	    }
 	    7 {
 		if {$focusid == 3} return
-		set w [expr {$w + $inc}]
+		if {$focusid == 1} {
+		    set w [expr {$w + $inc}]
+		} else {
+		    set w [expr {$w - $inc}]
+		}
 		if {$w >= 1.0} {
 		    set layout 2
-		    if {$focusid == 1} {
-			swap-vars t2 t3
-		    }
-		    if {$focusid == 2} {
-			swap-vars t1 t2
-			swap-vars t2 t3
-			set focused $t1
-		    }
+		    swap-vars t2 t3
 		}
 		if {$w <= 0.0} {
 		    set layout 2
-		    if {$focusid == 1} {
-			swap-vars t1 t2
-			swap-vars t2 t3
-		    }
-		    if {$focusid == 2} {
-			swap-vars t2 t3
-		    }
+		    swap-vars t1 t2
+		    swap-vars t2 t3
 		    set focused $t1
 		}
 	    }
 	    8 {
-		set w [expr {$w + $inc}]
+		if {$focusid == 1 || $focusid == 3} {
+		    set w [expr {$w + $inc}]
+		} else {
+		    set w [expr {$w - $inc}]
+		}
 		if { $w >= 1.0 } {
 		    set layout 2
-		    if {$focusid == 1} {
-			swap-vars t2 t3
-		    }
+		    swap-vars t2 t3
 		    if {$focusid == 3} {
-			swap-vars t2 t3
-			set focused $t2
-		    }
-		    if {$focusid == 2} {
-			swap-vars t1 t2
-			swap-vars t2 t4
-			set focused $t1
-		    }
-		    if {$focusid == 4} {
-			swap-vars t1 t2
-			swap-vars t2 t4
 			set focused $t2
 		    }
 		}
 		if {$w <= 0.0} {
 		    set layout 2
-		    if {$focusid == 1} {
-			swap-vars t1 t2
-			swap-vars t2 t4
-			set focused $t1
-		    }
-		    if {$focusid == 2} {
-			swap-vars t2 t3
-			set focused $t1
-		    }
-		    if {$focusid == 3} {
-			swap-vars t1 t2
-			swap-vars t2 t4
-			set focused $t2
-		    }
+		    swap-vars t1 t2
+		    swap-vars t2 t4
+		    set focused $t1
 		    if {$focusid == 4} {
-			swap-vars t2 t3
 			set focused $t2
 		    }
 		}
@@ -887,44 +899,48 @@ proc pane-vincr {{inc 0.1001}} {
 	switch -exact -- $layout {
 	    1 { return }
 	    2 {
-		set h [expr {$h + $inc}]
+		if {$focusid == 1} {
+		    set h [expr {$h + $inc}]
+		} else {
+		    set h [expr {$h - $inc}]
+		}
 		if {$h >= 1.0} {
 		    set layout 1
-		    if {$focusid == 2} {
-			swap-vars t1 t2
-			set focused $t1
-		    }
+		    set focused $t1
 		}
 		if {$h <= 0.0} {
 		    set layout 1
-		    if {$focusid == 1} {
-			swap-vars t1 t2
-			set focused $t1
-		    }			
+		    swap-vars t1 t2
+		    set focused $t1
 		}
 	    }
 	    3 { return }
 	    4 {
 		if {$focusid == 1} return
-		set h [expr {$h + $inc}]
+		if {$focusid == 2} {
+		    set h [expr {$h + $inc}]
+		} else {
+		    set h [expr {$h - $inc}]
+		}
 		if {$h >= 1.0} {
 		    set layout 3
 		    if {$focusid == 3} {
-			swap-vars t2 t3
 			set focused $t2
 		    }
 		}
 		if {$h <= 0.0} {
 		    set layout 3
-		    if {$focusid == 2} {
-			swap-vars t2 t3
-		    }
+		    swap-vars t2 t3
 		    set focused $t2
 		}
 	    }
 	    5 {
 		if {$focusid == 3} return
-		set h [expr {$h + $inc}]
+		if {$focusid == 1} {
+		    set h [expr {$h + $inc}]
+		} else {
+		    set h [expr {$h - $inc}]
+		}
 		if {$h >= 1.0} {
 		    set layout 3
 		    if {$focusid == 1} {
@@ -949,7 +965,11 @@ proc pane-vincr {{inc 0.1001}} {
 		}
 	    }
 	    6 {
-		set h [expr {$h + $inc}]
+		if {$focusid == 1} {
+		    set h [expr {$h + $inc}]
+		} else {
+		    set h [expr {$h - $inc}]
+		}
 		if {$h >= 1.0} {
 		    if {$focusid == 1} {
 			set layout 1
@@ -980,7 +1000,11 @@ proc pane-vincr {{inc 0.1001}} {
 		}
 	    }
 	    7 {
-		set h [expr {$h + $inc}]
+		if {$focusid == 3} {
+		    set h [expr {$h - $inc}]
+		} else {
+		    set h [expr {$h + $inc}]
+		}
 		if {$h >= 1.0} {
 		    if {$focusid == 1 || $focusid == 2} {
 			set layout 3
@@ -1003,7 +1027,11 @@ proc pane-vincr {{inc 0.1001}} {
 		}
 	    }
 	    8 {
-		set h [expr {$h + $inc}]
+		if {$focusid == 1 || $focusid == 2} {
+		    set h [expr {$h + $inc}]
+		} else {
+		    set h [expr {$h - $inc}]
+		}
 		if {$h >= 1.0} {
 		    set layout 3
 		    if {$focusid == 3} {
@@ -1488,44 +1516,10 @@ proc pane-hsplit {} {
     apply-layout
 }
 
-
-
 # --------------------------------------------------------------------------
-#  Banner that will get displayed in each terminal opened
-#  It gives some infos about control sequences to use
+#  mk-button
+#  Helper function to create a menubar button and display it.
 # --------------------------------------------------------------------------
-set BANNER [join {
-    ""
-    "-------------------------------------------------------------------------------"
-    ""
-    "               *** Welcome to cktermux ***"
-    ""
-    "   This program demonstrates the terminal widget of ck8.6."
-    "   It implements a small terminal multiplexer program."
-    ""
-    "   Your current shell is launched in a terminal."
-    ""
-    "   The control key is set to <Control-%1$s> and starts control sequences."
-    "     * <Control-%1$s>-o        : gives focus to control buttons"
-    "     * <Control-%1$s>-<PageUp> : Starts scrolling in terminal history."
-    ""    
-    "-------------------------------------------------------------------------------"
-    ""
-    ""
-} "\r\n"]
-
-proc next-term { t } {
-    global LAYOUT
-    dict with LAYOUT {
-    }
-}
-
-proc prev-term { t } {
-    global LAYOUT
-    dict with LAYOUT {
-    }
-}
-
 proc mk-button { name text command {pack left} } {
     button .l.${name} -text " ${text} " -command $command
     bind .l.${name} <Left>  {focus [ck_focusPrev %W]}
@@ -1533,53 +1527,6 @@ proc mk-button { name text command {pack left} } {
     pack .l.${name} -side ${pack}
 }
 
-proc set-term { t } {
-    global TX
-    for { set i 1 } { $i <= $TX } { incr i } {
-	if { [winfo exists .t${i}] } {
-	    lappend lst .t${i}
-	    .l.t${i} configure -foreground white
-	}
-    }
-    pack forget {*}$lst
-    pack $t -side left -anchor w -expand yes -fill both
-    .l$t configure -foreground red
-    focus $t
-}
-
-proc new-term { {ckey "b"} } {
-    global TX BANNER
-    incr TX
-    terminal .t${TX} -exec /bin/bash -term xterm-256color \
-	-commandkey ${ckey} -banner [format ${BANNER} ${ckey}] 
-#	-border {ulcorner hline urcorner vline lrcorner hline llcorner vline}
-
-    bind .t${TX} <Button-1> {focus %W}
-
-    # -- binding to virtual events
-    bind .t${TX} <<Close>> {close-term %W}
-    bind .t${TX} <<New>>   new-term
-    #bind .t${TX} <Control-b><Control-g> exit
-    
-    mk-button t${TX} "Term #${TX}" "set-term .t${TX}"
-    bind .l.t${TX} <Control-q> "close-term .t${TX}"
-    bind .l.t${TX} <Control-o> "new-term"
-
-    bindtags .t${TX} .t${TX}
-
-    return .t${TX}
-}
-
-proc close-term { t } {
-    global TX
-    destroy $t
-    destroy .l$t
-    for { set i 1 } { $i <= $TX } { incr i } {
-	if { [winfo exists .t${i}] } {
-	    set-term .t${i}
-	}
-    }
-}
 
 # --------------------------------------------------------------------------
 #  Help
@@ -1632,15 +1579,65 @@ proc help {} {
     focus .help.dismiss
 }
 
-label .l -text "Terminal multiplexer" -bg blue
-pack .l -side top -fill x
-frame .f
-pack .f -side top -fill both -expand yes
+# --------------------------------------------------------------------------
+#  create-gui
+#  Creates user interface
+# --------------------------------------------------------------------------
+proc create-gui {} {
+    global LAYOUT
+    
+    label .l -text "Terminal multiplexer" -bg blue
+    pack .l -side top -fill x
+    frame .f
+    pack .f -side top -fill both -expand yes
+    
+    set LAYOUT [dict create]
+    dict set LAYOUT layout 4
+    dict set LAYOUT t1 [choose-term 1]
+    dict set LAYOUT t2 [choose-term 1]
+    dict set LAYOUT t3 [choose-term 1]
+    dict set LAYOUT t4 [choose-term 1]
+    dict set LAYOUT w 0.7
+    dict set LAYOUT h 0.4
+    dict set LAYOUT focused [dict get $LAYOUT t1]
 
-#new-term
-#new-term
-#new-term
-#new-term
+    #set-term .t1
+
+    #mk-button q "Quit" exit right
+    #mk-button h "Help" help right
+    mk-button c "Commands" command-dialog right
+
+    mk-button state "layout" noop
+    
+    apply-layout
+}
+
+# --------------------------------------------------------------------------
+#  new-term
+#  Creates a new terminal widget
+# --------------------------------------------------------------------------
+proc new-term { {ckey "b"} } {
+    global TX BANNER
+    incr TX
+    terminal .t${TX} -exec /bin/bash -term xterm-256color \
+	-commandkey ${ckey} -banner [format ${BANNER} ${ckey}] 
+#	-border {ulcorner hline urcorner vline lrcorner hline llcorner vline}
+
+    bind .t${TX} <Button-1> {focus %W}
+
+    # -- binding to virtual events
+    bind .t${TX} <<Close>> {close-term %W}
+    bind .t${TX} <<New>>   new-term
+    #bind .t${TX} <Control-b><Control-g> exit
+    
+    mk-button t${TX} "Term #${TX}" "set-term .t${TX}"
+    bind .l.t${TX} <Control-q> "close-term .t${TX}"
+    bind .l.t${TX} <Control-o> "new-term"
+
+    bindtags .t${TX} .t${TX}
+
+    return .t${TX}
+}
 
 proc new-term { {ckey "b"} } {
     global TX BANNER TERM CHOOSER
@@ -1664,29 +1661,81 @@ proc new-term { {ckey "b"} } {
     foreach chooser $CHOOSER {
 	list-term $chooser
     }
+
+    do-bindings .f.t${TX}
     
     return .f.t${TX}
 }
 
+# --------------------------------------------------------------------------
+#  create-pref
+#  Creates a user specific file for storing preferences
+# --------------------------------------------------------------------------
+proc create-pref-file {} {
+    global PREFS
+    catch {
+	if {[file exists "~/.tmuckrc"]} return
+	set fout [open "~/.tmuckrc" "w"]
+	puts $fout $PREFS
+	close $fout
+    }
+}
 
-set LAYOUT [dict create]
-dict set LAYOUT layout 4
-dict set LAYOUT t1 [choose-term 1]
-dict set LAYOUT t2 [choose-term 1]
-dict set LAYOUT t3 [choose-term 1]
-dict set LAYOUT t4 [choose-term 1]
-dict set LAYOUT w 0.7
-dict set LAYOUT h 0.4
-dict set LAYOUT focused [dict get $LAYOUT t1]
+# --------------------------------------------------------------------------
+#  load-pref-file
+#
+#  Load preference file searching in various places.
+#   - first, tries to source file "/etc/tmuck/profile",
+#   - then :
+#       - if TMUCKRC environment variable is set. Its value is interpreted
+#         as a file name and its content is sourced.
+#       - otherwise, tries to source file "~/.tmuckrc".
+#
+#  As a result the preferences sourced is a combination of system wide
+#  settings and user specific settings. The user specific settings
+#  take precedence over system wide settings.
+# --------------------------------------------------------------------------
+proc load-pref-file {} {
+    if {[info exists ::env(TMUCKRC)]} {
+	lappend lst $::env(TMUCKRC)
+    } else {
+	lappend lst "~/.tmuckrc"
+    }
+    lappend lst "/etc/tmuck/profile"
+    foreach f $lst {
+	catch {source $f}
+    }
+}
 
-#set-term .t1
 
-#mk-button q "Quit" exit right
-#mk-button h "Help" help right
-mk-button c "Commands" command-dialog right
+# --------------------------------------------------------------------------
+# --------------------------------------------------------------------------
+proc do-bindings {{w all}} {
+    global COMMANDS
+    set m {
+	"left"     "Left"
+	"right"    "Right"
+	"down"     "Down"
+	"up"       "Up"
+    }
+    foreach command $COMMANDS {
+	dict with command {
+	    foreach k $shortcut {
+		set k [string map $m $k]
+		if {[string first "C-" $k] == 0} {
+		    set k "<[string map {C- Control-} [string toupper $k]]> "
+		}
+		append key $k
+	    }
+	    bind $w [string trim $key] $cmd
+	}
+    }
+}
 
-proc noop {} {}
-mk-button state "layout" noop
+# --------------------------------------------------------------------------
+create-pref-file
+load-pref-file
+create-gui
+do-bindings
+# --------------------------------------------------------------------------
 
-
-apply-layout
