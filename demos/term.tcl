@@ -261,23 +261,198 @@ proc focus { w } {
     catch {set wp [winfo parent $w]}
     global LAYOUT CHOOSER
     dict with LAYOUT {
-	if { ($w eq $focused) || ($wp eq $focused)  } {
-	    return
-	}
-	set n 1
-	if {$layout > 1} { incr n }
-	if {$layout > 3} { incr n }
-	if {$layout > 7} { incr n }
-	for {set i 1} {$i <= $n} {incr i} {
-	    set t [set t$i]
-	    if { $t eq $w } {
-		set focused $w
-	    }
-	    if { $t eq $wp } {
-		set focused $wp
+	if { ($w ne $focused) && ($wp ne $focused)  } {
+	    set n 1
+	    if {$layout > 1} { incr n }
+	    if {$layout > 3} { incr n }
+	    if {$layout > 7} { incr n }
+	    for {set i 1} {$i <= $n} {incr i} {
+		set t [set t$i]
+		if { $t eq $w } {
+		    set focused $w
+		    break
+		}
+		if { $t eq $wp } {
+		    set focused $wp
+		    break
+		}
 	    }
 	}
 	debug "layout #$layout $w $h $focused"
+    }
+    display-layout
+}
+
+# --------------------------------------------------------------------------
+#  display-layout
+#  small toplevel widget displaying the current layout and focused
+#  window.
+# --------------------------------------------------------------------------
+proc display-layout {} {
+    if { ![winfo exists .ld] } {
+	frame .ld -attr dim -border { ulcorner hline urcorner vline lrcorner hline llcorner vline } -takefocus 0
+	message .ld.m -attr dim -takefocus 0
+	place .ld.m -relx 0 -rely 0 -relwidth 1 -relheight 1
+    }
+    set px [expr {[winfo screenwidth  .] - 8}]
+    set py [expr {[winfo screenheight .] - 6}]
+    # -- default placement
+    place .ld -x $px -y 1 -width 8 -height 6
+    raise .ld
+    
+    global LAYOUT
+    set focusid [get-focused-idx]
+    dict with LAYOUT {
+	switch -exact -- $layout {
+	    1 {
+		append m "######\n"
+		append m "######\n"
+		append m "######\n"
+		append m "######\n"
+	    }
+	    2 {
+		if {$focusid == 1} {
+		    append m "######\n"
+		    append m "######\n"
+		    append m "......\n"
+		    append m "......\n"
+		    place .ld -x $px -y $py -width 8 -height 6
+		}
+		if {$focusid == 2} {
+		    append m "......\n"
+		    append m "......\n"
+		    append m "######\n"
+		    append m "######\n"
+		}
+	    }
+	    3 {
+		if {$focusid == 1} {
+		    append m "###...\n"
+		    append m "###...\n"
+		    append m "###...\n"
+		    append m "###...\n"
+		}
+		if {$focusid == 2} {
+		    append m "...###\n"
+		    append m "...###\n"
+		    append m "...###\n"
+		    append m "...###\n"
+		    place .ld -x 0 -y 1 -width 8 -height 6
+		}
+	    }
+	    4 {
+		if {$focusid == 1} {
+		    append m "###...\n"
+		    append m "###...\n"
+		    append m "###...\n"
+		    append m "###...\n"
+		}
+		if {$focusid == 2} {
+		    append m "...###\n"
+		    append m "...###\n"
+		    append m "......\n"
+		    append m "......\n"
+		    place .ld -x 0 -y 1 -width 8 -height 6
+		}
+		if {$focusid == 3} {
+		    append m "......\n"
+		    append m "......\n"
+		    append m "...###\n"
+		    append m "...###\n"
+		}
+	    }
+	    5 {
+		if {$focusid == 1} {
+		    append m "###...\n"
+		    append m "###...\n"
+		    append m "......\n"
+		    append m "......\n"
+		}
+		if {$focusid == 2} {
+		    append m "......\n"
+		    append m "......\n"
+		    append m "###...\n"
+		    append m "###...\n"
+		}
+		if {$focusid == 3} {
+		    append m "...###\n"
+		    append m "...###\n"
+		    append m "...###\n"
+		    append m "...###\n"
+		    place .ld -x 0 -y 1 -width 8 -height 6
+		}
+	    }
+	    6 {
+		if {$focusid == 1} {
+		    append m "######\n"
+		    append m "######\n"
+		    append m "......\n"
+		    append m "......\n"
+		    place .ld -x $px -y $py -width 8 -height 6
+		}
+		if {$focusid == 2} {
+		    append m "......\n"
+		    append m "......\n"
+		    append m "###...\n"
+		    append m "###...\n"
+		}
+		if {$focusid == 3} {
+		    append m "......\n"
+		    append m "......\n"
+		    append m "...###\n"
+		    append m "...###\n"
+		}
+	    }
+	    7 {
+		if {$focusid == 1} {
+		    append m "###...\n"
+		    append m "###...\n"
+		    append m "......\n"
+		    append m "......\n"
+		}
+		if {$focusid == 2} {
+		    append m "...###\n"
+		    append m "...###\n"
+		    append m "......\n"
+		    append m "......\n"
+		    place .ld -x 0 -y 1 -width 8 -height 6
+		}
+		if {$focusid == 3} {
+		    append m "......\n"
+		    append m "......\n"
+		    append m "######\n"
+		    append m "######\n"
+		}
+	    }
+	    8 {
+		if {$focusid == 1} {
+		    append m "###...\n"
+		    append m "###...\n"
+		    append m "......\n"
+		    append m "......\n"
+		}
+		if {$focusid == 2} {
+		    append m "...###\n"
+		    append m "...###\n"
+		    append m "......\n"
+		    append m "......\n"
+		    place .ld -x $px -y 1 -width 8 -height 6
+		}
+		if {$focusid == 3} {
+		    append m "......\n"
+		    append m "......\n"
+		    append m "###...\n"
+		    append m "###...\n"
+		}
+		if {$focusid == 4} {
+		    append m "......\n"
+		    append m "......\n"
+		    append m "...###\n"
+		    append m "...###\n"
+		}		
+	    }
+	}
+	.ld.m configure -text $m
     }
 }
 
@@ -591,18 +766,6 @@ proc swap-vars {v1 v2} {
 }
 
 # --------------------------------------------------------------------------
-#  display-layout
-#  Display a small toplevel window that shows the current layout and
-#  the currently focused widget in the layout
-# --------------------------------------------------------------------------
-proc display-layout {} {
-    toplevel .layout \
-	-border {ulcorner hline urcorner vline lrcorner hline llcorner vline} \
-	-width 3 -height 3
-    #@ todo
-}
-
-# --------------------------------------------------------------------------
 #  apply-layout --
 #  Apply directives in layout
 # --------------------------------------------------------------------------
@@ -707,31 +870,31 @@ proc pane-next {{inc 1}} {
     dict with LAYOUT {
 	switch -exact -- $layout {
 	    2 - 3 {
-		set focused [set t$focusid]
 		if {$focusid == 3} {
 		    set focused $t1
-		}
-		if {$focusid == 0} {
+		} elseif {$focusid == 0} {
 		    set focused $t2
+		} else {
+		    set focused [set t$focusid]
 		}
 	    }
 	    4 - 5 - 6 - 7 {
-		set focused [set t$focusid]
 		if {$focusid == 4} {
 		    set focused $t1
 		}
 		if {$focusid == 0} {
 		    set focused $t3
 		}
+		set focused [set t$focusid]
 	    }
 	    8 {
-		set focused [set t$focusid]
 		if {$focusid == 5} {
 		    set focused $t1
 		}
 		if {$focusid == 0} {
 		    set focused $t4
 		}
+		set focused [set t$focusid]
 	    }
 	}
     }
@@ -758,6 +921,7 @@ proc pane-prev {} {
 proc pane-hincr {{inc 0.1001}} {
     global LAYOUT
     set focusid [get-focused-idx]
+    debug $focusid
     dict with LAYOUT {
 	switch -exact -- $layout {
 	    1 - 2 { return }
@@ -930,6 +1094,7 @@ proc pane-vincr {{inc 0.1001}} {
 		}
 		if {$h >= 1.0} {
 		    set layout 3
+		    set focused $t1
 		    if {$focusid == 3} {
 			set focused $t2
 		    }
@@ -949,24 +1114,13 @@ proc pane-vincr {{inc 0.1001}} {
 		}
 		if {$h >= 1.0} {
 		    set layout 3
-		    if {$focusid == 1} {
-			swap-vars t2 t3
-		    }
-		    if {$focusid == 2} {
-			swap-vars t1 t2
-			swap-vars t2 t3
-		    }
+		    swap-vars t2 t3
 		    set focused $t1
 		}
 		if {$h <= 0.0} {
 		    set layout 3
-		    if {$focusid == 1} {
-			swap-vars t1 t2
-			swap-vars t2 t3
-		    }
-		    if {$focusid == 2} {
-			swap-vars t2 t3
-		    }
+		    swap-vars t1 t2
+		    swap-vars t2 t3
 		    set focused $t1
 		}
 	    }
@@ -977,32 +1131,17 @@ proc pane-vincr {{inc 0.1001}} {
 		    set h [expr {$h - $inc}]
 		}
 		if {$h >= 1.0} {
-		    if {$focusid == 1} {
-			set layout 1
-		    }
-		    if {$focusid == 2} {
-			set layout 3
-			swap-vars t1 t2
-			swap-vars t2 t3
-			set focused $t1
-		    }
-		    if {$focusid == 3} {
-			set layout 3
-			swap-vars t1 t2
-			swap-vars t2 t3
-			set focused $t2			
-		    }
+		    set layout 1
+		    set focused $t1
 		}
 		if {$h <= 0.0} {
-		    if {$focusid == 1} {
-			set layout 3
-			swap-vars t1 t2
-			swap-vars t2 t3
-		    }
-		    if {$focusid == 2 || $focusid == 3} {
-			set layout 1
-		    }
+		    set layout 3
+		    swap-vars t1 t2
+		    swap-vars t2 t3
 		    set focused $t1
+		    if {$focusid == 3} {
+			set focused $t2
+		    }
 		}
 	    }
 	    7 {
@@ -1015,20 +1154,10 @@ proc pane-vincr {{inc 0.1001}} {
 		    if {$focusid == 1 || $focusid == 2} {
 			set layout 3
 		    }
-		    if {$focusid == 3} {
-			set layout 1
-			swap-vars t1 t3
-			set focused $t1
-		    }
 		}
 		if {$h <= 0.0} {
-		    if {$focusid == 1 || $focusid == 2} {
-			set layout 1
-			swap-vars t1 t3
-		    }
-		    if {$focusid == 3} {
-			set layout 3
-		    }
+		    set layout 1
+		    swap-vars t1 t3
 		    set focused $t1
 		}
 	    }
@@ -1041,26 +1170,20 @@ proc pane-vincr {{inc 0.1001}} {
 		if {$h >= 1.0} {
 		    set layout 3
 		    if {$focusid == 3} {
-			swap-vars t1 t3
-			swap-vars t2 t4
 			set focused $t1
 		    }
 		    if {$focusid == 4} {
-			swap-vars t1 t3
-			swap-vars t2 t4
 			set focused $t2
 		    }
 		}
 		if {$h <= 0.0} {
 		    set layout 3
-		    if {$focusid == 1} {
-			swap-vars t1 t3
-			swap-vars t2 t4
+		    swap-vars t1 t3
+		    swap-vars t2 t4
+		    if {$focusid == 3} {
 			set focused $t1
 		    }
-		    if {$focusid == 2} {
-			swap-vars t1 t3
-			swap-vars t2 t4
+		    if {$focusid == 3} {
 			set focused $t2
 		    }
 		}
@@ -1539,6 +1662,7 @@ proc mk-button { name text command {pack left} } {
 #  Display help box
 # --------------------------------------------------------------------------
 proc help {} {
+
     catch {destroy .help}
     toplevel .help -bg black -fg white \
 	-border {ulcorner hline urcorner vline lrcorner hline llcorner vline}
@@ -1570,7 +1694,7 @@ proc help {} {
  
     $t insert end "This is crude terminal multiplexer.\n\n"
     
-    $t insert end "Type <Control-b><Key-o> to access to control buttons. "
+    $t insert end "Type <Control-b><Control-c> to access the command panel. "
     
     $t insert end "Keys on terminal buttons\n" header
     $t insert end "o <Control-q> closes the terminal.\n" bullet
@@ -1598,13 +1722,13 @@ proc create-gui {} {
     pack .f -side top -fill both -expand yes
     
     set LAYOUT [dict create]
-    dict set LAYOUT layout 4
-    dict set LAYOUT t1 [choose-term 1]
+    dict set LAYOUT layout 1
+    dict set LAYOUT w 1.0
+    dict set LAYOUT h 1.0
+    dict set LAYOUT t1 [new-term]
     dict set LAYOUT t2 [choose-term 1]
     dict set LAYOUT t3 [choose-term 1]
     dict set LAYOUT t4 [choose-term 1]
-    dict set LAYOUT w 0.7
-    dict set LAYOUT h 0.4
     dict set LAYOUT focused [dict get $LAYOUT t1]
 
     #set-term .t1
@@ -1623,36 +1747,50 @@ proc create-gui {} {
 #  Creates a new terminal widget
 # --------------------------------------------------------------------------
 proc new-term { {ckey "b"} } {
-    global TX BANNER
+    global TX BANNER TERM CHOOSER
     incr TX
-    terminal .t${TX} -exec /bin/bash -term xterm-256color \
-	-commandkey ${ckey} -banner [format ${BANNER} ${ckey}] 
-#	-border {ulcorner hline urcorner vline lrcorner hline llcorner vline}
+    terminal .f.t${TX} -exec /bin/bash -term xterm-256color \
+	-commandkey ${ckey} -banner [format ${BANNER} ${ckey}] \
+	-border {ulcorner hline urcorner vline lrcorner hline llcorner vline}
 
-    bind .t${TX} <Button-1> {focus %W}
+    bind .f.t${TX} <Button-1> {focus %W}
 
     # -- binding to virtual events
-    bind .t${TX} <<Close>> {close-term %W}
-    bind .t${TX} <<New>>   new-term
+    #bind .t${TX} <<Close>> {close-term %W}
+    #bind .t${TX} <<New>>   new-term
     #bind .t${TX} <Control-b><Control-g> exit
     
-    mk-button t${TX} "Term #${TX}" "set-term .t${TX}"
-    bind .l.t${TX} <Control-q> "close-term .t${TX}"
-    bind .l.t${TX} <Control-o> "new-term"
+    #mk-button t${TX} "Term #${TX}" "set-term .t${TX}"
+    #bind .l.t${TX} <Control-q> "close-term .t${TX}"
+    #bind .l.t${TX} <Control-o> "new-term"
 
-    bindtags .t${TX} .t${TX}
+    bindtags .f.t${TX} [list .t${TX} Terminal]
 
-    return .t${TX}
+    # -- compute terminal description
+    set desc [dict create]
+    dict set desc "name"   "unamed"
+    dict set desc "title"  ""
+    dict set desc "idx"    $TX
+    dict set desc "wid"    .f.t${TX}
+    dict set desc "layout" 0
+    lappend TERM $desc
+
+    # -- update terminal chooser content
+    foreach chooser $CHOOSER {
+	list-term $chooser
+    }
+
+    return .f.t${TX}
 }
 
-proc new-term { {ckey "b"} } {
+proc _new-term { {ckey "b"} } {
     global TX BANNER TERM CHOOSER
     
     incr TX
     array set colors {0 blue 1 red 2 green 3 cyan 4 magenta 5 yellow}
     set col $colors([expr {$TX%6}])
-    message .f.t${TX} -text "Frame #${TX}" -bg $col
-    bind .f.t${TX} <1> {dict set LAYOUT focused %W}
+    message .f.t${TX} -text "Frame #${TX}" -bg $col -width 10
+    bind .f.t${TX} <1> {focus %W}
 
     # -- compute terminal description
     set desc [dict create]
@@ -1713,6 +1851,8 @@ proc load-pref-file {} {
 
 
 # --------------------------------------------------------------------------
+#  do-bindings
+#  Generate generic key bindings
 # --------------------------------------------------------------------------
 proc do-bindings {{w all}} {
     global COMMANDS
@@ -1753,5 +1893,6 @@ create-pref-file
 load-pref-file
 create-gui
 do-bindings
+do-bindings Terminal
 # --------------------------------------------------------------------------
 
