@@ -280,7 +280,7 @@ proc focus { w } {
 	}
 	debug "layout #$layout $w $h $focused"
     }
-    display-layout
+    #display-layout
 }
 
 # --------------------------------------------------------------------------

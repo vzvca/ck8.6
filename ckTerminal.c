@@ -435,6 +435,7 @@ typedef struct Terminal_s {
 #define DISCONNECTED            2
 #define MODE_INTERACT           4
 #define MODE_COMMAND            8
+#define HAS_FOCUS               16
 #define DISPLAY_BANNER          32
 #define DISPLAY_TRAILER         64
 #define MOUSE_REPORT_1000      128  /* if set mouse buttons events are forwarded */
@@ -1748,25 +1749,24 @@ draw(NODE *n) /* Draw a node. */
   
   if ( (terminalPtr != NULL) &&  (terminalPtr->winPtr->window != NULL)) {
     CkWindow *winPtr = terminalPtr->winPtr;
-    int height = (n->h < winPtr->height) ? n->h : winPtr->height;
-    int width  = (n->w < winPtr->width)  ? n->w : winPtr->width;
-    int offsetx = (terminalPtr->borderPtr != NULL) ? 1 : 0;
-    int offsety = offsetx;
+    int offset = (terminalPtr->borderPtr != NULL) ? 1 : 0;
     int y, x;
 
     /* save cursor position */
     getyx(winPtr->window, y, x);
 
     copywin( n->s->win, winPtr->window,
-	     n->s->off, 0, offsety, offsetx, height-1-offsety, width-1-offsetx, 0);
+	     n->s->off, 0, offset, offset, winPtr->height-1-offset, winPtr->width-1-offset, 0);
 
+    /*
     Ck_SetWindowAttr(winPtr, COLOR_RED, COLOR_BLACK, A_NORMAL);
     if ( terminalPtr->flags & MODE_COMMAND ) {
-      mvwprintw( winPtr->window, 0, width - 7, "COMMAND" );
+      mvwprintw( winPtr->window, 0, winPtr->width - 7, "COMMAND" );
     }
     else {
-      mvwprintw( winPtr->window, 0, width - 6, "NORMAL" );
+      mvwprintw( winPtr->window, 0, winPtr->width - 6, "NORMAL" );
     }
+    */
 
     
     /* restore cursor position */
@@ -2255,7 +2255,8 @@ CkInitTerminal(interp, winPtr, argc, argv)
     terminalPtr->bindings[CTL('v')] = Ck_GetUid("<Paste>");
     
     Ck_CreateEventHandler(terminalPtr->winPtr,
-            CK_EV_MAP | CK_EV_EXPOSE | CK_EV_DESTROY,
+            CK_EV_MAP | CK_EV_EXPOSE | CK_EV_DESTROY |
+	    CK_EV_FOCUSIN | CK_EV_FOCUSOUT,
             TerminalEventProc, (ClientData) terminalPtr);
     Ck_CreateEventHandler(terminalPtr->winPtr,
             CK_EV_KEYPRESS,
@@ -2263,7 +2264,7 @@ CkInitTerminal(interp, winPtr, argc, argv)
     Ck_CreateEventHandler(terminalPtr->winPtr,
 	    CK_EV_MOUSE_DOWN | CK_EV_MOUSE_UP | CK_EV_MOUSE_MOVE,
             TerminalMouseEventProc, (ClientData) terminalPtr);
-
+    
     if (ConfigureTerminal(interp, terminalPtr, argc, argv, 0) != TCL_OK) {
         Ck_DestroyWindow(terminalPtr->winPtr);
         return TCL_ERROR;
@@ -2887,10 +2888,17 @@ DisplayTerminal(clientData)
     Ck_ClearToBot(winPtr, 0, 0);
     
     if (terminalPtr->borderPtr != NULL) {
-      int y, x;
+      int y, x, attr;
+      
       getyx(winPtr->window, y, x);
+
+      attr = (terminalPtr->flags & HAS_FOCUS) ? A_BOLD : A_DIM;
+      Ck_SetWindowAttr(winPtr, terminalPtr->fg, terminalPtr->bg, attr);
+      
       Ck_DrawBorder(winPtr, terminalPtr->borderPtr, 0, 0,
 		    winPtr->width, winPtr->height);
+
+      Ck_SetWindowAttr(winPtr, terminalPtr->fg, terminalPtr->bg, A_NORMAL);
       wmove(winPtr->window, y, x);
     }
 
@@ -2965,6 +2973,22 @@ TerminalEventProc(clientData, eventPtr)
         if (terminalPtr->flags & REDRAW_PENDING)
             Tk_CancelIdleCall(DisplayTerminal, (ClientData) terminalPtr);
         Ck_EventuallyFree((ClientData) terminalPtr, (Ck_FreeProc *) DestroyTerminal);
+	
+    } else if (eventPtr->type == CK_EV_FOCUSIN || eventPtr->type == CK_EV_FOCUSOUT ) {
+      if ( (eventPtr->type == CK_EV_FOCUSIN) && !(terminalPtr->flags & HAS_FOCUS) ) {
+	terminalPtr->flags |= HAS_FOCUS;
+        if (!(terminalPtr->flags & REDRAW_PENDING)) {
+	  Tk_DoWhenIdle(DisplayTerminal, (ClientData) terminalPtr);
+	  terminalPtr->flags |= REDRAW_PENDING;
+	}
+      }
+      if ( (eventPtr->type == CK_EV_FOCUSOUT) && (terminalPtr->flags & HAS_FOCUS) ) {
+	terminalPtr->flags &= ~HAS_FOCUS;
+        if (!(terminalPtr->flags & REDRAW_PENDING)) {
+	  Tk_DoWhenIdle(DisplayTerminal, (ClientData) terminalPtr);
+	  terminalPtr->flags |= REDRAW_PENDING;
+	}
+      }
     }
 }
 
