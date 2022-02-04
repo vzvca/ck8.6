@@ -146,7 +146,16 @@ A few games have been coded / ported form Tk to Ck. Most of the games come from 
  * Keith Wetter : I stole its montana solitaire.
  * BHE : I copied TinyTetris and changed it.
 
-There is a crude terminal multiplexer.
+### Terminal multiplexer
+
+There is a functional terminal multiplexer. It is less powerful than tmux but is really easy to use and learn. It was written to demonstrate the `terminal` widget.
+It is very short : around 1000 lines of code without comments and blank lines.
+
+~~~~
+$ cwsh demos/term.tcl
+~~~~
+
+![alt text](screenshots/tmuck.png)
 
 ### Puzzle
 
