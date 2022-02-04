@@ -445,6 +445,8 @@ typedef struct Terminal_s {
 
 #define MOUSE_REPORT (MOUSE_REPORT_1000 | MOUSE_REPORT_1002 | MOUSE_REPORT_1003)
 
+#define BINDING_IGNORE ((char*)0x01)
+
 static int ExecParseProc(ClientData clientData,
 			 Tcl_Interp *interp, CkWindow *winPtr,
 			 char *value, char *widgRec, int offset);
@@ -561,7 +563,6 @@ static void     TerminalMouseEventProc _ANSI_ARGS_((ClientData clientData,
 			  			    CkEvent *eventPtr));
 static void     TerminalPtyProc _ANSI_ARGS_((ClientData clientData, int flags));
 static void     SendToTerminal  _ANSI_ARGS_((Terminal *terminalPtr, char *text));
-static void     TerminalGiveFocus  _ANSI_ARGS_((Terminal *terminalPtr));
 static void     TerminalPostRedisplay  _ANSI_ARGS_((Terminal *terminalPtr));
 static void     TerminalYScrollCommand  _ANSI_ARGS_((ClientData clientData));
 static int      TerminalYView _ANSI_ARGS_((Terminal *terminalPtr,
@@ -1659,7 +1660,7 @@ newview(Terminal *term, int scrollback, int h, int w, int fg, int bg) /* Open a 
   
   pid_t pid = forkpty(&n->pt, NULL, NULL, &ws);
   if (pid < 0) {
-    // @todo: erreur handling a la Tk a mettre en place
+    // @todo: Tk like error handling to do
     perror("forkpty");
     return freenode(n), NULL;
     
@@ -1739,7 +1740,6 @@ reshape(NODE *n, int h, int w) /* Reshape a node. */
 
   reshapeview(n, d, ow);
   TerminalPostRedisplay(terminalPtr);
-  //draw(n);
 }
 
 static void
@@ -1909,31 +1909,28 @@ handlechar(NODE *n, int r, int k) /* Handle a single input character. */
 #include "ckKeys.h"
 #undef CK_NEW_KEY
   
-#if 0
-  //@todo : reprendre les bindings
-  DO(true,  MOVE_UP,             focus(findnode(root, ABOVE(n))));
-  DO(true,  MOVE_DOWN,           focus(findnode(root, BELOW(n))));
-  DO(true,  MOVE_LEFT,           focus(findnode(root, LEFT(n))));
-  DO(true,  MOVE_RIGHT,          focus(findnode(root, RIGHT(n))));
-  DO(true,  HSPLIT,              split(n, HORIZONTAL));
-  DO(true,  VSPLIT,              split(n, VERTICAL));
-#endif
-
   if ( n->cmd == TRUE ) {
     if ( (k < 0x7f) && terminalPtr->bindings[k] && (KEY(k) || CODE(k))) {
-      Ck_QueueVirtualEvent(terminalPtr->winPtr, terminalPtr->bindings[k], NULL);
+      if ( terminalPtr->bindings[k] != BINDING_IGNORE ) {
+	Ck_QueueVirtualEvent(terminalPtr->winPtr, terminalPtr->bindings[k], NULL);
+      }
+      else {
+	// silently ignore character and leave command mode
+	return setCommandMode(terminalPtr,false), true;
+      }
+    }
+    else if (MOVE_UP || MOVE_DOWN || MOVE_LEFT || MOVE_RIGHT ) {
+	// silently ignore character and leave command mode
+	return setCommandMode(terminalPtr,false), true;
     }
     else {
       // fallback to defaults bindings
-      DO(true,  MOVE_OTHER,          TerminalGiveFocus(terminalPtr));
-      DO(true,  MOVE_LEFT,           TerminalGiveFocus(terminalPtr));
-      DO(true,  MOVE_RIGHT,          TerminalGiveFocus(terminalPtr));
       DO(true,  REDRAW,              TerminalPostRedisplay(terminalPtr));
       DO(true,  SCROLLUP,            scrollback(n));
       DO(true,  SCROLLDOWN,          scrollforward(n));
       DO(true,  RECENTER,            scrollbottom(n));
-      DO(true,  MOVE_UP,             scrollbackx(n,1));
-      DO(true,  MOVE_DOWN,           scrollforwardx(n,1));
+      //DO(true,  MOVE_UP,             scrollbackx(n,1));
+      //DO(true,  MOVE_DOWN,           scrollforwardx(n,1));
       DO(true,  KEY(commandkey),     SENDN(n, cmdstr, 1));
     }
   }
@@ -2247,12 +2244,21 @@ CkInitTerminal(interp, winPtr, argc, argv)
     terminalPtr->banner = NULL;
 
     /* Initialize terminal binding table */
+    /* this binding table is designed to fit binding in terminal
+     * multiplexer demo program. Needs to be changed... */
     memset (terminalPtr->bindings, 0, sizeof(terminalPtr->bindings));
-    terminalPtr->bindings[CTL('q')] = Ck_GetUid("<Close>");
-    terminalPtr->bindings[CTL('o')] = Ck_GetUid("<New>");
-    terminalPtr->bindings[CTL('p')] = Ck_GetUid("<Prev>");
-    terminalPtr->bindings[CTL('n')] = Ck_GetUid("<Next>");
-    terminalPtr->bindings[CTL('v')] = Ck_GetUid("<Paste>");
+    terminalPtr->bindings[CTL('c')] = BINDING_IGNORE;
+    terminalPtr->bindings[CTL('f')] = BINDING_IGNORE;
+    terminalPtr->bindings[CTL('h')] = BINDING_IGNORE;
+    terminalPtr->bindings[CTL('k')] = BINDING_IGNORE;
+    terminalPtr->bindings[CTL('n')] = BINDING_IGNORE;
+    terminalPtr->bindings[CTL('p')] = BINDING_IGNORE;
+    terminalPtr->bindings[CTL('q')] = BINDING_IGNORE;
+    terminalPtr->bindings[CTL('v')] = BINDING_IGNORE;
+    terminalPtr->bindings[CTL('x')] = BINDING_IGNORE;
+    terminalPtr->bindings['!'] = BINDING_IGNORE;
+    terminalPtr->bindings['/'] = BINDING_IGNORE;
+
     
     Ck_CreateEventHandler(terminalPtr->winPtr,
             CK_EV_MAP | CK_EV_EXPOSE | CK_EV_DESTROY |
@@ -3232,15 +3238,13 @@ TerminalPtyProc( clientData, flags)
 
     /* disconnection */
     if (r <= 0 && errno != EINTR && errno != EWOULDBLOCK) {
-      char *argv[] = {"-takeFocus", "false"};
-      char  cmd[256];
-      
       Tcl_DeleteFileHandler( nodePtr->pt );
       close ( nodePtr->pt );
       terminalPtr->flags &= ~REDRAW_PENDING;
       terminalPtr->flags |= DISCONNECTED;
-      ConfigureTerminal(terminalPtr->interp, terminalPtr, 2, argv, CK_CONFIG_ARGV_ONLY);
-      TerminalGiveFocus(terminalPtr);
+
+      /* signal that the terminal subprocess has exited */
+      Ck_QueueVirtualEvent(terminalPtr->winPtr, Ck_GetUid("<Exited>"), NULL);
     }
   }
 }
@@ -3273,32 +3277,6 @@ SendToTerminal(terminalPtr, text)
       handlechar(terminalPtr->node, OK, text[i]);
     }
   }
-}
-
-/*
- *----------------------------------------------------------------------
- *
- * TerminalGiveFocus --
- *
- *      This procedure is invoked to give back the focus to the next
- *      window in the focus chain
- *
- * Results:
- *      None.
- *
- * Side effects:
- *      Push idle events to event queue.
- *
- *----------------------------------------------------------------------
- */
-
-static void
-TerminalGiveFocus(terminalPtr)
-     Terminal *terminalPtr;      /* Info about terminal widget. */
-{
-  char cmd[256];
-  sprintf(cmd, "after idle {focus [ck_focusNext %s]}", terminalPtr->winPtr->pathName );
-  Tcl_Eval(terminalPtr->interp, cmd);
 }
 
 /*

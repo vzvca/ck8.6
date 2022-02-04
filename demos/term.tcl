@@ -280,181 +280,8 @@ proc focus { w } {
 	}
 	debug "layout #$layout $w $h $focused"
     }
-    #display-layout
 }
 
-# --------------------------------------------------------------------------
-#  display-layout
-#  small toplevel widget displaying the current layout and focused
-#  window.
-# --------------------------------------------------------------------------
-proc display-layout {} {
-    if { ![winfo exists .ld] } {
-	frame .ld -attr dim -border { ulcorner hline urcorner vline lrcorner hline llcorner vline } -takefocus 0
-	message .ld.m -attr dim -takefocus 0
-	place .ld.m -relx 0 -rely 0 -relwidth 1 -relheight 1
-    }
-    set px [expr {[winfo screenwidth  .] - 8}]
-    set py [expr {[winfo screenheight .] - 6}]
-    # -- default placement
-    place .ld -x $px -y 1 -width 8 -height 6
-    raise .ld
-    
-    global LAYOUT
-    set focusid [get-focused-idx]
-    dict with LAYOUT {
-	switch -exact -- $layout {
-	    1 {
-		append m "######\n"
-		append m "######\n"
-		append m "######\n"
-		append m "######\n"
-	    }
-	    2 {
-		if {$focusid == 1} {
-		    append m "######\n"
-		    append m "######\n"
-		    append m "......\n"
-		    append m "......\n"
-		    place .ld -x $px -y $py -width 8 -height 6
-		}
-		if {$focusid == 2} {
-		    append m "......\n"
-		    append m "......\n"
-		    append m "######\n"
-		    append m "######\n"
-		}
-	    }
-	    3 {
-		if {$focusid == 1} {
-		    append m "###...\n"
-		    append m "###...\n"
-		    append m "###...\n"
-		    append m "###...\n"
-		}
-		if {$focusid == 2} {
-		    append m "...###\n"
-		    append m "...###\n"
-		    append m "...###\n"
-		    append m "...###\n"
-		    place .ld -x 0 -y 1 -width 8 -height 6
-		}
-	    }
-	    4 {
-		if {$focusid == 1} {
-		    append m "###...\n"
-		    append m "###...\n"
-		    append m "###...\n"
-		    append m "###...\n"
-		}
-		if {$focusid == 2} {
-		    append m "...###\n"
-		    append m "...###\n"
-		    append m "......\n"
-		    append m "......\n"
-		    place .ld -x 0 -y 1 -width 8 -height 6
-		}
-		if {$focusid == 3} {
-		    append m "......\n"
-		    append m "......\n"
-		    append m "...###\n"
-		    append m "...###\n"
-		}
-	    }
-	    5 {
-		if {$focusid == 1} {
-		    append m "###...\n"
-		    append m "###...\n"
-		    append m "......\n"
-		    append m "......\n"
-		}
-		if {$focusid == 2} {
-		    append m "......\n"
-		    append m "......\n"
-		    append m "###...\n"
-		    append m "###...\n"
-		}
-		if {$focusid == 3} {
-		    append m "...###\n"
-		    append m "...###\n"
-		    append m "...###\n"
-		    append m "...###\n"
-		    place .ld -x 0 -y 1 -width 8 -height 6
-		}
-	    }
-	    6 {
-		if {$focusid == 1} {
-		    append m "######\n"
-		    append m "######\n"
-		    append m "......\n"
-		    append m "......\n"
-		    place .ld -x $px -y $py -width 8 -height 6
-		}
-		if {$focusid == 2} {
-		    append m "......\n"
-		    append m "......\n"
-		    append m "###...\n"
-		    append m "###...\n"
-		}
-		if {$focusid == 3} {
-		    append m "......\n"
-		    append m "......\n"
-		    append m "...###\n"
-		    append m "...###\n"
-		}
-	    }
-	    7 {
-		if {$focusid == 1} {
-		    append m "###...\n"
-		    append m "###...\n"
-		    append m "......\n"
-		    append m "......\n"
-		}
-		if {$focusid == 2} {
-		    append m "...###\n"
-		    append m "...###\n"
-		    append m "......\n"
-		    append m "......\n"
-		    place .ld -x 0 -y 1 -width 8 -height 6
-		}
-		if {$focusid == 3} {
-		    append m "......\n"
-		    append m "......\n"
-		    append m "######\n"
-		    append m "######\n"
-		}
-	    }
-	    8 {
-		if {$focusid == 1} {
-		    append m "###...\n"
-		    append m "###...\n"
-		    append m "......\n"
-		    append m "......\n"
-		}
-		if {$focusid == 2} {
-		    append m "...###\n"
-		    append m "...###\n"
-		    append m "......\n"
-		    append m "......\n"
-		    place .ld -x $px -y 1 -width 8 -height 6
-		}
-		if {$focusid == 3} {
-		    append m "......\n"
-		    append m "......\n"
-		    append m "###...\n"
-		    append m "###...\n"
-		}
-		if {$focusid == 4} {
-		    append m "......\n"
-		    append m "......\n"
-		    append m "...###\n"
-		    append m "...###\n"
-		}		
-	    }
-	}
-	.ld.m configure -text $m
-    }
-}
 
 # --------------------------------------------------------------------------
 #  set-widget
@@ -728,21 +555,28 @@ proc get-focused-idx {} {
 	switch -exact -- $layout {
 	    1 {
 		if { $focusid > 1 } {
-		    error "invalid focusid $focusid for layout $layout"
+		    debug "invalid focusid $focusid for layout $layout"
 		    set focusid 1
 		    set focused $t1
 		}
 	    }
 	    2 - 3 {
 		if { $focusid > 2 } {
-		    error "invalid focusid $focusid for layout $layout"
+		    debug "invalid focusid $focusid for layout $layout"
 		    set focusid 1
 		    set focused $t1
 		}
 	    }
 	    4 - 5 - 6 - 7 {
 		if { $focusid > 3 } {
-		    error "invalid focusid $focusid for layout $layout"
+		    debug "invalid focusid $focusid for layout $layout"
+		    set focusid 1
+		    set focused $t1
+		}
+	    }
+	    8 {
+		if { $focusid > 4 } {
+		    debug "invalid focusid $focusid for layout $layout"
 		    set focusid 1
 		    set focused $t1
 		}
@@ -881,20 +715,20 @@ proc pane-next {{inc 1}} {
 	    4 - 5 - 6 - 7 {
 		if {$focusid == 4} {
 		    set focused $t1
-		}
-		if {$focusid == 0} {
+		} elseif {$focusid == 0} {
 		    set focused $t3
+		} else {
+		    set focused [set t$focusid]
 		}
-		set focused [set t$focusid]
 	    }
 	    8 {
 		if {$focusid == 5} {
 		    set focused $t1
-		}
-		if {$focusid == 0} {
+		} elseif {$focusid == 0} {
 		    set focused $t4
+		} else {
+		    set focused [set t$focusid]
 		}
-		set focused [set t$focusid]
 	    }
 	}
     }
