@@ -208,20 +208,25 @@ set COMMANDS {
 # --------------------------------------------------------------------------
 set BANNER [join {
     ""
-    "-------------------------------------------------------------------------------"
-    ""
-    "               *** Welcome to cktermux ***"
-    ""
-    "   This program demonstrates the terminal widget of ck8.6."
-    "   It implements a small terminal multiplexer program."
-    ""
-    "   Your current shell is launched in a terminal."
-    ""
-    "   The control key is set to <Control-%1$s> and starts control sequences."
-    "     * <Control-%1$s>-o        : gives focus to control buttons"
-    "     * <Control-%1$s>-<PageUp> : Starts scrolling in terminal history."
-    ""    
-    "-------------------------------------------------------------------------------"
+    "    ----------------------------------------------------------------------------"
+    "    |                       *** Welcome to tmuck ***                           |"
+    "    ----------------------------------------------------------------------------"
+    "    |                                                                          |"
+    "    |                                                                          |"
+    "    |        This program demonstrates the terminal widget of ck8.6.           |"
+    "    |        It implements a small terminal multiplexer program.               |"
+    "    |                                                                          |"
+    "    |        Your current shell is launched in a terminal.                     |"
+    "    |                                                                          |"
+    "    |        The control key is set to <Control-%1$s>.                            |"
+    "    |        It starts command shortcuts.                                      |"
+    "    |                                                                          |"
+    "    |        There is only one command to know :                               |"
+    "    |                                                                          |"
+    "    |      <Control-%1$s><Control-c> Display available commands with              |"
+    "    |                                their documentation.                      |"
+    "    |                                                                          |"
+    "    ----------------------------------------------------------------------------"
     ""
     ""
 } "\r\n"]
@@ -237,7 +242,7 @@ set PREFS [join {
 #  Helper - debug
 # --------------------------------------------------------------------------
 proc debug msg {
-    .l.state configure -text $msg
+#    .l.state configure -text $msg
 }
 
 # --------------------------------------------------------------------------
@@ -427,6 +432,15 @@ proc choose-term {{create 0}} {
 }
 
 # --------------------------------------------------------------------------
+#  Command format for list box display
+# --------------------------------------------------------------------------
+proc command-fmt {command} {
+    dict with command {
+	set res [format "%-12s%-12s%s" $name $shortcut $desc] 
+    }
+}
+
+# --------------------------------------------------------------------------
 #  command-update-list
 #  Updates the list of commands. The list is updating by selecting
 #  commands whose name match the content of the entry.
@@ -442,10 +456,10 @@ proc command-update-list {} {
 	dict with command {
 	    if {[string length $filter]} {
 		if {[string first $filter $name] == 0} {
-		    $w.lst insert end [format "%-12s%s " $name $desc]
+		    $w.lst insert end [command-fmt $command]
 		}
 	    } else {
-		$w.lst insert end [format "%-12s%s " $name $desc]
+		$w.lst insert end [command-fmt $command]
 	    }
 	}
     }
@@ -459,15 +473,12 @@ proc command-execute {{what ""}} {
     set w .cmd
     set sz [$w.lst size]
 
-    # -- no argument give, try to find one
+    # -- hide command window
+    lower .cmd
+    
+    # -- no argument given do nothing
     if {![string length $what]} {
-	if {$sz == 1} {
-	    set what [$w.lst get 0]
-	} elseif {$sz > 1} {
-	    set what [$w.lst get active]
-	} else {
-	    return
-	}
+	return
     }
 
     # -- scan commands
@@ -484,7 +495,7 @@ proc command-execute {{what ""}} {
 		catch $cmd
 		break
 	    }
-	    set txt [format "%-12s%s " $name $desc]
+	    set txt [command-fmt $command]
 	    if { $txt eq $what } {
 		debug "run: $cmd"
 		catch $cmd
@@ -525,7 +536,7 @@ proc command-dialog {} {
 	bind $w.entry <KeyPress> command-update-list
 	bind $w.entry <Return> {command-execute [%W get]}
 	bind $w.lst   <Return> {command-execute}
-	bind $w.lst   <1>  {%W activate @%x,%y ; command-execute}
+	bind $w.lst   <1>  {%W activate @%x,%y ; command-execute [%W get active]}
 
 	# we change the default binding order
 	# to have the typed characters already inserted
@@ -1044,7 +1055,7 @@ proc pane-fullscreen {} {
     global LAYOUT
     set focusid [get-focused-idx]
     dict with LAYOUT {
-	.l.state configure -text "$LAYOUT"
+	debug "$LAYOUT"
 	set layout 1
 	if {$focusid > 1} {
 	    swap-vars t1 t${focusid}
@@ -1555,6 +1566,11 @@ proc create-gui {} {
     frame .f
     pack .f -side top -fill both -expand yes
     
+    #mk-button q "Quit" exit right
+    #mk-button h "Help" help right
+    #mk-button c "Commands" command-dialog right
+    #mk-button state "layout" noop
+    
     set LAYOUT [dict create]
     dict set LAYOUT layout 1
     dict set LAYOUT w 1.0
@@ -1565,14 +1581,6 @@ proc create-gui {} {
     dict set LAYOUT t4 [choose-term 1]
     dict set LAYOUT focused [dict get $LAYOUT t1]
 
-    #set-term .t1
-
-    #mk-button q "Quit" exit right
-    #mk-button h "Help" help right
-    mk-button c "Commands" command-dialog right
-
-    mk-button state "layout" noop
-    
     apply-layout
 }
 
@@ -1614,32 +1622,6 @@ proc new-term { {ckey "b"} } {
 	list-term $chooser
     }
 
-    return .f.t${TX}
-}
-
-proc _new-term { {ckey "b"} } {
-    global TX BANNER TERM CHOOSER
-    
-    incr TX
-    array set colors {0 blue 1 red 2 green 3 cyan 4 magenta 5 yellow}
-    set col $colors([expr {$TX%6}])
-    message .f.t${TX} -text "Frame #${TX}" -bg $col -width 10
-    bind .f.t${TX} <1> {focus %W}
-
-    # -- compute terminal description
-    set desc [dict create]
-    dict set desc "name"   "unamed"
-    dict set desc "title"  ""
-    dict set desc "idx"    $TX
-    dict set desc "wid"    .f.t${TX}
-    dict set desc "layout" 0
-    lappend TERM $desc
-
-    # -- update terminal chooser content
-    foreach chooser $CHOOSER {
-	list-term $chooser
-    }
-    
     return .f.t${TX}
 }
 
