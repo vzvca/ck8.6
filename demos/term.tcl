@@ -182,12 +182,6 @@ set COMMANDS {
 	shortcut "C-b C-f"
     }
     {
-	name "help"
-	desc "Display help screen."
-	cmd  help
-	shortcut "C-b C-h"
-    }
-    {
 	name "commands"
 	desc "Display command dialog."
 	cmd  command-dialog
@@ -512,42 +506,39 @@ proc command-execute {{what ""}} {
 # --------------------------------------------------------------------------
 proc command-dialog {} {
     set w .cmd
-    if { ![winfo exists $w] } {
-	toplevel $w -border { ulcorner hline urcorner vline lrcorner hline llcorner vline }
+    catch {destroy $w}
 
-	label $w.title -text "Type Command"
-	place $w.title -y 0 -relx 0.5 -bordermode ignore -anchor center
+    toplevel $w -border { ulcorner hline urcorner vline lrcorner hline llcorner vline } -width 60
+    
+    label $w.title -text "Type Command"
+    place $w.title -y 0 -relx 0.5 -bordermode ignore -anchor center
 
-	entry $w.entry
-	frame $w.sep0 -border hline -height 1
-	scrollbar $w.scroll -command "$w.lst yview" -takefocus 0
-	listbox $w.lst -yscrollcommand "$w.scroll set"
-#	frame $w.sep1 -border hline -height 1
-#	button $w.close -command "lower $w" -text "Close"
+    entry $w.entry
+    frame $w.sep0 -border hline -height 1
+    scrollbar $w.scroll -command "$w.lst yview" -takefocus 0
+    listbox $w.lst -yscrollcommand "$w.scroll set"
 
-#	pack $w.close -side bottom -ipadx 1
-#	pack $w.sep1 -side bottom -fill x
-	pack $w.entry -side bottom -fill x
-	pack $w.sep0 -side bottom -fill x
-	pack $w.lst -side left -fill both -expand 1
-	pack $w.scroll -side right -fill y
+    pack $w.entry -side bottom -fill x
+    pack $w.sep0 -side bottom -fill x
+    pack $w.lst -side left -fill both -expand 1
+    pack $w.scroll -side right -fill y
 
-	# bindings
-	bind $w.entry <KeyPress> command-update-list
-	bind $w.entry <Return> {command-execute [%W get]}
-	bind $w.lst   <Return> {command-execute}
-	bind $w.lst   <1>  {%W activate @%x,%y ; command-execute [%W get active]}
+    # bindings
+    bind $w.entry <KeyPress> command-update-list
+    bind $w.entry <Return> {command-execute [%W get]}
+    bind $w.lst   <Return> {command-execute}
+    bind $w.lst   <1>  {%W activate @%x,%y ; command-execute [%W get active]}
 
-	# we change the default binding order
-	# to have the typed characters already inserted
-	# before calling "command-update-list"
-	bindtags $w.entry [list Entry $w.entry $w all]
-    }
+    # we change the default binding order
+    # to have the typed characters already inserted
+    # before calling "command-update-list"
+    bindtags $w.entry [list Entry $w.entry $w all]
     
     $w.entry delete 0 end
     command-update-list
     focus $w.entry
-    place $w -relx 0.5 -rely 0.5 -relwidth 0.5 -relheight 0.5 -anchor center
+    place $w -relx 0.5 -rely 0.5 -relwidth 0.6 -relheight 0.6 -anchor center
+    #place $w -relx 0.15 -rely 0.15 -relwidth 0.70 -relheight 0.70
     raise $w
 }
 
@@ -1501,59 +1492,6 @@ proc mk-button { name text command {pack left} } {
     pack .l.${name} -side ${pack}
 }
 
-
-# --------------------------------------------------------------------------
-#  Help
-#  Display help box
-# --------------------------------------------------------------------------
-proc help {} {
-
-    catch {destroy .help}
-    toplevel .help -bg black -fg white \
-	-border {ulcorner hline urcorner vline lrcorner hline llcorner vline}
-
-    set W [winfo width  .]
-    set H [winfo height .]
-    incr W -1
-    incr H -1
-    
-    place .help -x 1 -width $W -y 1 -height $H
-    raise .help
- 
-    set t .help.t
-    text $t -wrap word -width 70 -height 30 -yscrollcommand {.help.sb set}
-    scrollbar .help.sb -orient vertical -command [list $t yview]
-    button .help.dismiss -text Close -command {destroy .help}
-    pack .help.dismiss -side bottom -pady 1
-    pack .help.sb -side right -fill y
-    pack $t -side top -expand 1 -fill both
- 
-    $t tag config title -justify center -foregr red -attr bold
-    $t tag configure title2 -justify center -attr bold
-    $t tag configure header -attr bold
-    $t tag configure n -lmargin1 10 -lmargin2 10
-    $t tag configure bullet -lmargin1 10 -lmargin2 12
- 
-    $t insert end "Terminal multiplexer\n" title
-    $t insert end "by vzvca\n\n" title2
- 
-    $t insert end "This is crude terminal multiplexer.\n\n"
-    
-    $t insert end "Type <Control-b><Control-c> to access the command panel. "
-    
-    $t insert end "Keys on terminal buttons\n" header
-    $t insert end "o <Control-q> closes the terminal.\n" bullet
-    $t insert end "o <Control-n> opens a new terminal.\n" bullet
-    $t insert end "o Use <Left> and <Right> to navigate between buttons.\n" bullet
-    $t insert end "\n\n"
-
-    $t insert end "Mouse\n" header
-    $t insert end "o Left button clicked in terminal will transfer focus to it.\n" bullet
-    
-    $t config -state disabled -takefocus 0
-    focus .help.dismiss
-}
-
 # --------------------------------------------------------------------------
 #  create-gui
 #  Creates user interface
@@ -1623,6 +1561,47 @@ proc new-term { {ckey "b"} } {
     }
 
     return .f.t${TX}
+}
+
+# --------------------------------------------------------------------------
+#  remove-term
+#  Removes a terminal widget once the shell has exited
+# --------------------------------------------------------------------------
+proc remove-term {wt} {
+    global TERM LAYOUT CHOOSER
+
+    # -- remove term from global list
+    set lst [list]
+    foreach term $TERM {
+	dict with term {
+	    if {$wid ne $wt} {
+		lappend lst $term
+	    }
+	}
+    }
+    set TERM $lst
+
+    # -- update terminal chooser content
+    foreach chooser $CHOOSER {
+	list-term $chooser
+    }
+
+    # -- remove from layout
+    dict with LAYOUT {
+	for {set i 1} {$i <= 4} {incr i} {
+	    if {[set t$i] eq $wt} {
+		break
+	    }
+	}
+    }
+    if {$i <= 4 } {
+	set-widget $wt [choose-term]
+	if { $focused == $wt} {
+	    set focused [set t$i]
+	}
+    }
+
+    apply-layout
 }
 
 # --------------------------------------------------------------------------
@@ -1701,6 +1680,11 @@ proc do-bindings {{w all}} {
 	    bind $w $key $cmd
 	    debug "bind $w $key $cmd"
 	}
+    }
+
+    if { $w eq "Terminal" } {
+	bind $w <<Exited>> {remove-term %W}
+	bind $w <1> {focus %W}
     }
 }
 

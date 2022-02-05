@@ -198,6 +198,7 @@ static EventInfo eventArray[CK_MAX_EV] =
     *
     * Will be improved to allow adding of new virtual events types.
     */
+   {"<Exited>",        CK_EV_VIRTUAL,          CK_EV_VIRTUAL},  /* Subprocess exited */
    {"<New>",           CK_EV_VIRTUAL,          CK_EV_VIRTUAL},  /* Open a new terminal */
    {"<Close>",         CK_EV_VIRTUAL,          CK_EV_VIRTUAL},  /* Close terminal */
    {"<Next>",          CK_EV_VIRTUAL,          CK_EV_VIRTUAL},  /* Move to next terminal */
