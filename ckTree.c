@@ -703,9 +703,9 @@ TreeWidgetCmd(clientData, interp, argc, argv)
 	}
 	nodePtr = StartTagSearch(treePtr, argv[2], &search);
 	if (nodePtr != NULL) {
-	    result = Ck_ConfigureValue(treePtr->interp, treePtr->winPtr,
-		    nodeConfigSpecs, (char *) nodePtr,
-		    argv[3], 0);
+	  result = Ck_ConfigureValue(treePtr->interp, treePtr->winPtr,
+				     nodeConfigSpecs, (char *) nodePtr,
+				     argv[3], 0);
 	}
     } else if ((c == 'n') && (strncmp(argv[1], "nodeconfigure", length) == 0)
 	    && (length >= 6)) {
@@ -755,8 +755,27 @@ TreeWidgetCmd(clientData, interp, argc, argv)
 	if (nodePtr->parent != NULL)
 	    DoNode(interp, nodePtr->parent, (Ck_Uid) NULL);
 	result = TCL_OK;
+	
+    } else if ((c == 's') && (strncmp(argv[1], "see", length) == 0)) {
+	Node *nodePtr;
+	TagSearch search;
+	int index = 0;
+	
+	nodePtr = StartTagSearch(treePtr, argv[2], &search);
+	if (nodePtr == NULL) {
+	  Tcl_AppendResult(interp, "can't find a selectable node \"",
+			   argv[3], "\"", (char *) NULL);
+	  goto error;
+	}
+	if (GetNodeYCoord(treePtr, nodePtr, &index) == TCL_OK) {
+	  if (index < treePtr->topIndex ||
+	      index >= treePtr->topIndex + treePtr->winPtr->height)
+	    ChangeTreeView(treePtr,
+			   index - treePtr->winPtr->height / 2);
+	}
+	
     } else if ((c == 's') && (strncmp(argv[1], "select", length) == 0)
-	    && (length >= 2)) {
+	    && (length >= 3)) {
 	Node *nodePtr;
 	TagSearch search;
 
@@ -773,8 +792,7 @@ TreeWidgetCmd(clientData, interp, argc, argv)
 	}
 	length = strlen(argv[2]);
 	c = argv[2][0];
-	if ((c == 'c') && (argv[2] != NULL) &&
-	    (strncmp(argv[2], "clear", length) == 0)) {
+	if ((c == 'c') && (strncmp(argv[2], "clear", length) == 0)) {
 	    do {
 		nodePtr->flags &= ~SELECTED;
 		nodePtr = NextNode(&search);
@@ -819,6 +837,7 @@ TreeWidgetCmd(clientData, interp, argc, argv)
 	if (argc == 2) {
 	    if (treePtr->visibleNodes == 0) {
 	      Tcl_SetObjResult(interp, Tcl_NewStringObj( "0 1", -1));
+	      
 	    } else {
 		double fraction2;
 
@@ -1124,6 +1143,7 @@ DisplayTree(clientData)
     long rarrow;
     long ulcorner, urcorner, llcorner, lrcorner, lvline, lhline, ltee, ttee;
     WINDOW *window;
+    char *text;
 
     treePtr->flags &= ~REDRAW_PENDING;
     if ((treePtr->winPtr == NULL) || !(winPtr->flags & CK_MAPPED)) {
@@ -1236,22 +1256,24 @@ DisplayTree(clientData)
 	}
 
 	if (nodePtr == treePtr->activeNode && (treePtr->flags & GOT_FOCUS)) {
-	    Ck_SetWindowAttr(winPtr, treePtr->activeFg, treePtr->activeBg,
-		treePtr->activeAttr | ((nodePtr->flags & SELECTED) ? 
-		treePtr->selectAttr : 0));
-	    mustRestore = 1;
+	  Ck_SetWindowAttr(winPtr, treePtr->activeFg, treePtr->activeBg,
+			   treePtr->activeAttr | ((nodePtr->flags & SELECTED) ? 
+						  treePtr->selectAttr : 0));
+	  mustRestore = 1;
 	} else if (nodePtr->flags & SELECTED) {
-	    Ck_SetWindowAttr(winPtr, treePtr->selectFg, treePtr->selectBg,
-		treePtr->selectAttr);
-	    mustRestore = 1;
+	  Ck_SetWindowAttr(winPtr, treePtr->selectFg, treePtr->selectBg,
+			   treePtr->selectAttr);
+	  mustRestore = 1;
 	}
+	text = (nodePtr->text != NULL) ? nodePtr->text : "";
 	CkDisplayChars(winPtr->mainPtr, window,
-	    nodePtr->text, strlen(nodePtr->text),
-	    x, y, 0,
-	    CK_NEWLINES_NOT_SPECIAL | CK_IGNORE_TABS);
-	if (mustRestore)
+		       text, strlen(text),
+		       x, y, 0,
+		       CK_NEWLINES_NOT_SPECIAL | CK_IGNORE_TABS);
+	if (mustRestore) {
 	    Ck_SetWindowAttr(winPtr, treePtr->normalFg, treePtr->normalBg,
 		treePtr->normalAttr);
+	}
 	Ck_ClearToEol(winPtr, -1, -1);
 
 	i = nodePtr->level * 2;
@@ -1663,7 +1685,7 @@ TreeTagsPrintProc(clientData, winPtr, widgRec, offset, freeProcPtr)
 	*freeProcPtr = (Tcl_FreeProc *) NULL;
 	return (char *) nodePtr->tagPtr[0];
     }
-    *freeProcPtr = (Tcl_FreeProc *) free;
+    *freeProcPtr = (Tcl_FreeProc *) Tcl_Free;
     return Tcl_Merge(nodePtr->numTags, (char **) nodePtr->tagPtr);
 }
 
@@ -2062,8 +2084,9 @@ FindNodes(interp, treePtr, argc, argv, newTag, cmdName, option)
 	    }
 	    count++;
 	}
-	if (nodePtr != NULL)
+	if (nodePtr != NULL) {
 	  Tcl_SetObjResult( interp, Tcl_NewLongObj( nodePtr->id));
+	}
     } else if ((c == 'p') && (strncmp(argv[0], "prev", length) == 0)) {
     	int done = 0;
 	Node *parentPtr, *nextPtr;
@@ -2082,10 +2105,12 @@ FindNodes(interp, treePtr, argc, argv, newTag, cmdName, option)
 		if (nodePtr == parentPtr->firstChild) {
 		    nextPtr = parentPtr;
 		    done = 1;
-		} else
-		    nextPtr = parentPtr->firstChild;
-	    } else
+		} else {
+		  nextPtr = parentPtr->firstChild;
+		}
+	    } else {
 	    	parentPtr = nextPtr = treePtr->firstChild;
+	    }
 	    if (!done) {
 		for (;nextPtr != NULL && nextPtr->next != nodePtr;
 		     nextPtr = nextPtr->next) {
@@ -2103,6 +2128,22 @@ FindNodes(interp, treePtr, argc, argv, newTag, cmdName, option)
 	    }
 	    DoNode(interp, nextPtr, uid);
 	}
+	
+    } else if ((c == 's') && (strncmp(argv[0], "selected", length) == 0)) {
+	if (argc != 2) {
+	    Tcl_AppendResult(interp, "wrong # args:  must be \"",
+		    cmdName, option, " selected tagOrId", (char *) NULL);
+	    return TCL_ERROR;
+	}
+	for (nodePtr = StartTagSearch(treePtr, argv[1], &search);
+	     nodePtr != NULL; nodePtr = NextNode(&search)) {
+	  if (nodePtr->flags & SELECTED) {
+	    char buf[32];
+	    sprintf(buf, "%d", nodePtr->id);
+	    Tcl_AppendElement(interp, buf);
+	  }
+	}
+      
     } else if ((c == 'w') && (strncmp(argv[0], "withtag", length) == 0)) {
 	if (argc != 2) {
 	    Tcl_AppendResult(interp, "wrong # args:  must be \"",
@@ -2110,7 +2151,7 @@ FindNodes(interp, treePtr, argc, argv, newTag, cmdName, option)
 	    return TCL_ERROR;
 	}
 	for (nodePtr = StartTagSearch(treePtr, argv[1], &search);
-		nodePtr != NULL; nodePtr = NextNode(&search)) {
+	     nodePtr != NULL; nodePtr = NextNode(&search)) {
 	    DoNode(interp, nodePtr, uid);
 	}
     } else  {
