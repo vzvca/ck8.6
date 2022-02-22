@@ -3765,12 +3765,17 @@ done
 #       not, assume that its top-level directory is a sibling of ours.
 #--------------------------------------------------------------------
 
+TCL_LIB_DIR=$(find /usr/lib -type d -a -name 'tcl8.*' | tail -1)
+if test -z "$TCL_LIB_DIR" ; then
+  TCL_LIB_DIR=$(find /usr/lib64 -type d -a -name 'tcl8.*' | tail -1)
+fi
+
 
 # Check whether --with-tcl was given.
 if test "${with_tcl+set}" = set; then :
   withval=$with_tcl; TCL_BIN_DIR=$withval
 else
-  TCL_BIN_DIR=`cd /usr/lib/tcl8.* ; pwd`
+  TCL_BIN_DIR="$TCL_LIB_DIR"
 fi
 
 if test ! -d $TCL_BIN_DIR ; then
@@ -3786,7 +3791,9 @@ fi
 if test -z "$TCL_BIN_DIR" ; then
     for i in /usr/lib /usr/lib64 /usr/local/lib /opt/lib ; do
         if test -r $i/tclConfig.sh ; then
+	    echo "Found tclConfig.sh in $i"
             TCL_BIN_DIR=$i
+	    break
         fi
     done
 fi
@@ -3977,7 +3984,6 @@ $as_echo_n "checking ncursesw library... " >&6; }
 	fi
 	tk_oldLibs=$LIBS
 	LIBS="$LIBSW"
-	echo " ==> $i/libncursesw$SHLIB_SUFFIX"
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <ncurses.h>

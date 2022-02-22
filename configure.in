@@ -44,8 +44,13 @@ AC_HAVE_FUNCS(sigaction)
 #       not, assume that its top-level directory is a sibling of ours.
 #--------------------------------------------------------------------
 
+TCL_LIB_DIR=$(find /usr/lib -type d -a -name 'tcl8.*' | tail -1)
+if test -z "$TCL_LIB_DIR" ; then
+  TCL_LIB_DIR=$(find /usr/lib64 -type d -a -name 'tcl8.*' | tail -1)
+fi
+
 AC_ARG_WITH(tcl, [  --with-tcl=DIR          use Tcl 8.X binaries from DIR],
-        TCL_BIN_DIR=$withval, TCL_BIN_DIR=`cd /usr/lib/tcl8.* ; pwd`)
+        TCL_BIN_DIR=$withval, TCL_BIN_DIR="$TCL_LIB_DIR")
 if test ! -d $TCL_BIN_DIR ; then
     AC_MSG_ERROR(Tcl directory $TCL_BIN_DIR doesn't exist)
 fi
@@ -59,7 +64,9 @@ fi
 if test -z "$TCL_BIN_DIR" ; then
     for i in /usr/lib /usr/lib64 /usr/local/lib /opt/lib ; do
         if test -r $i/tclConfig.sh ; then
+	    echo "Found tclConfig.sh in $i"
             TCL_BIN_DIR=$i
+	    break
         fi
     done
 fi
@@ -201,7 +208,6 @@ for i in $dirs ; do
 	fi
 	tk_oldLibs=$LIBS
 	LIBS="$LIBSW"
-	echo " ==> $i/libncursesw$SHLIB_SUFFIX"
 	AC_TRY_LINK([#include <ncurses.h>],
 		    [int c; initscr(); c = ACS_ULCORNER; addwstr("");],
 		    [AC_MSG_RESULT(yes)
