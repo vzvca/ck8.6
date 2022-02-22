@@ -624,7 +624,6 @@ LIBOBJS
 CURSESLIBSW
 CURSESINCLUDES
 USE_NCURSESW
-USE_NCURSES
 CK_BUILD_LIB_SPEC
 CK_VERSION
 CK_SHLIB_CFLAGS
@@ -682,7 +681,6 @@ infodir
 docdir
 oldincludedir
 includedir
-runstatedir
 localstatedir
 sharedstatedir
 sysconfdir
@@ -755,7 +753,6 @@ datadir='${datarootdir}'
 sysconfdir='${prefix}/etc'
 sharedstatedir='${prefix}/com'
 localstatedir='${prefix}/var'
-runstatedir='${localstatedir}/run'
 includedir='${prefix}/include'
 oldincludedir='/usr/include'
 docdir='${datarootdir}/doc/${PACKAGE}'
@@ -1008,15 +1005,6 @@ do
   | -silent | --silent | --silen | --sile | --sil)
     silent=yes ;;
 
-  -runstatedir | --runstatedir | --runstatedi | --runstated \
-  | --runstate | --runstat | --runsta | --runst | --runs \
-  | --run | --ru | --r)
-    ac_prev=runstatedir ;;
-  -runstatedir=* | --runstatedir=* | --runstatedi=* | --runstated=* \
-  | --runstate=* | --runstat=* | --runsta=* | --runst=* | --runs=* \
-  | --run=* | --ru=* | --r=*)
-    runstatedir=$ac_optarg ;;
-
   -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
     ac_prev=sbindir ;;
   -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
@@ -1154,7 +1142,7 @@ fi
 for ac_var in	exec_prefix prefix bindir sbindir libexecdir datarootdir \
 		datadir sysconfdir sharedstatedir localstatedir includedir \
 		oldincludedir docdir infodir htmldir dvidir pdfdir psdir \
-		libdir localedir mandir runstatedir
+		libdir localedir mandir
 do
   eval ac_val=\$$ac_var
   # Remove trailing slashes.
@@ -1307,7 +1295,6 @@ Fine tuning of the installation directories:
   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
-  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
   --libdir=DIR            object code libraries [EPREFIX/lib]
   --includedir=DIR        C header files [PREFIX/include]
   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
@@ -3797,7 +3784,7 @@ fi
 #--------------------------------------------------------------------
 
 if test -z "$TCL_BIN_DIR" ; then
-    for i in /usr/lib /usr/local/lib /opt/lib ; do
+    for i in /usr/lib /usr/lib64 /usr/local/lib /opt/lib ; do
         if test -r $i/tclConfig.sh ; then
             TCL_BIN_DIR=$i
         fi
@@ -3928,7 +3915,6 @@ fi
 
 echo checking for curses/ncurses header files
 CURSESINCLUDES=nope
-USE_NCURSES=0
 USE_NCURSESW=0
 dirs="../ncurses/include /usr/include/ncursesw /usr/include /usr/include/ncurses /opt/ncurses/include /usr/local/include /usr/local/include/ncurses"
 for i in $dirs ; do
@@ -3959,37 +3945,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
         CFLAGS=$tk_oldCFlags
         if test "$CURSESINCLUDES" != nope; then
-	    USE_NCURSES=1
-	    break
-        fi
-    fi
-    if test -r $i/curses.h; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking curses headers" >&5
-$as_echo_n "checking curses headers... " >&6; }
-        tk_oldCFlags=$CFLAGS
-        CFLAGS="$CFLAGS -I$i"
-        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <curses.h>
-int
-main ()
-{
-int c; initscr(); c = ACS_ULCORNER; curs_set(1);
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-            CURSESINCLUDES="-I$i"
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-        CFLAGS=$tk_oldCFlags
-        if test "$CURSESINCLUDES" != nope; then
+	    USE_NCURSESW=1
 	    break
         fi
     fi
@@ -3998,61 +3954,20 @@ if test "$CURSESINCLUDES" = nope; then
     echo "Warning:  couldn't find any curses header file."
     CURSESINCLUDES="# no header file found"
 else
-    if test $USE_NCURSES = 1 ; then
+    if test $USE_NCURSESW = 1 ; then
         echo "using ncurses.h from $CURSESINCLUDES"
     else
-        echo "using curses.h from $CURSESINCLUDES"
+        echo "can't find usable ncurses.h"
     fi
 fi
 
-echo checking for curses/ncurses library files
+echo checking for ncursesw library files
 CURSESLIBSW=nope
 dirs="../ncurses/lib /usr/lib /usr/lib64 /usr/lib/ncurses /usr/lib64/ncurses /usr/lib/`uname -m`-linux-gnu /usr/lib/arm-linux-gnueabihf /opt/ncurses/lib /usr/local/lib /usr/local/ncurses/lib"
 for i in $dirs ; do
-  if test $USE_NCURSES = 0 ; then
-    if test -r $i/libcurses.a || test -r $i/libcurses$SHLIB_SUFFIX ; then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking curses library" >&5
-$as_echo_n "checking curses library... " >&6; }
-	tk_oldCFlags=$CFLAGS
-	CFLAGS="$CFLAGS $CURSESINCLUDES"
-	if test "$i" = "/usr/lib" ; then
-	    LIBSW="-lcurses -ltermcap"
-	else
-	    LIBSW="-L$i -lcurses -ltermcap"
-	fi
-	tk_oldLibs=$LIBS
-	LIBS="$LIBSW"
-	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <curses.h>
-int
-main ()
-{
-int c; initscr(); c = ACS_ULCORNER; curs_set(1);
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-	     CURSESLIBSW="$LIBSW"
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-	CFLAGS=$tk_oldCFlags
-	LIBS=$tk_oldLibs
-	if test "$CURSESLIBSW" != nope; then
-	    break
-	fi
-    fi
-  else
     if test -r $i/libncursesw.a || test -r $i/libncursesw$SHLIB_SUFFIX ; then
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking ncurses library" >&5
-$as_echo_n "checking ncurses library... " >&6; }
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking ncursesw library" >&5
+$as_echo_n "checking ncursesw library... " >&6; }
 	tk_oldCFlags=$CFLAGS
 	CFLAGS="$CFLAGS $CURSESINCLUDES -D_XOPEN_SOURCE_EXTENDED"
 	if test "$i" = "/usr/lib" ; then
@@ -4062,6 +3977,7 @@ $as_echo_n "checking ncurses library... " >&6; }
 	fi
 	tk_oldLibs=$LIBS
 	LIBS="$LIBSW"
+	echo " ==> $i/libncursesw$SHLIB_SUFFIX"
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <ncurses.h>
@@ -4076,9 +3992,9 @@ _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-	     USE_NCURSESW=1
-	     CURSESINCLUDES="$CURSESINCLUDES -D_XOPEN_SOURCE_EXTENDED"
-	     CURSESLIBSW="$LIBSW"
+		     USE_NCURSESW=1
+		     CURSESINCLUDES="$CURSESINCLUDES -D_XOPEN_SOURCE_EXTENDED"
+		     CURSESLIBSW="$LIBSW"
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
@@ -4090,48 +4006,13 @@ rm -f core conftest.err conftest.$ac_objext \
 	if test "$CURSESLIBSW" != nope; then
 	    break
 	fi
-	tk_oldCFlags=$CFLAGS
-	CFLAGS="$CFLAGS $CURSESINCLUDES"
-	if test "$i" = "/usr/lib" ; then
-	    LIBSW="-lncurses"
-	else
-	    LIBSW="-L$i -lncurses"
-	fi
-	tk_oldLibs=$LIBS
-	LIBS="$LIBSW"
-	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <ncurses.h>
-int
-main ()
-{
-int c; initscr(); c = ACS_ULCORNER; curs_set(1);
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-	     CURSESLIBSW="$LIBSW"
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-	CFLAGS=$tk_oldCFlags
-	LIBS=$tk_oldLibs
-	if test "$CURSESLIBSW" != nope; then
-	    break
-	fi
-    fi
   fi
 done
 
 if test "$CURSESLIBSW" = nope ; then
-    echo "Warning:  couldn't find the curses library archive.  Using -lcurses."
-    CURSESLIBSW="-lcurses -ltermcap"
+    echo "Warning:  couldn't find the curses library archive.  Using -lncursesw."
+    CURSESLIBSW="-lncursesw -ltermcap"
+    CURSESINCLUDES="$CURSESINCLUDES -D_XOPEN_SOURCE_EXTENDED"
 else
     echo "using curses library: $CURSESLIBSW"
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking curses scr_dump function" >&5
@@ -4140,33 +4021,10 @@ $as_echo_n "checking curses scr_dump function... " >&6; }
     CFLAGS="$CFLAGS $CURSESINCLUDES"
     tk_oldLibs=$LIBS
     LIBS="$CURSESLIBSW"
-    if test $USE_NCURSES = 1 ; then
+    if test $USE_NCURSESW = 1 ; then
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <ncurses.h>
-int
-main ()
-{
-int c; initscr(); scr_dump("xx");
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-           $as_echo "#define HAVE_SCR_DUMP 1" >>confdefs.h
-
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-    else
-	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <curses.h>
 int
 main ()
 {
@@ -4191,16 +4049,12 @@ rm -f core conftest.err conftest.$ac_objext \
     LIBS=$tk_oldLibs
 fi
 
-if test $USE_NCURSES = 1 ; then
-    USE_NCURSES="-DUSE_NCURSES"
-else
-    USE_NCURSES=""
-fi
 if test $USE_NCURSESW = 1 ; then
     USE_NCURSESW="-DUSE_NCURSESW"
 else
     USE_NCURSESW=""
 fi
+USE_NCURSESW="-DUSE_NCURSESW"
 
 #---------------------------------------------------------------------
 #	Check for GPM (General Purpose Mouse)
@@ -4827,7 +4681,6 @@ else
     CK_BUILD_LIB_SPEC="-L`pwd` -lck`echo ${VERSION} | tr -d .`"
     CK_LIB_SPEC="-L${exec_prefix}/lib -lck`echo ${VERSION} | tr -d .`"
 fi
-
 
 
 

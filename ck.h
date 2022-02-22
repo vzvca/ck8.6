@@ -62,7 +62,7 @@
 #include <wchar.h>
 #endif
 
-#ifdef USE_NCURSES
+#ifdef USE_NCURSESW
 #include <ncurses.h>
 #else
 #include <curses.h>

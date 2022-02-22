@@ -57,7 +57,7 @@ fi
 #--------------------------------------------------------------------
 
 if test -z "$TCL_BIN_DIR" ; then
-    for i in /usr/lib /usr/local/lib /opt/lib ; do
+    for i in /usr/lib /usr/lib64 /usr/local/lib /opt/lib ; do
         if test -r $i/tclConfig.sh ; then
             TCL_BIN_DIR=$i
         fi
@@ -157,7 +157,6 @@ fi
 
 echo checking for curses/ncurses header files
 CURSESINCLUDES=nope
-USE_NCURSES=0
 USE_NCURSESW=0
 dirs="../ncurses/include /usr/include/ncursesw /usr/include /usr/include/ncurses /opt/ncurses/include /usr/local/include /usr/local/include/ncurses"
 for i in $dirs ; do
@@ -171,20 +170,7 @@ for i in $dirs ; do
             CURSESINCLUDES="-I$i"], AC_MSG_RESULT(no))
         CFLAGS=$tk_oldCFlags
         if test "$CURSESINCLUDES" != nope; then
-	    USE_NCURSES=1
-	    break
-        fi
-    fi
-    if test -r $i/curses.h; then
-        AC_MSG_CHECKING([curses headers])
-        tk_oldCFlags=$CFLAGS
-        CFLAGS="$CFLAGS -I$i"
-        AC_TRY_COMPILE([#include <curses.h>],
-           [int c; initscr(); c = ACS_ULCORNER; curs_set(1);],
-           [AC_MSG_RESULT(yes)
-            CURSESINCLUDES="-I$i"], AC_MSG_RESULT(no))
-        CFLAGS=$tk_oldCFlags
-        if test "$CURSESINCLUDES" != nope; then
+	    USE_NCURSESW=1
 	    break
         fi
     fi
@@ -193,42 +179,19 @@ if test "$CURSESINCLUDES" = nope; then
     echo "Warning:  couldn't find any curses header file."
     CURSESINCLUDES="# no header file found"
 else
-    if test $USE_NCURSES = 1 ; then
+    if test $USE_NCURSESW = 1 ; then
         echo "using ncurses.h from $CURSESINCLUDES"
     else
-        echo "using curses.h from $CURSESINCLUDES"
+        echo "can't find usable ncurses.h"
     fi
 fi
 
-echo checking for curses/ncurses library files
+echo checking for ncursesw library files
 CURSESLIBSW=nope
 dirs="../ncurses/lib /usr/lib /usr/lib64 /usr/lib/ncurses /usr/lib64/ncurses /usr/lib/`uname -m`-linux-gnu /usr/lib/arm-linux-gnueabihf /opt/ncurses/lib /usr/local/lib /usr/local/ncurses/lib"
 for i in $dirs ; do
-  if test $USE_NCURSES = 0 ; then
-    if test -r $i/libcurses.a || test -r $i/libcurses$SHLIB_SUFFIX ; then
-	AC_MSG_CHECKING([curses library])
-	tk_oldCFlags=$CFLAGS
-	CFLAGS="$CFLAGS $CURSESINCLUDES"
-	if test "$i" = "/usr/lib" ; then
-	    LIBSW="-lcurses -ltermcap"
-	else
-	    LIBSW="-L$i -lcurses -ltermcap"
-	fi
-	tk_oldLibs=$LIBS
-	LIBS="$LIBSW"
-	AC_TRY_LINK([#include <curses.h>],
-	    [int c; initscr(); c = ACS_ULCORNER; curs_set(1);],
-	    [AC_MSG_RESULT(yes)
-	     CURSESLIBSW="$LIBSW"], AC_MSG_RESULT(no))
-	CFLAGS=$tk_oldCFlags
-	LIBS=$tk_oldLibs
-	if test "$CURSESLIBSW" != nope; then
-	    break
-	fi
-    fi
-  else
     if test -r $i/libncursesw.a || test -r $i/libncursesw$SHLIB_SUFFIX ; then
-	AC_MSG_CHECKING([ncurses library])
+	AC_MSG_CHECKING([ncursesw library])
 	tk_oldCFlags=$CFLAGS
 	CFLAGS="$CFLAGS $CURSESINCLUDES -D_XOPEN_SOURCE_EXTENDED"
 	if test "$i" = "/usr/lib" ; then
@@ -238,42 +201,25 @@ for i in $dirs ; do
 	fi
 	tk_oldLibs=$LIBS
 	LIBS="$LIBSW"
+	echo " ==> $i/libncursesw$SHLIB_SUFFIX"
 	AC_TRY_LINK([#include <ncurses.h>],
-	    [int c; initscr(); c = ACS_ULCORNER; addwstr("");],
-	    [AC_MSG_RESULT(yes)
-	     USE_NCURSESW=1
-	     CURSESINCLUDES="$CURSESINCLUDES -D_XOPEN_SOURCE_EXTENDED"
-	     CURSESLIBSW="$LIBSW"], AC_MSG_RESULT(no))
+		    [int c; initscr(); c = ACS_ULCORNER; addwstr("");],
+		    [AC_MSG_RESULT(yes)
+		     USE_NCURSESW=1
+		     CURSESINCLUDES="$CURSESINCLUDES -D_XOPEN_SOURCE_EXTENDED"
+		     CURSESLIBSW="$LIBSW"], AC_MSG_RESULT(no))
 	CFLAGS=$tk_oldCFlags
 	LIBS=$tk_oldLibs
 	if test "$CURSESLIBSW" != nope; then
 	    break
 	fi
-	tk_oldCFlags=$CFLAGS
-	CFLAGS="$CFLAGS $CURSESINCLUDES"
-	if test "$i" = "/usr/lib" ; then
-	    LIBSW="-lncurses"
-	else
-	    LIBSW="-L$i -lncurses"
-	fi
-	tk_oldLibs=$LIBS
-	LIBS="$LIBSW"
-	AC_TRY_LINK([#include <ncurses.h>],
-	    [int c; initscr(); c = ACS_ULCORNER; curs_set(1);],
-	    [AC_MSG_RESULT(yes)
-	     CURSESLIBSW="$LIBSW"], AC_MSG_RESULT(no))
-	CFLAGS=$tk_oldCFlags
-	LIBS=$tk_oldLibs
-	if test "$CURSESLIBSW" != nope; then
-	    break
-	fi
-    fi
   fi
 done
 
 if test "$CURSESLIBSW" = nope ; then
-    echo "Warning:  couldn't find the curses library archive.  Using -lcurses."
-    CURSESLIBSW="-lcurses -ltermcap"
+    echo "Warning:  couldn't find the curses library archive.  Using -lncursesw."
+    CURSESLIBSW="-lncursesw -ltermcap"
+    CURSESINCLUDES="$CURSESINCLUDES -D_XOPEN_SOURCE_EXTENDED"
 else
     echo "using curses library: $CURSESLIBSW"
     AC_MSG_CHECKING([curses scr_dump function])
@@ -281,13 +227,8 @@ else
     CFLAGS="$CFLAGS $CURSESINCLUDES"
     tk_oldLibs=$LIBS
     LIBS="$CURSESLIBSW"
-    if test $USE_NCURSES = 1 ; then
+    if test $USE_NCURSESW = 1 ; then
 	AC_TRY_LINK([#include <ncurses.h>],
-	   [int c; initscr(); scr_dump("xx");],
-           [AC_MSG_RESULT(yes)
-           AC_DEFINE(HAVE_SCR_DUMP)], AC_MSG_RESULT(no))
-    else
-	AC_TRY_LINK([#include <curses.h>],
 	   [int c; initscr(); scr_dump("xx");],
            [AC_MSG_RESULT(yes)
            AC_DEFINE(HAVE_SCR_DUMP)], AC_MSG_RESULT(no))
@@ -296,16 +237,12 @@ else
     LIBS=$tk_oldLibs
 fi
 
-if test $USE_NCURSES = 1 ; then
-    USE_NCURSES="-DUSE_NCURSES"
-else
-    USE_NCURSES=""
-fi
 if test $USE_NCURSESW = 1 ; then
     USE_NCURSESW="-DUSE_NCURSESW"
 else
     USE_NCURSESW=""
 fi
+USE_NCURSESW="-DUSE_NCURSESW"
 
 #---------------------------------------------------------------------
 #	Check for GPM (General Purpose Mouse)
@@ -553,7 +490,6 @@ AC_SUBST(CK_CFLAGS)
 AC_SUBST(CK_SHLIB_CFLAGS)
 AC_SUBST(CK_VERSION)
 AC_SUBST(CK_BUILD_LIB_SPEC)
-AC_SUBST(USE_NCURSES)
 AC_SUBST(USE_NCURSESW)
 AC_SUBST(CURSESINCLUDES)
 AC_SUBST(CURSESLIBSW)

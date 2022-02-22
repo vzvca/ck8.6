@@ -85,7 +85,7 @@ TCL_BIN_DIR =		@TCL_BIN_DIR@
 # accessible (the configure script will try to set this value, and
 # will cause it to be an empty string if the include file is accessible
 # via /usr/include).
-CURSES_INCLUDES = @CURSESINCLUDES@ @USE_NCURSES@ @USE_NCURSESW@
+CURSES_INCLUDES = @CURSESINCLUDES@ @USE_NCURSESW@
 
 # Linker switch(es) to use to link with the curses library archive (the
 # configure script will try to set this value automatically, but you

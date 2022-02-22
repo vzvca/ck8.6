@@ -33,7 +33,7 @@ CK_PREFIX='@prefix@'
 CK_EXEC_PREFIX='@exec_prefix@'
 
 # -I switch(es) where to find curses include files
-CK_CURSESINCLUDES='@CURSESINCLUDES@ @USE_NCURSES@'
+CK_CURSESINCLUDES='@CURSESINCLUDES@ @USE_NCURSESW@'
 
 # Linker switch(es) to use when linking with curses
 CK_CURSESLIBSW='@CURSESLIBSW@'
