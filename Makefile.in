@@ -270,11 +270,12 @@ install-libraries:
 		else true; \
 		fi; \
 	    done;
-	@echo "Installing ck.h ckKeys.h ckConfig.sh"
+	@echo "Installing ck.h, ckKeys.h, ckPort.h, ckConfig.sh"
 	@$(INSTALL_DATA) $(SRC_DIR)/ck.h $(INCLUDE_INSTALL_DIR)
 	@$(INSTALL_DATA) $(SRC_DIR)/ckKeys.h $(INCLUDE_INSTALL_DIR)
+	@$(INSTALL_DATA) $(SRC_DIR)/ckPort.h $(INCLUDE_INSTALL_DIR)
 	@$(INSTALL_DATA) $(SRC_DIR)/ckConfig.sh $(SCRIPT_INSTALL_DIR)
-	@ln -s $(SCRIPT_INSTALL_DIR)/ckConfig.sh $(LIB_INSTALL_DIR)/ckConfig.sh
+	@ln -sf $(SCRIPT_INSTALL_DIR)/ckConfig.sh $(LIB_INSTALL_DIR)/ckConfig.sh
 	for i in $(SRC_DIR)/library/*.tcl $(SRC_DIR)/library/tclIndex \
 	    $(SRC_DIR)/ckAppInit.c; do \
 	    echo "Installing $$i"; \
