@@ -526,7 +526,7 @@ proc command-dialog {} {
     # bindings
     bind $w.entry <KeyPress> command-update-list
     bind $w.entry <Return> {command-execute [%W get]}
-    bind $w.lst   <Return> {command-execute}
+    bind $w.lst   <Return> {command-execute [%W get active]}
     bind $w.lst   <1>  {%W activate @%x,%y ; command-execute [%W get active]}
 
     # we change the default binding order
